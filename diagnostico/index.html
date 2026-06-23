@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diagnóstico de Automação | Iadverra</title>
-  <meta name="description" content="Em 30 minutos identificamos quais processos estão travando sua empresa e quanto tempo você pode recuperar com automação. Gratuito." />
+  <meta name="description" content="Em 30 minutos identificamos quais processos estão travando sua empresa. Agende gratuitamente." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -12,12 +12,13 @@
 
     :root {
       --bg: #080808;
-      --surface: #121212;
+      --surface: #111111;
       --card: #181818;
-      --border: #262626;
+      --border: #252525;
       --white: #ffffff;
       --muted: #777777;
       --green: #22c55e;
+      --red: #ef4444;
     }
 
     html { scroll-behavior: smooth; }
@@ -39,13 +40,11 @@
       align-items: center;
       justify-content: space-between;
       padding: 18px 32px;
-      background: rgba(8,8,8,0.92);
+      background: rgba(8,8,8,0.94);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
     }
-
     .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.4px; }
-
     .nav-btn {
       background: #fff;
       color: #000;
@@ -65,7 +64,6 @@
       max-width: 860px;
       margin: 0 auto;
     }
-
     .live-badge {
       display: inline-flex;
       align-items: center;
@@ -78,19 +76,16 @@
       color: var(--muted);
       margin-bottom: 28px;
     }
-
     .dot {
       width: 7px; height: 7px;
       background: var(--green);
       border-radius: 50%;
       animation: blink 2s infinite;
     }
-
     @keyframes blink {
       0%,100% { opacity: 1; }
       50% { opacity: .3; }
     }
-
     h1 {
       font-size: clamp(34px, 5.5vw, 68px);
       font-weight: 900;
@@ -98,12 +93,7 @@
       line-height: 1.04;
       margin-bottom: 22px;
     }
-
-    h1 em {
-      font-style: normal;
-      color: var(--muted);
-    }
-
+    h1 em { font-style: normal; color: var(--muted); }
     .sub {
       font-size: clamp(16px, 2vw, 19px);
       color: var(--muted);
@@ -111,16 +101,7 @@
       margin: 0 auto 44px;
       line-height: 1.75;
     }
-
-    /* ── CTA BLOCK ── */
-    .cta-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn {
+    .btn-ghost {
       display: inline-flex;
       align-items: center;
       gap: 10px;
@@ -133,19 +114,12 @@
       text-decoration: none;
       letter-spacing: -0.3px;
       transition: transform .18s, box-shadow .18s;
-      box-shadow: 0 0 0 0 rgba(255,255,255,.2);
     }
-
-    .btn:hover {
+    .btn-ghost:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 36px rgba(255,255,255,.12);
     }
-
-    .btn-note {
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .3px;
-    }
+    .btn-note { font-size: 12px; color: var(--muted); margin-top: 12px; }
 
     /* ── TRUST BAR ── */
     .trust {
@@ -153,12 +127,10 @@
       justify-content: center;
       gap: 32px;
       flex-wrap: wrap;
-      padding: 32px 24px;
+      padding: 28px 24px;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      margin-bottom: 0;
     }
-
     .trust-item {
       display: flex;
       align-items: center;
@@ -167,15 +139,12 @@
       color: var(--muted);
     }
 
-    .trust-item span { font-size: 16px; }
-
     /* ── SECTION ── */
     .section {
       max-width: 1040px;
       margin: 0 auto;
       padding: 80px 24px;
     }
-
     .label {
       font-size: 11px;
       font-weight: 700;
@@ -184,7 +153,6 @@
       color: var(--muted);
       margin-bottom: 14px;
     }
-
     h2 {
       font-size: clamp(26px, 3.5vw, 44px);
       font-weight: 800;
@@ -199,7 +167,6 @@
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 14px;
     }
-
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -207,32 +174,21 @@
       padding: 28px 24px;
       transition: border-color .2s;
     }
-
     .card:hover { border-color: #3a3a3a; }
-
     .card-icon { font-size: 26px; margin-bottom: 14px; }
     .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
     .card-body { font-size: 14px; color: var(--muted); line-height: 1.65; }
 
     /* ── STEPS ── */
     .steps { display: flex; flex-direction: column; position: relative; }
-
     .steps::before {
       content: '';
       position: absolute;
-      left: 26px;
-      top: 32px;
-      bottom: 32px;
+      left: 26px; top: 32px; bottom: 32px;
       width: 1px;
       background: var(--border);
     }
-
-    .step {
-      display: flex;
-      gap: 24px;
-      padding: 24px 0;
-    }
-
+    .step { display: flex; gap: 24px; padding: 24px 0; }
     .step-num {
       width: 52px; height: 52px; min-width: 52px;
       background: var(--card);
@@ -242,109 +198,205 @@
       font-size: 18px; font-weight: 900;
       position: relative; z-index: 1;
     }
-
     .step-body { padding-top: 10px; }
     .step-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
     .step-desc { font-size: 14px; color: var(--muted); }
 
-    /* ── OFFER BOX ── */
-    .offer {
+    /* ── FORM SECTION ── */
+    #agendar {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 80px 24px 96px;
+    }
+
+    .form-box {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 24px;
-      padding: 52px 44px;
+      padding: 48px 40px;
     }
 
-    .offer-label {
-      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
+    .form-label-top {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
     }
 
-    .offer-title {
-      font-size: clamp(24px, 3vw, 38px);
+    .form-title {
+      font-size: clamp(22px, 3vw, 32px);
       font-weight: 900;
-      letter-spacing: -1.2px;
-      margin-bottom: 36px;
-      line-height: 1.1;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 8px;
     }
 
-    .check-list {
-      list-style: none;
+    .form-sub {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    .field {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      margin-bottom: 44px;
+      gap: 6px;
+      margin-bottom: 20px;
     }
 
-    .check-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      font-size: 16px;
-      line-height: 1.5;
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ccc;
     }
 
-    .ck {
-      width: 22px; height: 22px; min-width: 22px;
-      background: #fff;
-      color: #000;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 900;
-      margin-top: 2px;
-    }
-
-    .offer-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 24px;
-      padding-top: 36px;
-      border-top: 1px solid var(--border);
-    }
-
-    .price-old { font-size: 14px; color: var(--muted); text-decoration: line-through; margin-bottom: 4px; }
-    .price-free { font-size: 44px; font-weight: 900; letter-spacing: -2px; line-height: 1; }
-    .price-tag { font-size: 13px; color: var(--muted); margin-top: 4px; }
-
-    /* ── URGENCY BANNER ── */
-    .urgency {
+    .field input,
+    .field select {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 24px;
-      font-size: 14px;
+      border-radius: 10px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color .18s;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
-    .urgency-icon { font-size: 20px; }
-    .urgency-text { color: var(--muted); }
-    .urgency-text strong { color: #fff; }
+    .field input::placeholder { color: #444; }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #555;
+    }
+
+    .field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      cursor: pointer;
+    }
+
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+
+    .field select option { background: #1a1a1a; }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--red);
+      display: none;
+    }
+
+    .field.has-error input,
+    .field.has-error select { border-color: var(--red); }
+    .field.has-error .field-error { display: block; }
+
+    .submit-btn {
+      width: 100%;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      padding: 18px;
+      cursor: pointer;
+      margin-top: 8px;
+      letter-spacing: -0.3px;
+      transition: opacity .18s, transform .18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      opacity: .88;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid #000;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* States */
+    .form-success,
+    .form-error-msg {
+      display: none;
+      text-align: center;
+      padding: 40px 24px;
+    }
+
+    .form-success .success-icon { font-size: 56px; margin-bottom: 16px; }
+    .form-success h3 {
+      font-size: 24px; font-weight: 800;
+      letter-spacing: -0.8px; margin-bottom: 10px;
+    }
+    .form-success p { font-size: 15px; color: var(--muted); line-height: 1.7; }
+
+    .form-error-msg .error-icon { font-size: 48px; margin-bottom: 16px; }
+    .form-error-msg p { font-size: 15px; color: var(--muted); }
+    .retry-btn {
+      margin-top: 20px;
+      background: none;
+      border: 1px solid var(--border);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .urgency {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .urgency strong { color: #fff; }
 
     /* ── FAQ ── */
     .faq-list { display: flex; flex-direction: column; }
-
-    .faq-item {
-      padding: 26px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .faq-item { padding: 26px 0; border-bottom: 1px solid var(--border); }
     .faq-q { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
     .faq-a { font-size: 14px; color: var(--muted); line-height: 1.75; }
-
-    /* ── FINAL ── */
-    .final {
-      text-align: center;
-      padding: 96px 24px;
-      border-top: 1px solid var(--border);
-    }
-
-    .final h2 { margin-bottom: 16px; }
-    .final p { color: var(--muted); font-size: 17px; margin-bottom: 40px; }
 
     footer {
       text-align: center;
@@ -358,8 +410,8 @@
     @media (max-width: 600px) {
       nav { padding: 14px 18px; }
       .hero { padding: 60px 18px 52px; }
-      .offer { padding: 28px 20px; }
-      .offer-footer { flex-direction: column; }
+      .form-box { padding: 28px 20px; }
+      .row-2 { grid-template-columns: 1fr; }
       .trust { gap: 18px; }
       .steps::before { display: none; }
     }
@@ -379,27 +431,22 @@
     <span class="dot"></span>
     Vagas disponíveis esta semana
   </div>
-
   <h1>Sua empresa perde tempo<br><em>porque não automatizou ainda.</em></h1>
-
   <p class="sub">
     Em 30 minutos de conversa, identificamos exatamente quais processos estão custando mais — e o que automatizar primeiro para sentir resultado rápido.
   </p>
-
-  <div class="cta-block">
-    <a href="SEU_LINK_GOOGLE_CALENDAR" target="_blank" class="btn">
-      Quero meu Diagnóstico Gratuito →
-    </a>
-    <span class="btn-note">Gratuito · 30 min · Sem compromisso · Via Google Meet</span>
-  </div>
+  <a href="#agendar" class="btn-ghost">
+    Quero meu Diagnóstico Gratuito →
+  </a>
+  <p class="btn-note">Gratuito · 30 min · Sem compromisso · Via Google Meet</p>
 </div>
 
 <!-- TRUST BAR -->
 <div class="trust">
-  <div class="trust-item"><span>🔒</span> Sem enrolação de vendas</div>
-  <div class="trust-item"><span>⚡</span> Resultado prático em 30 min</div>
-  <div class="trust-item"><span>📅</span> Escolhe o horário que preferir</div>
-  <div class="trust-item"><span>🇧🇷</span> 100% em português</div>
+  <div class="trust-item">🔒 Sem enrolação de vendas</div>
+  <div class="trust-item">⚡ Resultado prático em 30 min</div>
+  <div class="trust-item">📅 Escolhe o horário que preferir</div>
+  <div class="trust-item">🇧🇷 100% em português</div>
 </div>
 
 <!-- DOR -->
@@ -435,7 +482,7 @@
     <div class="card">
       <div class="card-icon">🔔</div>
       <div class="card-title">Depende de uma pessoa</div>
-      <div class="card-body">Se ela sai, o processo para. Conhecimento na cabeça, não no sistema.</div>
+      <div class="card-body">Se ela sai, o processo para. O conhecimento está na cabeça, não no sistema.</div>
     </div>
   </div>
 </div>
@@ -443,94 +490,151 @@
 <!-- COMO FUNCIONA -->
 <div class="section" style="border-bottom:1px solid var(--border);">
   <p class="label">Como funciona</p>
-  <h2>Do zero ao diagnóstico<br>em 30 minutos</h2>
+  <h2>Do formulário à reunião<br>em minutos</h2>
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <div class="step-title">Você agenda um horário</div>
-        <div class="step-desc">Clica no botão, escolhe o dia e hora que preferir. A reunião é pelo Google Meet — sem instalar nada.</div>
+        <div class="step-title">Você preenche o formulário abaixo</div>
+        <div class="step-desc">Nome, e-mail, WhatsApp, horário preferido e duração. Leva menos de 1 minuto.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Mapeamos seus processos</div>
-        <div class="step-desc">Você conta como sua empresa funciona hoje. A gente identifica onde está o maior desperdício e o que tem maior ROI para automatizar.</div>
+        <div class="step-title">A reunião é criada automaticamente</div>
+        <div class="step-desc">Um convite do Google Meet é gerado e enviado para o seu e-mail com os dados confirmados.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Você recebe o plano</div>
-        <div class="step-desc">Sai da reunião com um roadmap claro: o que automatizar, em qual ordem e o que esperar de resultado. Mesmo que não contrate a Iadverra.</div>
+        <div class="step-title">Mapeamos seus processos juntos</div>
+        <div class="step-desc">Você conta como sua empresa funciona. Identificamos onde está o maior desperdício e o que tem maior ROI para automatizar.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <div class="step-title">Implementamos se fizer sentido</div>
-        <div class="step-desc">Se quiser avançar, a Iadverra cuida de tudo — da arquitetura à automação em produção. Sem jargão técnico.</div>
+        <div class="step-title">Você sai com o plano</div>
+        <div class="step-desc">Roadmap claro: o que automatizar, em qual ordem e o que esperar de resultado — mesmo que não contrate a Iadverra.</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- OFERTA -->
-<div class="section" id="agendar">
-  <div class="offer">
-    <div class="offer-label">O que você ganha</div>
-    <div class="offer-title">Diagnóstico de Automação<br>— completamente gratuito</div>
-    <ul class="check-list">
-      <li>
-        <span class="ck">✓</span>
-        <span>Mapeamento dos 3 processos que mais desperdiçam tempo na sua operação</span>
-      </li>
-      <li>
-        <span class="ck">✓</span>
-        <span>Análise das ferramentas que você já tem e que podem ser integradas sem custo extra</span>
-      </li>
-      <li>
-        <span class="ck">✓</span>
-        <span>Estimativa real de horas/mês economizadas com cada automação identificada</span>
-      </li>
-      <li>
-        <span class="ck">✓</span>
-        <span>Roadmap de prioridades: o que fazer primeiro para sentir resultado rápido</span>
-      </li>
-      <li>
-        <span class="ck">✓</span>
-        <span>30 minutos de atenção total de um especialista — sem pitch comercial no meio</span>
-      </li>
-    </ul>
-    <div class="offer-footer">
-      <div>
-        <div class="price-old">Valor de mercado: R$ 497</div>
-        <div class="price-free">Gratuito</div>
-        <div class="price-tag">Para empresas selecionadas esta semana</div>
+<!-- FORMULÁRIO -->
+<div id="agendar">
+  <div class="form-box">
+
+    <!-- Estado: Formulário -->
+    <div id="form-view">
+      <div class="form-label-top">Agendar diagnóstico</div>
+      <div class="form-title">Reservar minha vaga<br>gratuita</div>
+      <p class="form-sub">Preencha abaixo. A reunião é criada e enviada para você automaticamente.</p>
+
+      <form id="booking-form" novalidate>
+
+        <div class="field" id="field-nome">
+          <label for="nome">Nome completo</label>
+          <input
+            type="text"
+            id="nome"
+            name="nome"
+            placeholder="João Silva"
+            autocomplete="name"
+          />
+          <span class="field-error">Por favor, informe seu nome.</span>
+        </div>
+
+        <div class="field" id="field-email">
+          <label for="email">E-mail</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="joao@empresa.com.br"
+            autocomplete="email"
+          />
+          <span class="field-error">Informe um e-mail válido.</span>
+        </div>
+
+        <div class="field" id="field-numero">
+          <label for="numero">WhatsApp (com DDD)</label>
+          <input
+            type="tel"
+            id="numero"
+            name="numero"
+            placeholder="(11) 99999-9999"
+            autocomplete="tel"
+            maxlength="15"
+          />
+          <span class="field-error">Informe seu número com DDD.</span>
+        </div>
+
+        <div class="row-2">
+          <div class="field" id="field-horario">
+            <label for="horario">Data e horário</label>
+            <input
+              type="datetime-local"
+              id="horario"
+              name="horario"
+            />
+            <span class="field-error">Selecione data e horário.</span>
+          </div>
+
+          <div class="field" id="field-duracao">
+            <label for="duracao">Duração</label>
+            <select id="duracao" name="duracao">
+              <option value="">Selecione</option>
+              <option value="30">30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
+            <span class="field-error">Selecione a duração.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <span id="btn-text">Agendar minha reunião →</span>
+          <span class="spinner" id="spinner"></span>
+        </button>
+
+      </form>
+
+      <div class="urgency">
+        ⚠️ <span><strong>Apenas 5 vagas por semana.</strong> Diagnósticos são limitados para garantir qualidade no atendimento.</span>
       </div>
-      <a href="SEU_LINK_GOOGLE_CALENDAR" target="_blank" class="btn" style="font-size:16px;">
-        Agendar agora →
-      </a>
     </div>
 
-    <div class="urgency">
-      <span class="urgency-icon">⚠️</span>
-      <span class="urgency-text">
-        <strong>Vagas limitadas:</strong> aceitamos apenas <strong>5 diagnósticos por semana</strong> para garantir qualidade no atendimento.
-      </span>
+    <!-- Estado: Sucesso -->
+    <div id="success-view" class="form-success">
+      <div class="success-icon">✅</div>
+      <h3>Reunião agendada!</h3>
+      <p>
+        Você receberá um convite no e-mail informado com o link do Google Meet e todos os detalhes da sua reunião.<br><br>
+        Nos vemos em breve.
+      </p>
     </div>
+
+    <!-- Estado: Erro -->
+    <div id="error-view" class="form-error-msg">
+      <div class="error-icon">⚠️</div>
+      <p>Não foi possível agendar no momento. Tente novamente ou entre em contato pelo WhatsApp.</p>
+      <button class="retry-btn" onclick="resetForm()">Tentar novamente</button>
+    </div>
+
   </div>
 </div>
 
 <!-- FAQ -->
-<div class="section" style="border-top:1px solid var(--border);">
+<div class="section" style="border-top:1px solid var(--border);padding-top:72px;">
   <p class="label">Dúvidas</p>
   <h2>Respostas diretas</h2>
   <div class="faq-list">
     <div class="faq-item">
       <div class="faq-q">Realmente é gratuito? Qual o motivo?</div>
-      <div class="faq-a">Sim, 100% gratuito. O diagnóstico é nossa forma de mostrar como trabalhamos. Você sai com um plano de ação real independente de contratar a Iadverra ou não.</div>
+      <div class="faq-a">Sim, 100% gratuito. O diagnóstico é nossa forma de mostrar como trabalhamos. Você sai com um plano real independente de contratar a Iadverra ou não.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Para que tipo de empresa serve?</div>
@@ -538,31 +642,126 @@
     </div>
     <div class="faq-item">
       <div class="faq-q">Preciso ter conhecimento técnico?</div>
-      <div class="faq-a">Zero. Você fala sobre como sua empresa funciona, a Iadverra cuida da parte técnica. Nossa missão é simplificar, não complicar.</div>
+      <div class="faq-a">Zero. Você fala sobre como sua empresa funciona, a Iadverra cuida da parte técnica.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Quanto tempo leva para ver resultado depois?</div>
-      <div class="faq-a">Automações simples entram em produção em 48h. Projetos mais completos de 2 a 4 semanas. O ganho começa no primeiro processo automatizado.</div>
+      <div class="faq-a">Automações simples entram em produção em 48h. Projetos completos de 2 a 4 semanas.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">A reunião é presencial ou online?</div>
-      <div class="faq-a">100% online pelo Google Meet. Você recebe o link automaticamente ao agendar. Funciona de qualquer lugar do Brasil.</div>
+      <div class="faq-a">100% online pelo Google Meet. O link chega automaticamente no seu e-mail após o agendamento.</div>
     </div>
   </div>
-</div>
-
-<!-- FINAL CTA -->
-<div class="final">
-  <h2>Pare de perder tempo<br><em style="color:var(--muted);font-style:normal;">com o que pode ser automático.</em></h2>
-  <p>30 minutos. Gratuito. Sem compromisso.</p>
-  <a href="SEU_LINK_GOOGLE_CALENDAR" target="_blank" class="btn" style="font-size:18px; padding:20px 48px;">
-    Agendar meu Diagnóstico →
-  </a>
 </div>
 
 <footer>
   © 2026 Iadverra · Automação que funciona de verdade
 </footer>
+
+<script>
+  // Máscara de telefone brasileiro
+  document.getElementById('numero').addEventListener('input', function (e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length <= 10) {
+      v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    } else {
+      v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    }
+    e.target.value = v;
+  });
+
+  // Data mínima = agora
+  const horarioInput = document.getElementById('horario');
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  horarioInput.min = now.toISOString().slice(0, 16);
+
+  function showError(fieldId) {
+    document.getElementById(fieldId).classList.add('has-error');
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
+  }
+
+  function validate() {
+    clearErrors();
+    let valid = true;
+
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const numero = document.getElementById('numero').value.trim();
+    const horario = document.getElementById('horario').value;
+    const duracao = document.getElementById('duracao').value;
+
+    if (!nome) { showError('field-nome'); valid = false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('field-email'); valid = false; }
+    if (!numero || numero.replace(/\D/g, '').length < 10) { showError('field-numero'); valid = false; }
+    if (!horario) { showError('field-horario'); valid = false; }
+    if (!duracao) { showError('field-duracao'); valid = false; }
+
+    return valid;
+  }
+
+  function resetForm() {
+    document.getElementById('form-view').style.display = 'block';
+    document.getElementById('success-view').style.display = 'none';
+    document.getElementById('error-view').style.display = 'none';
+    document.getElementById('booking-form').reset();
+    clearErrors();
+    setLoading(false);
+  }
+
+  function setLoading(loading) {
+    const btn = document.getElementById('submit-btn');
+    const text = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+    btn.disabled = loading;
+    text.style.display = loading ? 'none' : 'flex';
+    spinner.style.display = loading ? 'block' : 'none';
+  }
+
+  document.getElementById('booking-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    setLoading(true);
+
+    const payload = {
+      nome: document.getElementById('nome').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      numero: document.getElementById('numero').value.replace(/\D/g, ''),
+      horario: document.getElementById('horario').value,
+      duracao: parseInt(document.getElementById('duracao').value, 10)
+    };
+
+    try {
+      const res = await fetch(
+        'https://n8n.srv1288686.hstgr.cloud/webhook/b5fe50b6-27b5-4429-8a02-f904a967db20',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }
+      );
+
+      if (res.ok) {
+        document.getElementById('form-view').style.display = 'none';
+        document.getElementById('success-view').style.display = 'block';
+      } else {
+        throw new Error('status ' + res.status);
+      }
+    } catch (err) {
+      console.error('Webhook error:', err);
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('error-view').style.display = 'block';
+    }
+
+    setLoading(false);
+  });
+</script>
 
 </body>
 </html>
