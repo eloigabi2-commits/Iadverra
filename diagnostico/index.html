@@ -11,12 +11,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #080808;
-      --surface: #111111;
-      --card: #181818;
-      --border: #252525;
+      --bg: #05050a;
+      --surface: #0d0d16;
+      --card: #0f0f1a;
+      --card-hover: #141425;
+      --border: #1e1e35;
+      --border-bright: #2d2d55;
       --white: #ffffff;
-      --muted: #777777;
+      --muted: #6b6b8a;
+      --muted-bright: #9898b8;
+      --accent: #7c6eff;
+      --accent-dim: rgba(124,110,255,0.15);
+      --accent-glow: rgba(124,110,255,0.4);
+      --star: #ffffff;
       --green: #22c55e;
       --red: #ef4444;
     }
@@ -29,7 +36,23 @@
       color: var(--white);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
+
+    /* ── GRID BG ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,110,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,110,255,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * { position: relative; z-index: 1; }
 
     /* ── NAV ── */
     nav {
@@ -39,364 +62,440 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 32px;
-      background: rgba(8,8,8,0.94);
-      backdrop-filter: blur(16px);
+      padding: 16px 40px;
+      background: rgba(5,5,10,0.88);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-    .logo { font-size: 18px; font-weight: 800; letter-spacing: -0.4px; }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .logo-star svg {
+      width: 26px;
+      height: 26px;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--white);
+    }
+
     .nav-btn {
-      background: #fff;
-      color: #000;
+      background: var(--accent);
+      color: #fff;
       padding: 10px 22px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 700;
       text-decoration: none;
-      transition: opacity .18s;
+      letter-spacing: -0.2px;
+      transition: opacity .18s, box-shadow .18s;
+      box-shadow: 0 0 20px var(--accent-glow);
     }
-    .nav-btn:hover { opacity: .82; }
+    .nav-btn:hover { opacity: .88; box-shadow: 0 0 32px var(--accent-glow); }
 
     /* ── HERO ── */
     .hero {
-      padding: 88px 24px 72px;
+      position: relative;
+      padding: 100px 24px 80px;
       text-align: center;
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
     }
+
+    /* Glow blob behind hero */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(124,110,255,0.12) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
     .live-badge {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-bright);
       border-radius: 100px;
-      padding: 5px 14px;
+      padding: 6px 16px;
       font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 28px;
+      font-weight: 600;
+      color: var(--muted-bright);
+      margin-bottom: 32px;
+      letter-spacing: 0.2px;
     }
+
     .dot {
       width: 7px; height: 7px;
       background: var(--green);
       border-radius: 50%;
       animation: blink 2s infinite;
+      box-shadow: 0 0 6px var(--green);
     }
+
     @keyframes blink {
       0%,100% { opacity: 1; }
       50% { opacity: .3; }
     }
+
     h1 {
-      font-size: clamp(34px, 5.5vw, 68px);
+      font-size: clamp(38px, 6vw, 76px);
       font-weight: 900;
-      letter-spacing: -2.5px;
-      line-height: 1.04;
-      margin-bottom: 22px;
+      letter-spacing: -3px;
+      line-height: 1.02;
+      margin-bottom: 24px;
     }
-    h1 em { font-style: normal; color: var(--muted); }
+
+    h1 .white { color: var(--white); }
+    h1 .purple {
+      color: var(--accent);
+      text-shadow: 0 0 40px var(--accent-glow);
+    }
+
     .sub {
       font-size: clamp(16px, 2vw, 19px);
-      color: var(--muted);
-      max-width: 560px;
-      margin: 0 auto 44px;
-      line-height: 1.75;
+      color: var(--muted-bright);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
+      font-weight: 400;
     }
-    .btn-ghost {
+
+    .hero-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-primary {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: #fff;
-      color: #000;
+      background: var(--accent);
+      color: #fff;
       font-size: 17px;
       font-weight: 800;
       padding: 18px 40px;
       border-radius: 12px;
       text-decoration: none;
       letter-spacing: -0.3px;
-      transition: transform .18s, box-shadow .18s;
+      transition: transform .18s, box-shadow .18s, opacity .18s;
+      box-shadow: 0 0 32px var(--accent-glow), 0 4px 24px rgba(0,0,0,0.4);
     }
-    .btn-ghost:hover {
+    .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 36px rgba(255,255,255,.12);
+      box-shadow: 0 0 48px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.4);
     }
-    .btn-note { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    .btn-note {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.2px;
+    }
 
     /* ── TRUST BAR ── */
     .trust {
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-      padding: 28px 24px;
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      background: var(--surface);
     }
     .trust-item {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: var(--muted);
+      color: var(--muted-bright);
+      font-weight: 500;
     }
+    .trust-item .ti { font-size: 15px; }
 
     /* ── SECTION ── */
     .section {
-      max-width: 1040px;
+      max-width: 1080px;
       margin: 0 auto;
-      padding: 80px 24px;
+      padding: 88px 24px;
     }
-    .label {
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 2.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 14px;
+      color: var(--accent);
+      margin-bottom: 16px;
     }
+    .tag::before {
+      content: '';
+      display: block;
+      width: 16px;
+      height: 1px;
+      background: var(--accent);
+    }
+
     h2 {
-      font-size: clamp(26px, 3.5vw, 44px);
-      font-weight: 800;
-      letter-spacing: -1.5px;
-      line-height: 1.1;
-      margin-bottom: 48px;
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.08;
+      margin-bottom: 52px;
+      color: var(--white);
     }
+
+    h2 .dim { color: var(--muted); }
 
     /* ── PAIN GRID ── */
     .grid-3 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-    }
-    .card {
-      background: var(--card);
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1px;
+      background: var(--border);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
-      transition: border-color .2s;
+      border-radius: 20px;
+      overflow: hidden;
     }
-    .card:hover { border-color: #3a3a3a; }
-    .card-icon { font-size: 26px; margin-bottom: 14px; }
-    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .card-body { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+    .pain-card {
+      background: var(--card);
+      padding: 32px 28px;
+      transition: background .2s;
+    }
+    .pain-card:hover { background: var(--card-hover); }
+
+    .pain-icon {
+      width: 44px; height: 44px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
+    .pain-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .pain-body { font-size: 13px; color: var(--muted-bright); line-height: 1.65; }
 
     /* ── STEPS ── */
-    .steps { display: flex; flex-direction: column; position: relative; }
-    .steps::before {
-      content: '';
-      position: absolute;
-      left: 26px; top: 32px; bottom: 32px;
-      width: 1px;
+    .steps-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
       background: var(--border);
-    }
-    .step { display: flex; gap: 24px; padding: 24px 0; }
-    .step-num {
-      width: 52px; height: 52px; min-width: 52px;
-      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 900;
-      position: relative; z-index: 1;
+      border-radius: 20px;
+      overflow: hidden;
     }
-    .step-body { padding-top: 10px; }
-    .step-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-    .step-desc { font-size: 14px; color: var(--muted); }
+
+    .step-card {
+      background: var(--card);
+      padding: 36px 32px;
+      transition: background .2s;
+    }
+    .step-card:hover { background: var(--card-hover); }
+
+    .step-num-big {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .step-title-big { font-size: 18px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.4px; }
+    .step-body { font-size: 14px; color: var(--muted-bright); line-height: 1.7; }
 
     /* ── FORM SECTION ── */
     #agendar {
-      max-width: 640px;
+      padding: 88px 24px;
+      max-width: 680px;
       margin: 0 auto;
-      padding: 80px 24px 96px;
     }
 
     .form-box {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-bright);
       border-radius: 24px;
-      padding: 48px 40px;
+      padding: 52px 44px;
+      box-shadow: 0 0 80px rgba(124,110,255,0.08), 0 40px 80px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
     }
 
-    .form-label-top {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
+    /* Glow top accent */
+    .form-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
     }
 
-    .form-title {
-      font-size: clamp(22px, 3vw, 32px);
-      font-weight: 900;
-      letter-spacing: -1px;
-      line-height: 1.15;
-      margin-bottom: 8px;
-    }
+    .form-tag { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+    .form-title { font-size: clamp(24px, 3vw, 36px); font-weight: 900; letter-spacing: -1.2px; line-height: 1.1; margin-bottom: 8px; }
+    .form-sub { font-size: 14px; color: var(--muted-bright); margin-bottom: 36px; }
 
-    .form-sub {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 36px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 20px;
-    }
-
-    .field label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #ccc;
-    }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--muted-bright); text-transform: uppercase; letter-spacing: 0.8px; }
 
     .field input,
     .field select {
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-bright);
       border-radius: 10px;
       color: var(--white);
       font-family: 'Inter', sans-serif;
       font-size: 15px;
       padding: 14px 16px;
       outline: none;
-      transition: border-color .18s;
+      transition: border-color .18s, box-shadow .18s;
       -webkit-appearance: none;
       appearance: none;
     }
-
-    .field input::placeholder { color: #444; }
-
+    .field input::placeholder { color: #3a3a5c; }
     .field input:focus,
     .field select:focus {
-      border-color: #555;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,110,255,0.12);
     }
 
     .field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.5);
+      filter: invert(0.4);
       cursor: pointer;
     }
 
     .field select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
       padding-right: 40px;
       cursor: pointer;
     }
+    .field select option { background: #0d0d16; }
 
-    .field select option { background: #1a1a1a; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-    .row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .field-error {
-      font-size: 12px;
-      color: var(--red);
-      display: none;
-    }
-
+    .field-error { font-size: 11px; color: var(--red); display: none; margin-top: 2px; }
     .field.has-error input,
     .field.has-error select { border-color: var(--red); }
     .field.has-error .field-error { display: block; }
 
     .submit-btn {
       width: 100%;
-      background: #fff;
-      color: #000;
+      background: var(--accent);
+      color: #fff;
       border: none;
       border-radius: 12px;
       font-family: 'Inter', sans-serif;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       padding: 18px;
       cursor: pointer;
       margin-top: 8px;
-      letter-spacing: -0.3px;
-      transition: opacity .18s, transform .18s;
+      letter-spacing: -0.2px;
+      transition: opacity .18s, transform .18s, box-shadow .18s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      box-shadow: 0 0 24px var(--accent-glow);
     }
-
     .submit-btn:hover:not(:disabled) {
-      opacity: .88;
+      opacity: .9;
       transform: translateY(-1px);
+      box-shadow: 0 0 40px var(--accent-glow);
     }
-
-    .submit-btn:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .submit-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
     .spinner {
       width: 18px; height: 18px;
-      border: 2px solid #000;
-      border-top-color: transparent;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
       border-radius: 50%;
       animation: spin .7s linear infinite;
       display: none;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* States */
-    .form-success,
-    .form-error-msg {
-      display: none;
-      text-align: center;
-      padding: 40px 24px;
-    }
-
-    .form-success .success-icon { font-size: 56px; margin-bottom: 16px; }
-    .form-success h3 {
-      font-size: 24px; font-weight: 800;
-      letter-spacing: -0.8px; margin-bottom: 10px;
-    }
-    .form-success p { font-size: 15px; color: var(--muted); line-height: 1.7; }
-
-    .form-error-msg .error-icon { font-size: 48px; margin-bottom: 16px; }
-    .form-error-msg p { font-size: 15px; color: var(--muted); }
-    .retry-btn {
-      margin-top: 20px;
-      background: none;
-      border: 1px solid var(--border);
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 10px 24px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
 
     .urgency {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(124,110,255,0.06);
+      border: 1px solid var(--border-bright);
       border-radius: 10px;
       padding: 14px 16px;
-      margin-top: 20px;
+      margin-top: 18px;
       font-size: 13px;
-      color: var(--muted);
+      color: var(--muted-bright);
       line-height: 1.5;
     }
-    .urgency strong { color: #fff; }
+    .urgency strong { color: var(--white); }
+
+    /* States */
+    .form-success, .form-error-msg { display: none; text-align: center; padding: 40px 20px; }
+    .state-icon { font-size: 52px; margin-bottom: 18px; }
+    .state-title { font-size: 22px; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 10px; }
+    .state-body { font-size: 14px; color: var(--muted-bright); line-height: 1.7; }
+    .retry-btn {
+      margin-top: 20px;
+      background: none;
+      border: 1px solid var(--border-bright);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .18s;
+    }
+    .retry-btn:hover { border-color: var(--accent); }
 
     /* ── FAQ ── */
-    .faq-list { display: flex; flex-direction: column; }
-    .faq-item { padding: 26px 0; border-bottom: 1px solid var(--border); }
-    .faq-q { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
-    .faq-a { font-size: 14px; color: var(--muted); line-height: 1.75; }
+    .faq-item {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-q { font-size: 16px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.3px; }
+    .faq-a { font-size: 14px; color: var(--muted-bright); line-height: 1.8; }
+
+    /* ── FINAL CTA ── */
+    .final {
+      text-align: center;
+      padding: 100px 24px;
+      position: relative;
+    }
+    .final::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center bottom, rgba(124,110,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .final h2 { margin-bottom: 16px; }
+    .final p { color: var(--muted-bright); font-size: 17px; margin-bottom: 44px; }
 
     footer {
       text-align: center;
@@ -404,16 +503,21 @@
       border-top: 1px solid var(--border);
       font-size: 12px;
       color: var(--muted);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     /* ── MOBILE ── */
-    @media (max-width: 600px) {
-      nav { padding: 14px 18px; }
-      .hero { padding: 60px 18px 52px; }
-      .form-box { padding: 28px 20px; }
+    @media (max-width: 640px) {
+      nav { padding: 14px 20px; }
+      .hero { padding: 72px 18px 60px; }
+      .form-box { padding: 32px 20px; }
       .row-2 { grid-template-columns: 1fr; }
-      .trust { gap: 18px; }
-      .steps::before { display: none; }
+      .trust { gap: 16px; }
+      .steps-wrap { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -421,7 +525,15 @@
 
 <!-- NAV -->
 <nav>
-  <div class="logo">Iadverra</div>
+  <a href="#" class="logo">
+    <span class="logo-star">
+      <svg viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 2L15.09 9.26H22.63L16.77 13.74L18.86 21L13 16.52L7.14 21L9.23 13.74L3.37 9.26H10.91L13 2Z"
+          fill="white" stroke="white" stroke-width="0.5" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="logo-text">Iadverra</span>
+  </a>
   <a href="#agendar" class="nav-btn">Agendar Diagnóstico →</a>
 </nav>
 
@@ -429,96 +541,96 @@
 <div class="hero">
   <div class="live-badge">
     <span class="dot"></span>
-    Vagas disponíveis esta semana
+    Vagas abertas esta semana
   </div>
-  <h1>Sua empresa perde tempo<br><em>porque não automatizou ainda.</em></h1>
+
+  <h1>
+    <span class="white">Automação que</span><br>
+    <span class="purple">realmente funciona.</span>
+  </h1>
+
   <p class="sub">
-    Em 30 minutos de conversa, identificamos exatamente quais processos estão custando mais — e o que automatizar primeiro para sentir resultado rápido.
+    Em 30 minutos identificamos quais processos estão travando sua empresa e o que automatizar primeiro para sentir resultado de verdade.
   </p>
-  <a href="#agendar" class="btn-ghost">
-    Quero meu Diagnóstico Gratuito →
-  </a>
-  <p class="btn-note">Gratuito · 30 min · Sem compromisso · Via Google Meet</p>
+
+  <div class="hero-cta">
+    <a href="#agendar" class="btn-primary">
+      Quero meu Diagnóstico Gratuito →
+    </a>
+    <span class="btn-note">100% gratuito &nbsp;·&nbsp; sem compromisso &nbsp;·&nbsp; Google Meet</span>
+  </div>
 </div>
 
 <!-- TRUST BAR -->
 <div class="trust">
-  <div class="trust-item">🔒 Sem enrolação de vendas</div>
-  <div class="trust-item">⚡ Resultado prático em 30 min</div>
-  <div class="trust-item">📅 Escolhe o horário que preferir</div>
-  <div class="trust-item">🇧🇷 100% em português</div>
+  <div class="trust-item"><span class="ti">🔒</span> Sem enrolação de vendas</div>
+  <div class="trust-item"><span class="ti">⚡</span> Plano real em 30 minutos</div>
+  <div class="trust-item"><span class="ti">📅</span> Você escolhe o horário</div>
+  <div class="trust-item"><span class="ti">🇧🇷</span> 100% em português</div>
 </div>
 
 <!-- DOR -->
-<div class="section" style="border-bottom:1px solid var(--border);">
-  <p class="label">O problema</p>
-  <h2>Reconhece algum desses?</h2>
+<div class="section" style="border-bottom:1px solid var(--border)">
+  <div class="tag">O problema</div>
+  <h2>Sua equipe ainda faz isso<br><span class="dim">todo. santo. dia.</span></h2>
   <div class="grid-3">
-    <div class="card">
-      <div class="card-icon">⏳</div>
-      <div class="card-title">Processos feitos na mão</div>
-      <div class="card-body">Tarefas repetitivas que sua equipe faz todo dia e que um robô resolveria em segundos.</div>
+    <div class="pain-card">
+      <div class="pain-icon">⏳</div>
+      <div class="pain-title">Tarefas repetitivas na mão</div>
+      <div class="pain-body">Sua equipe copia dados, gera relatórios e manda e-mails que poderiam ser feitos automaticamente.</div>
     </div>
-    <div class="card">
-      <div class="card-icon">🔁</div>
-      <div class="card-title">Dados copiados entre sistemas</div>
-      <div class="card-body">O mesmo dado digitado no CRM, na planilha e no e-mail. Erro humano garantido.</div>
+    <div class="pain-card">
+      <div class="pain-icon">🔁</div>
+      <div class="pain-title">Mesmo dado em 3 sistemas</div>
+      <div class="pain-body">CRM, planilha, ERP — tudo preenchido na mão. Erro garantido, retrabalho garantido.</div>
     </div>
-    <div class="card">
-      <div class="card-icon">📉</div>
-      <div class="card-title">Crescimento travado</div>
-      <div class="card-body">Para crescer, precisaria contratar mais pessoas para fazer mais do mesmo manual.</div>
+    <div class="pain-card">
+      <div class="pain-icon">📉</div>
+      <div class="pain-title">Não consegue escalar</div>
+      <div class="pain-body">Para crescer, precisaria de mais gente fazendo mais do mesmo. O processo limita o negócio.</div>
     </div>
-    <div class="card">
-      <div class="card-icon">💸</div>
-      <div class="card-title">Custo operacional alto</div>
-      <div class="card-body">Horas pagas para tarefas que não geram valor — dinheiro queimado em operação.</div>
+    <div class="pain-card">
+      <div class="pain-icon">💸</div>
+      <div class="pain-title">Custo operacional alto</div>
+      <div class="pain-body">Horas pagas para tarefas mecânicas que não geram valor estratégico nenhum.</div>
     </div>
-    <div class="card">
-      <div class="card-icon">🧩</div>
-      <div class="card-title">Ferramentas desconectadas</div>
-      <div class="card-body">CRM, ERP, WhatsApp, planilha — tudo separado, gerando retrabalho e perda de dados.</div>
+    <div class="pain-card">
+      <div class="pain-icon">🧩</div>
+      <div class="pain-title">Ferramentas que não conversam</div>
+      <div class="pain-body">WhatsApp, planilha, CRM, e-mail — silos de informação que geram perda e confusão.</div>
     </div>
-    <div class="card">
-      <div class="card-icon">🔔</div>
-      <div class="card-title">Depende de uma pessoa</div>
-      <div class="card-body">Se ela sai, o processo para. O conhecimento está na cabeça, não no sistema.</div>
+    <div class="pain-card">
+      <div class="pain-icon">🔔</div>
+      <div class="pain-title">Tudo depende de uma pessoa</div>
+      <div class="pain-body">Ela saiu? O processo parou. O conhecimento está na cabeça das pessoas, não no sistema.</div>
     </div>
   </div>
 </div>
 
 <!-- COMO FUNCIONA -->
-<div class="section" style="border-bottom:1px solid var(--border);">
-  <p class="label">Como funciona</p>
-  <h2>Do formulário à reunião<br>em minutos</h2>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <div class="step-title">Você preenche o formulário abaixo</div>
-        <div class="step-desc">Nome, e-mail, WhatsApp, horário preferido e duração. Leva menos de 1 minuto.</div>
-      </div>
+<div class="section" style="border-bottom:1px solid var(--border)">
+  <div class="tag">Como funciona</div>
+  <h2>Do formulário à reunião<br><span class="dim">em minutos.</span></h2>
+  <div class="steps-wrap">
+    <div class="step-card">
+      <div class="step-num-big">PASSO 01</div>
+      <div class="step-title-big">Você preenche o formulário</div>
+      <div class="step-body">Nome, e-mail, WhatsApp, data e duração. Menos de 1 minuto. A reunião é criada automaticamente e o convite vai direto pro seu e-mail.</div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <div class="step-title">A reunião é criada automaticamente</div>
-        <div class="step-desc">Um convite do Google Meet é gerado e enviado para o seu e-mail com os dados confirmados.</div>
-      </div>
+    <div class="step-card">
+      <div class="step-num-big">PASSO 02</div>
+      <div class="step-title-big">Mapeamos seus processos</div>
+      <div class="step-body">Você conta como a empresa funciona hoje. A Iadverra identifica onde está o maior desperdício e quais automações têm maior retorno.</div>
     </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <div class="step-title">Mapeamos seus processos juntos</div>
-        <div class="step-desc">Você conta como sua empresa funciona. Identificamos onde está o maior desperdício e o que tem maior ROI para automatizar.</div>
-      </div>
+    <div class="step-card">
+      <div class="step-num-big">PASSO 03</div>
+      <div class="step-title-big">Você recebe o plano</div>
+      <div class="step-body">Sai da reunião com um roadmap real: o que automatizar, em qual ordem e o que esperar de resultado — independente de contratar a Iadverra.</div>
     </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <div class="step-title">Você sai com o plano</div>
-        <div class="step-desc">Roadmap claro: o que automatizar, em qual ordem e o que esperar de resultado — mesmo que não contrate a Iadverra.</div>
-      </div>
+    <div class="step-card">
+      <div class="step-num-big">PASSO 04</div>
+      <div class="step-title-big">Implementamos se quiser</div>
+      <div class="step-body">Se fizer sentido avançar, a Iadverra cuida de tudo — da arquitetura à automação rodando em produção. Sem jargão técnico.</div>
     </div>
   </div>
 </div>
@@ -527,65 +639,41 @@
 <div id="agendar">
   <div class="form-box">
 
-    <!-- Estado: Formulário -->
+    <!-- Formulário -->
     <div id="form-view">
-      <div class="form-label-top">Agendar diagnóstico</div>
-      <div class="form-title">Reservar minha vaga<br>gratuita</div>
+      <div class="form-tag">★ Agendar diagnóstico</div>
+      <div class="form-title">Reservar minha vaga gratuita</div>
       <p class="form-sub">Preencha abaixo. A reunião é criada e enviada para você automaticamente.</p>
 
       <form id="booking-form" novalidate>
 
         <div class="field" id="field-nome">
           <label for="nome">Nome completo</label>
-          <input
-            type="text"
-            id="nome"
-            name="nome"
-            placeholder="João Silva"
-            autocomplete="name"
-          />
+          <input type="text" id="nome" placeholder="João Silva" autocomplete="name" />
           <span class="field-error">Por favor, informe seu nome.</span>
         </div>
 
         <div class="field" id="field-email">
           <label for="email">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="joao@empresa.com.br"
-            autocomplete="email"
-          />
+          <input type="email" id="email" placeholder="joao@empresa.com.br" autocomplete="email" />
           <span class="field-error">Informe um e-mail válido.</span>
         </div>
 
         <div class="field" id="field-numero">
           <label for="numero">WhatsApp (com DDD)</label>
-          <input
-            type="tel"
-            id="numero"
-            name="numero"
-            placeholder="(11) 99999-9999"
-            autocomplete="tel"
-            maxlength="15"
-          />
+          <input type="tel" id="numero" placeholder="(11) 99999-9999" autocomplete="tel" maxlength="15" />
           <span class="field-error">Informe seu número com DDD.</span>
         </div>
 
         <div class="row-2">
           <div class="field" id="field-horario">
             <label for="horario">Data e horário</label>
-            <input
-              type="datetime-local"
-              id="horario"
-              name="horario"
-            />
+            <input type="datetime-local" id="horario" />
             <span class="field-error">Selecione data e horário.</span>
           </div>
-
           <div class="field" id="field-duracao">
             <label for="duracao">Duração</label>
-            <select id="duracao" name="duracao">
+            <select id="duracao">
               <option value="">Selecione</option>
               <option value="30">30 minutos</option>
               <option value="45">45 minutos</option>
@@ -607,20 +695,17 @@
       </div>
     </div>
 
-    <!-- Estado: Sucesso -->
+    <!-- Sucesso -->
     <div id="success-view" class="form-success">
-      <div class="success-icon">✅</div>
-      <h3>Reunião agendada!</h3>
-      <p>
-        Você receberá um convite no e-mail informado com o link do Google Meet e todos os detalhes da sua reunião.<br><br>
-        Nos vemos em breve.
-      </p>
+      <div class="state-icon">✅</div>
+      <div class="state-title">Reunião agendada!</div>
+      <p class="state-body">O convite com o link do Google Meet foi enviado para o seu e-mail com todos os detalhes.<br><br>Nos vemos em breve.</p>
     </div>
 
-    <!-- Estado: Erro -->
+    <!-- Erro -->
     <div id="error-view" class="form-error-msg">
-      <div class="error-icon">⚠️</div>
-      <p>Não foi possível agendar no momento. Tente novamente ou entre em contato pelo WhatsApp.</p>
+      <div class="state-icon">⚠️</div>
+      <p class="state-body">Não foi possível agendar no momento.<br>Tente novamente ou entre em contato pelo WhatsApp.</p>
       <button class="retry-btn" onclick="resetForm()">Tentar novamente</button>
     </div>
 
@@ -628,80 +713,73 @@
 </div>
 
 <!-- FAQ -->
-<div class="section" style="border-top:1px solid var(--border);padding-top:72px;">
-  <p class="label">Dúvidas</p>
-  <h2>Respostas diretas</h2>
-  <div class="faq-list">
-    <div class="faq-item">
-      <div class="faq-q">Realmente é gratuito? Qual o motivo?</div>
-      <div class="faq-a">Sim, 100% gratuito. O diagnóstico é nossa forma de mostrar como trabalhamos. Você sai com um plano real independente de contratar a Iadverra ou não.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Para que tipo de empresa serve?</div>
-      <div class="faq-a">Qualquer empresa que use processos repetitivos: jurídicas, financeiras, imobiliárias, e-commerce, agências, clínicas, indústria. Se tem processo manual, tem oportunidade.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Preciso ter conhecimento técnico?</div>
-      <div class="faq-a">Zero. Você fala sobre como sua empresa funciona, a Iadverra cuida da parte técnica.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">Quanto tempo leva para ver resultado depois?</div>
-      <div class="faq-a">Automações simples entram em produção em 48h. Projetos completos de 2 a 4 semanas.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q">A reunião é presencial ou online?</div>
-      <div class="faq-a">100% online pelo Google Meet. O link chega automaticamente no seu e-mail após o agendamento.</div>
-    </div>
+<div class="section" style="border-top:1px solid var(--border); padding-top:72px;">
+  <div class="tag">Dúvidas</div>
+  <h2>Respostas diretas.</h2>
+  <div class="faq-item">
+    <div class="faq-q">Realmente é gratuito? Qual o motivo?</div>
+    <div class="faq-a">Sim, 100% gratuito. O diagnóstico é nossa forma de mostrar como trabalhamos. Você sai com um plano real independente de contratar a Iadverra ou não.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Para que tipo de empresa funciona?</div>
+    <div class="faq-a">Qualquer empresa que use processos repetitivos: jurídicas, financeiras, imobiliárias, e-commerce, agências, clínicas, indústria. Se tem processo manual, tem oportunidade de automação.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Preciso ter conhecimento técnico?</div>
+    <div class="faq-a">Zero. Você fala sobre como a empresa funciona, a Iadverra cuida da parte técnica. Nossa missão é simplificar, não complicar.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Quanto tempo leva para ver resultado depois?</div>
+    <div class="faq-a">Automações simples entram em produção em 48h. Projetos completos de 2 a 4 semanas. O ganho começa no primeiro processo automatizado.</div>
+  </div>
+  <div class="faq-item" style="border-bottom:none">
+    <div class="faq-q">A reunião é presencial ou online?</div>
+    <div class="faq-a">100% online pelo Google Meet. O link chega automaticamente no e-mail após o agendamento.</div>
   </div>
 </div>
 
+<!-- FINAL CTA -->
+<div class="final" style="border-top:1px solid var(--border)">
+  <h2>Pronto para parar de<br><span class="dim">perder tempo?</span></h2>
+  <p>30 minutos. Gratuito. Sem compromisso.</p>
+  <a href="#agendar" class="btn-primary" style="font-size:18px; padding:20px 48px;">
+    Agendar meu Diagnóstico →
+  </a>
+</div>
+
 <footer>
+  <svg width="16" height="16" viewBox="0 0 26 26" fill="white" opacity="0.6">
+    <path d="M13 2L15.09 9.26H22.63L16.77 13.74L18.86 21L13 16.52L7.14 21L9.23 13.74L3.37 9.26H10.91L13 2Z"/>
+  </svg>
   © 2026 Iadverra · Automação que funciona de verdade
 </footer>
 
 <script>
-  // Máscara de telefone brasileiro
-  document.getElementById('numero').addEventListener('input', function (e) {
-    let v = e.target.value.replace(/\D/g, '').slice(0, 11);
-    if (v.length <= 10) {
-      v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-    } else {
-      v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    }
+  // Máscara tel
+  document.getElementById('numero').addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g,'').slice(0,11);
+    if (v.length <= 10) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+    else v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3');
     e.target.value = v;
   });
 
   // Data mínima = agora
-  const horarioInput = document.getElementById('horario');
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  horarioInput.min = now.toISOString().slice(0, 16);
+  document.getElementById('horario').min = now.toISOString().slice(0,16);
 
-  function showError(fieldId) {
-    document.getElementById(fieldId).classList.add('has-error');
-  }
-
-  function clearErrors() {
-    document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
-  }
+  function showErr(id) { document.getElementById(id).classList.add('has-error'); }
+  function clearErrors() { document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error')); }
 
   function validate() {
-    clearErrors();
-    let valid = true;
-
-    const nome = document.getElementById('nome').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const numero = document.getElementById('numero').value.trim();
-    const horario = document.getElementById('horario').value;
-    const duracao = document.getElementById('duracao').value;
-
-    if (!nome) { showError('field-nome'); valid = false; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('field-email'); valid = false; }
-    if (!numero || numero.replace(/\D/g, '').length < 10) { showError('field-numero'); valid = false; }
-    if (!horario) { showError('field-horario'); valid = false; }
-    if (!duracao) { showError('field-duracao'); valid = false; }
-
-    return valid;
+    clearErrors(); let ok = true;
+    if (!document.getElementById('nome').value.trim()) { showErr('field-nome'); ok = false; }
+    const em = document.getElementById('email').value.trim();
+    if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showErr('field-email'); ok = false; }
+    if (document.getElementById('numero').value.replace(/\D/g,'').length < 10) { showErr('field-numero'); ok = false; }
+    if (!document.getElementById('horario').value) { showErr('field-horario'); ok = false; }
+    if (!document.getElementById('duracao').value) { showErr('field-duracao'); ok = false; }
+    return ok;
   }
 
   function resetForm() {
@@ -709,30 +787,25 @@
     document.getElementById('success-view').style.display = 'none';
     document.getElementById('error-view').style.display = 'none';
     document.getElementById('booking-form').reset();
-    clearErrors();
-    setLoading(false);
+    clearErrors(); setLoading(false);
   }
 
-  function setLoading(loading) {
+  function setLoading(on) {
     const btn = document.getElementById('submit-btn');
-    const text = document.getElementById('btn-text');
-    const spinner = document.getElementById('spinner');
-    btn.disabled = loading;
-    text.style.display = loading ? 'none' : 'flex';
-    spinner.style.display = loading ? 'block' : 'none';
+    btn.disabled = on;
+    document.getElementById('btn-text').style.display = on ? 'none' : 'flex';
+    document.getElementById('spinner').style.display = on ? 'block' : 'none';
   }
 
-  document.getElementById('booking-form').addEventListener('submit', async function (e) {
+  document.getElementById('booking-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-
     if (!validate()) return;
-
     setLoading(true);
 
     const payload = {
       nome: document.getElementById('nome').value.trim(),
       email: document.getElementById('email').value.trim(),
-      numero: document.getElementById('numero').value.replace(/\D/g, ''),
+      numero: document.getElementById('numero').value.replace(/\D/g,''),
       horario: document.getElementById('horario').value,
       duracao: parseInt(document.getElementById('duracao').value, 10)
     };
@@ -740,28 +813,18 @@
     try {
       const res = await fetch(
         'https://n8n.srv1288686.hstgr.cloud/webhook/b5fe50b6-27b5-4429-8a02-f904a967db20',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        }
+        { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }
       );
-
       if (res.ok) {
         document.getElementById('form-view').style.display = 'none';
         document.getElementById('success-view').style.display = 'block';
-      } else {
-        throw new Error('status ' + res.status);
-      }
-    } catch (err) {
-      console.error('Webhook error:', err);
+      } else throw new Error(res.status);
+    } catch(err) {
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('error-view').style.display = 'block';
     }
-
     setLoading(false);
   });
 </script>
-
 </body>
 </html>
