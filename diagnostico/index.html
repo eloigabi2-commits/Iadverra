@@ -103,25 +103,26 @@
     .nav-btn:hover { opacity: .88; box-shadow: 0 0 32px var(--accent-glow); }
 
     /* ── HERO ── */
+    .hero-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
     .hero {
       position: relative;
+      z-index: 2;
       padding: 100px 24px 80px;
       text-align: center;
       max-width: 900px;
       margin: 0 auto;
-    }
-
-    /* Glow blob behind hero */
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 500px;
-      background: radial-gradient(ellipse at center, rgba(124,110,255,0.12) 0%, transparent 65%);
-      pointer-events: none;
     }
 
     .live-badge {
@@ -538,6 +539,8 @@
 </nav>
 
 <!-- HERO -->
+<div class="hero-wrapper">
+<canvas id="hero-canvas"></canvas>
 <div class="hero">
   <div class="live-badge">
     <span class="dot"></span>
@@ -560,6 +563,8 @@
     <span class="btn-note">100% gratuito &nbsp;·&nbsp; sem compromisso &nbsp;·&nbsp; Google Meet</span>
   </div>
 </div>
+
+</div><!-- /hero-wrapper -->
 
 <!-- TRUST BAR -->
 <div class="trust">
@@ -755,7 +760,127 @@
 </footer>
 
 <script>
-  // Máscara tel
+// ── CONSTELLATION CANVAS ──
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+
+  const STAR_COUNT = 120;
+  const MAX_DIST   = 160;   // distância para conectar estrelas
+  const SPEED      = 0.28;
+  const STAR_MIN   = 0.8;
+  const STAR_MAX   = 2.2;
+
+  let W, H, stars = [];
+
+  function resize() {
+    const wrapper = canvas.parentElement;
+    W = canvas.width  = wrapper.offsetWidth;
+    H = canvas.height = wrapper.offsetHeight;
+  }
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function mkStar() {
+    return {
+      x:  rand(0, W),
+      y:  rand(0, H),
+      r:  rand(STAR_MIN, STAR_MAX),
+      vx: rand(-SPEED, SPEED),
+      vy: rand(-SPEED, SPEED),
+      // some stars pulse
+      pulse: Math.random() > 0.7,
+      phase: rand(0, Math.PI * 2),
+    };
+  }
+
+  function init() {
+    resize();
+    stars = Array.from({ length: STAR_COUNT }, mkStar);
+  }
+
+  function draw(ts) {
+    ctx.clearRect(0, 0, W, H);
+
+    // radial glow in centre
+    const grd = ctx.createRadialGradient(W/2, H*0.45, 0, W/2, H*0.45, W*0.55);
+    grd.addColorStop(0,   'rgba(124,110,255,0.10)');
+    grd.addColorStop(0.5, 'rgba(124,110,255,0.04)');
+    grd.addColorStop(1,   'transparent');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    // move & wrap
+    for (const s of stars) {
+      s.x += s.vx;
+      s.y += s.vy;
+      if (s.x < -5) s.x = W + 5;
+      if (s.x > W + 5) s.x = -5;
+      if (s.y < -5) s.y = H + 5;
+      if (s.y > H + 5) s.y = -5;
+    }
+
+    // connections
+    for (let i = 0; i < stars.length; i++) {
+      for (let j = i + 1; j < stars.length; j++) {
+        const a = stars[i], b = stars[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < MAX_DIST) {
+          const alpha = (1 - dist / MAX_DIST) * 0.28;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(180,170,255,${alpha})`;
+          ctx.lineWidth = 0.6;
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // stars
+    for (const s of stars) {
+      let r = s.r;
+      let alpha = 0.75;
+      if (s.pulse) {
+        const p = Math.sin(ts * 0.0015 + s.phase);
+        r += p * 0.6;
+        alpha = 0.55 + p * 0.25;
+      }
+
+      // glow
+      const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 4);
+      g.addColorStop(0,   `rgba(200,195,255,${alpha * 0.5})`);
+      g.addColorStop(1,   'transparent');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r * 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // core dot
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+    // redistribute stars within new bounds
+    for (const s of stars) {
+      if (s.x > W) s.x = rand(0, W);
+      if (s.y > H) s.y = rand(0, H);
+    }
+  });
+
+  init();
+  requestAnimationFrame(draw);
+})();
+
+// ── Máscara tel
   document.getElementById('numero').addEventListener('input', function(e) {
     let v = e.target.value.replace(/\D/g,'').slice(0,11);
     if (v.length <= 10) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
