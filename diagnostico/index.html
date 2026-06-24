@@ -30,6 +30,16 @@
 
     html { scroll-behavior: smooth; }
 
+    /* Hide WordPress theme header and footer */
+    .site-header, #masthead, header.site-header, .header-main,
+    .site-footer, #colophon, footer.site-footer, .footer-area,
+    .footer-widgets, .footer-bottom, .footer-container,
+    .wp-site-blocks > header, .wp-site-blocks > footer,
+    #footer, .footer-wrap, .ast-footer-wrap,
+    .hfeed > footer, body > footer:not(#iadverra-footer) {
+      display: none !important;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
@@ -752,7 +762,7 @@
   </a>
 </div>
 
-<footer>
+<footer id="iadverra-footer">
   <svg width="16" height="16" viewBox="0 0 26 26" fill="white" opacity="0.6">
     <path d="M13 2L15.09 9.26H22.63L16.77 13.74L18.86 21L13 16.52L7.14 21L9.23 13.74L3.37 9.26H10.91L13 2Z"/>
   </svg>
