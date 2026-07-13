@@ -14,6 +14,8 @@
     --borda: #e3ddd2;
     --branco: #ffffff;
     --acento: #d97b4f;
+    --azul: #3a6ea5;
+    --erro: #c0553d;
   }
   *{box-sizing:border-box;}
   body{
@@ -50,7 +52,7 @@
   .content{
     margin-left:260px;
     padding:40px 48px;
-    max-width:760px;
+    max-width:780px;
     width:100%;
   }
   .menu-toggle{ display:none; }
@@ -72,16 +74,87 @@
   table{ width:100%; border-collapse:collapse; margin:16px 0; }
   th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--borda); font-size:0.92rem; }
   th{ color:var(--texto-suave); font-weight:600; font-size:0.8rem; text-transform:uppercase; }
-  .tracker-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(70px,1fr)); gap:8px; margin:16px 0; }
-  .day{
-    background:var(--branco); border:1px solid var(--borda); border-radius:10px;
-    text-align:center; padding:10px 4px; cursor:pointer; font-size:0.85rem; user-select:none;
-  }
-  .day.checked{ background:var(--verde); color:white; border-color:var(--verde); }
   .disclaimer{ font-size:0.8rem; color:var(--texto-suave); background:#fff8ee; border:1px solid #f0e2c8; border-radius:10px; padding:14px 16px; margin-top:28px; }
   .welcome-hero{ background:var(--verde); color:white; border-radius:16px; padding:32px; margin-bottom:24px; }
   .welcome-hero h2{ color:white; }
   .cta-list{ margin:0; padding-left:20px; }
+
+  /* Quiz */
+  .quiz{ background:#fdf6ec; border:1px solid #ecdcb9; border-radius:12px; padding:18px 20px; margin:18px 0; }
+  .quiz h4{ margin:0 0 10px; font-size:0.95rem; }
+  .quiz-option{
+    display:block; width:100%; text-align:left; background:var(--branco); border:1px solid var(--borda);
+    border-radius:8px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:0.9rem;
+  }
+  .quiz-option:hover{ border-color:var(--verde); }
+  .quiz-option.correct{ background:#e6f4ea; border-color:#4a9a63; }
+  .quiz-option.wrong{ background:#fbe9e6; border-color:var(--erro); }
+  .quiz-feedback{ font-size:0.88rem; margin-top:8px; font-weight:600; }
+  .quiz-feedback.correct{ color:#2f6b4f; }
+  .quiz-feedback.wrong{ color:var(--erro); }
+
+  /* Dashboard */
+  .rings{ display:flex; gap:28px; flex-wrap:wrap; margin:20px 0; }
+  .ring-box{ text-align:center; }
+  .ring-box .num{ font-size:1.3rem; font-weight:700; color:var(--verde); }
+  .ring-box .lbl{ font-size:0.78rem; color:var(--texto-suave); margin-top:4px; }
+  .tip-card{ background:var(--verde-claro); border-left:4px solid var(--verde); border-radius:8px; padding:16px 18px; margin:18px 0; }
+
+  /* Diario */
+  .diary-form{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:20px 22px; margin:16px 0; }
+  .diary-form label{ display:block; font-size:0.85rem; color:var(--texto-suave); margin-top:14px; margin-bottom:4px; }
+  .diary-form select, .diary-form input[type=number]{
+    width:100%; padding:8px 10px; border:1px solid var(--borda); border-radius:8px; font-size:0.95rem;
+  }
+  .water-row{ display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .cup{
+    width:34px; height:34px; border-radius:8px; border:1px solid var(--borda); background:var(--branco);
+    cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;
+  }
+  .cup.filled{ background:var(--azul); border-color:var(--azul); color:white; }
+  .toggle-row{ display:flex; gap:10px; margin-top:6px; }
+  .toggle-btn{ flex:1; padding:8px; border-radius:8px; border:1px solid var(--borda); background:var(--branco); cursor:pointer; font-size:0.88rem; }
+  .toggle-btn.active{ background:var(--verde); color:white; border-color:var(--verde); }
+  .save-btn{ margin-top:18px; background:var(--verde); color:white; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:0.92rem; }
+  .save-btn:hover{ background:#245a41; }
+  #diary-saved-msg{ font-size:0.85rem; color:var(--verde); margin-left:10px; }
+  canvas#weight-chart{ width:100%; max-width:100%; height:220px; background:var(--branco); border:1px solid var(--borda); border-radius:12px; margin-top:16px; }
+
+  /* Receitas */
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 20px; }
+  .filter-btn{ background:var(--branco); border:1px solid var(--borda); border-radius:999px; padding:6px 14px; font-size:0.85rem; cursor:pointer; }
+  .filter-btn.active{ background:var(--verde); color:white; border-color:var(--verde); }
+  .recipe-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
+  .recipe-card{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:16px; }
+  .recipe-card h4{ margin:0 0 6px; font-size:1rem; }
+  .recipe-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .tag-pill{ font-size:0.68rem; background:var(--verde-claro); color:var(--verde); padding:2px 8px; border-radius:999px; }
+
+  /* Conquistas */
+  .badge-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-top:18px; }
+  .badge-card{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:16px; text-align:center; opacity:0.45; }
+  .badge-card.unlocked{ opacity:1; border-color:var(--acento); }
+  .badge-icon{ font-size:1.8rem; margin-bottom:8px; }
+  .badge-card h4{ margin:0 0 4px; font-size:0.9rem; }
+  .badge-card p{ font-size:0.75rem; color:var(--texto-suave); margin:0; }
+
+  /* Certificado */
+  #certificate-canvas{ width:100%; max-width:640px; border:1px solid var(--borda); border-radius:12px; display:block; margin:16px 0; }
+  .locked-msg{ background:#fff8ee; border:1px solid #f0e2c8; border-radius:10px; padding:16px; font-size:0.9rem; }
+
+  /* Onboarding modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(20,20,18,0.55); display:flex; align-items:center; justify-content:center;
+    z-index:100; padding:20px;
+  }
+  .modal-box{ background:var(--branco); border-radius:16px; padding:30px; max-width:420px; width:100%; }
+  .modal-box h2{ margin-top:0; }
+  .modal-box input[type=text]{ width:100%; padding:10px 12px; border:1px solid var(--borda); border-radius:8px; font-size:0.95rem; margin-bottom:16px; }
+  .onb-option{ display:block; width:100%; text-align:left; background:var(--creme); border:1px solid var(--borda); border-radius:8px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:0.9rem; }
+  .onb-option.selected{ background:var(--verde-claro); border-color:var(--verde); }
+  .modal-next{ margin-top:14px; background:var(--verde); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; width:100%; font-size:0.95rem; }
+  .modal-next:disabled{ opacity:0.5; cursor:not-allowed; }
+
   @media (max-width:860px){
     .sidebar{
       width:220px; transform:translateX(-100%); transition:transform .25s; z-index:20;
@@ -98,6 +171,28 @@
 </head>
 <body>
 
+<div class="modal-overlay" id="onboarding-modal">
+  <div class="modal-box">
+    <div id="onb-step-1">
+      <h2>Antes de começar</h2>
+      <p style="color:var(--texto-suave); font-size:0.9rem;">Como podemos te chamar?</p>
+      <input type="text" id="onb-name" placeholder="Seu nome">
+      <button class="modal-next" id="onb-next-1" disabled>Continuar</button>
+    </div>
+    <div id="onb-step-2" style="display:none;">
+      <h2>Qual sua maior dificuldade hoje?</h2>
+      <div id="onb-options">
+        <button class="onb-option" data-val="agua">Beber pouca água</button>
+        <button class="onb-option" data-val="acucar">Vontade de doce / açúcar</button>
+        <button class="onb-option" data-val="sono">Sono ruim</button>
+        <button class="onb-option" data-val="exercicio">Sedentarismo</button>
+        <button class="onb-option" data-val="rotina">Falta de rotina/constância</button>
+      </div>
+      <button class="modal-next" id="onb-finish" disabled>Começar meu desafio</button>
+    </div>
+  </div>
+</div>
+
 <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
 
 <div class="app">
@@ -110,7 +205,7 @@
 
     <nav>
       <ul>
-        <li><a href="#inicio" data-target="inicio">Início</a></li>
+        <li><a href="#dashboard" data-target="dashboard">Meu Painel</a></li>
         <li class="grupo">Módulo 1</li>
         <li><a href="#m1l1" data-target="m1l1" data-lesson="m1l1">Os 3 erros mais comuns</a></li>
         <li><a href="#m1l2" data-target="m1l2" data-lesson="m1l2">Por que dietas radicais falham</a></li>
@@ -138,26 +233,33 @@
         <li><a href="#m5l3" data-target="m5l3" data-lesson="m5l3">Seus próximos passos</a></li>
 
         <li class="grupo">Ferramentas</li>
-        <li><a href="#tracker" data-target="tracker">Tracker dos 21 dias</a></li>
-        <li><a href="#cardapio" data-target="cardapio">Cardápio de 3 dias</a></li>
+        <li><a href="#diario" data-target="diario">Diário de 21 dias</a></li>
+        <li><a href="#receitas" data-target="receitas">Receitas</a></li>
         <li><a href="#compras" data-target="compras">Lista de compras</a></li>
+        <li><a href="#conquistas" data-target="conquistas">Conquistas</a></li>
+        <li><a href="#certificado" data-target="certificado">Certificado</a></li>
       </ul>
     </nav>
   </aside>
 
   <main class="content">
 
-    <section id="inicio">
+    <section id="dashboard">
       <div class="welcome-hero">
         <span class="badge">Bem-vindo(a)</span>
-        <h2>Seu guia de 21 dias começa agora</h2>
-        <p>Este programa foi criado para te ajudar a desinchar e emagrecer com hábitos simples, sem dietas radicais e sem passar fome. São 5 módulos curtos + ferramentas práticas que você pode acessar quando quiser, no seu ritmo.</p>
-        <ul class="cta-list">
-          <li>Assista/leia um módulo por vez, na ordem do menu ao lado</li>
-          <li>Marque as aulas como concluídas para acompanhar seu progresso</li>
-          <li>Use o Tracker dos 21 dias para manter a constância</li>
-        </ul>
+        <h2 id="dash-greeting">Seu guia de 21 dias começa agora</h2>
+        <p>Este programa foi criado para te ajudar a desinchar e emagrecer com hábitos simples, sem dietas radicais e sem passar fome.</p>
       </div>
+
+      <div class="tip-card" id="dash-tip"></div>
+
+      <div class="rings">
+        <div class="ring-box"><div class="num" id="dash-lessons">0/16</div><div class="lbl">Aulas concluídas</div></div>
+        <div class="ring-box"><div class="num" id="dash-diary">0/21</div><div class="lbl">Dias registrados no diário</div></div>
+        <div class="ring-box"><div class="num" id="dash-streak">0</div><div class="lbl">Sequência atual (dias)</div></div>
+        <div class="ring-box"><div class="num" id="dash-badges">0/9</div><div class="lbl">Conquistas desbloqueadas</div></div>
+      </div>
+
       <div class="disclaimer">
         Este conteúdo é educacional e tem foco em hábitos alimentares e de rotina. Ele não substitui acompanhamento médico ou nutricional individualizado. Consulte um profissional de saúde antes de iniciar mudanças significativas na alimentação ou rotina de exercícios.
       </div>
@@ -197,6 +299,13 @@
         <p>Inchaço nem sempre é gordura — muitas vezes é retenção de líquido causada por excesso de sódio, baixa ingestão de água (o corpo retém mais água quando acha que vai faltar), noites mal dormidas e longos períodos sentado. Entender isso ajuda a não se frustrar com variações normais do corpo de um dia para o outro.</p>
         <p>Nos próximos módulos você vai aprender ajustes simples de alimentação e rotina que atacam diretamente essas causas.</p>
         <label><input type="checkbox" data-lesson-check="m1l3"> Marcar aula como concluída</label>
+      </div>
+      <div class="quiz" data-quiz="q1">
+        <h4>Teste rápido: o que mais causa inchaço de um dia para o outro?</h4>
+        <button class="quiz-option" data-correct="false">Só gordura corporal acumulada</button>
+        <button class="quiz-option" data-correct="true">Sal em excesso, pouca água e sono ruim</button>
+        <button class="quiz-option" data-correct="false">Apenas fatores genéticos</button>
+        <div class="quiz-feedback"></div>
       </div>
     </section>
 
@@ -240,6 +349,13 @@
         <p>Essa proporção simples, sem precisar pesar nada ou contar calorias, já é suficiente para reduzir inchaço e manter saciedade por mais tempo.</p>
         <label><input type="checkbox" data-lesson-check="m2l3"> Marcar aula como concluída</label>
       </div>
+      <div class="quiz" data-quiz="q2">
+        <h4>Teste rápido: qual a proporção ideal do prato desincha?</h4>
+        <button class="quiz-option" data-correct="false">Metade do prato de carboidrato</button>
+        <button class="quiz-option" data-correct="true">Metade vegetais, ¼ proteína, ¼ carboidrato</button>
+        <button class="quiz-option" data-correct="false">Só proteína, sem carboidrato</button>
+        <div class="quiz-feedback"></div>
+      </div>
     </section>
 
     <!-- MÓDULO 3 -->
@@ -251,7 +367,7 @@
         <p><strong>Semana 1 — Ajuste:</strong> foco em água, redução de sal/açúcar e montagem do prato.<br>
         <strong>Semana 2 — Rotina:</strong> inclusão dos hábitos de manhã e noite, e movimento diário.<br>
         <strong>Semana 3 — Consolidação:</strong> manter tudo funcionando mesmo com imprevistos da rotina.</p>
-        <p>Use o Tracker (na aba Ferramentas) para marcar seu progresso dia a dia.</p>
+        <p>Use o Diário (na aba Ferramentas) para registrar seu progresso dia a dia.</p>
         <label><input type="checkbox" data-lesson-check="m3l1"> Marcar aula como concluída</label>
       </div>
     </section>
@@ -285,6 +401,13 @@
         <p>Regra simples: depois de uma recaída, a próxima refeição já volta ao normal. Não existe "compensar" pulando refeições ou se punindo — isso só alimenta o ciclo de culpa e compulsão.</p>
         <label><input type="checkbox" data-lesson-check="m3l4"> Marcar aula como concluída</label>
       </div>
+      <div class="quiz" data-quiz="q3">
+        <h4>Teste rápido: o que fazer depois de uma recaída alimentar?</h4>
+        <button class="quiz-option" data-correct="false">Pular a próxima refeição para compensar</button>
+        <button class="quiz-option" data-correct="true">Voltar ao normal já na próxima refeição</button>
+        <button class="quiz-option" data-correct="false">Desistir do desafio</button>
+        <div class="quiz-feedback"></div>
+      </div>
     </section>
 
     <!-- MÓDULO 4 -->
@@ -317,6 +440,13 @@
         <p>Defina um horário fixo (mesmo que curto) para se movimentar — de preferência associado a algo que você já faz, como logo depois de escovar os dentes pela manhã. Hábitos "grudados" em rotinas existentes têm muito mais chance de continuar depois dos 21 dias.</p>
         <label><input type="checkbox" data-lesson-check="m4l3"> Marcar aula como concluída</label>
       </div>
+      <div class="quiz" data-quiz="q4">
+        <h4>Teste rápido: qual a chave para manter constância nos exercícios?</h4>
+        <button class="quiz-option" data-correct="false">Treino intenso uma vez por semana</button>
+        <button class="quiz-option" data-correct="true">Associar o exercício a um hábito que já existe na rotina</button>
+        <button class="quiz-option" data-correct="false">Só vale ir à academia</button>
+        <div class="quiz-feedback"></div>
+      </div>
     </section>
 
     <!-- MÓDULO 5 -->
@@ -342,42 +472,62 @@
       <div class="modulo-tag">Módulo 5 · Aula 3</div>
       <h2>Seus próximos passos</h2>
       <div class="lesson">
-        <p>Parabéns por chegar até aqui. Revise os módulos sempre que precisar de reforço, use o Tracker para acompanhar novas rodadas de 21 dias, e lembre-se: progresso consistente vale mais que perfeição.</p>
+        <p>Parabéns por chegar até aqui. Revise os módulos sempre que precisar de reforço, use o Diário para acompanhar novas rodadas de 21 dias, e lembre-se: progresso consistente vale mais que perfeição.</p>
         <label><input type="checkbox" data-lesson-check="m5l3"> Marcar aula como concluída</label>
       </div>
+      <div class="quiz" data-quiz="q5">
+        <h4>Teste rápido: qual o segredo para não recuperar o peso?</h4>
+        <button class="quiz-option" data-correct="false">Tratar o processo como uma fase temporária</button>
+        <button class="quiz-option" data-correct="true">Manter os hábitos como o novo normal</button>
+        <button class="quiz-option" data-correct="false">Fazer uma dieta radical de novo se precisar</button>
+        <div class="quiz-feedback"></div>
+      </div>
     </section>
 
-    <!-- FERRAMENTAS -->
-    <section id="tracker">
+    <!-- DIÁRIO -->
+    <section id="diario">
       <div class="modulo-tag">Ferramenta</div>
-      <h2>Tracker dos 21 dias</h2>
-      <p>Clique em cada dia conforme for cumprindo os hábitos da semana. Seu progresso fica salvo neste navegador.</p>
-      <div class="tracker-grid" id="tracker-grid"></div>
+      <h2>Diário de 21 dias</h2>
+      <p>Registre seu dia para acompanhar sua evolução real, não só o que você "acha" que fez.</p>
+      <div class="diary-form">
+        <label>Dia do desafio</label>
+        <select id="diary-day"></select>
+
+        <label>Copos de água (clique para marcar)</label>
+        <div class="water-row" id="water-cups"></div>
+
+        <label>Horas de sono</label>
+        <input type="number" id="diary-sleep" min="0" max="14" step="0.5" placeholder="ex: 7">
+
+        <label>Praticou movimento hoje?</label>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn" data-val="sim" id="moved-yes">Sim</button>
+          <button type="button" class="toggle-btn" data-val="nao" id="moved-no">Não</button>
+        </div>
+
+        <label>Peso atual (opcional, kg)</label>
+        <input type="number" id="diary-weight" min="0" step="0.1" placeholder="ex: 68.5">
+
+        <button class="save-btn" id="diary-save">Salvar registro do dia</button>
+        <span id="diary-saved-msg"></span>
+      </div>
+
+      <h3 style="margin-top:28px; font-size:1.05rem;">Evolução do peso</h3>
+      <canvas id="weight-chart" width="700" height="220"></canvas>
     </section>
 
-    <section id="cardapio">
+    <!-- RECEITAS -->
+    <section id="receitas">
       <div class="modulo-tag">Ferramenta</div>
-      <h2>Cardápio exemplo de 3 dias</h2>
-      <p>Um modelo de referência — adapte às suas preferências e restrições alimentares.</p>
-      <div class="card">
-        <strong>Dia 1</strong><br>
-        Café da manhã: tapioca com ovo + café sem açúcar<br>
-        Almoço: arroz, feijão, frango grelhado, salada variada<br>
-        Jantar: sopa de legumes com frango desfiado
+      <h2>Receitas desincha</h2>
+      <p>Filtre por tipo de preferência — todas seguem a regra do prato do Módulo 2.</p>
+      <div class="filter-row" id="recipe-filters">
+        <button class="filter-btn active" data-tag="todas">Todas</button>
+        <button class="filter-btn" data-tag="rapida">Rápidas</button>
+        <button class="filter-btn" data-tag="vegetariana">Vegetarianas</button>
+        <button class="filter-btn" data-tag="proteica">Proteicas</button>
       </div>
-      <div class="card">
-        <strong>Dia 2</strong><br>
-        Café da manhã: vitamina de fruta com aveia<br>
-        Almoço: batata doce, peixe assado, brócolis e cenoura<br>
-        Jantar: omelete de legumes + salada verde
-      </div>
-      <div class="card">
-        <strong>Dia 3</strong><br>
-        Café da manhã: pão integral com ovo mexido<br>
-        Almoço: arroz integral, lentilha, carne magra grelhada, salada<br>
-        Jantar: creme de abóbora com frango desfiado
-      </div>
-      <label><input type="checkbox" data-lesson-check="cardapio"> Marcar como visto</label>
+      <div class="recipe-grid" id="recipe-grid"></div>
     </section>
 
     <section id="compras">
@@ -390,7 +540,26 @@
         <strong>Temperos naturais:</strong> alho, cebola, limão, ervas frescas, azeite<br><br>
         <strong>Frutas:</strong> variedade da estação (maçã, banana, mamão, melancia)
       </div>
-      <label><input type="checkbox" data-lesson-check="compras"> Marcar como visto</label>
+    </section>
+
+    <!-- CONQUISTAS -->
+    <section id="conquistas">
+      <div class="modulo-tag">Ferramenta</div>
+      <h2>Suas conquistas</h2>
+      <p>Desbloqueadas conforme você avança nas aulas e no diário.</p>
+      <div class="badge-grid" id="badge-grid"></div>
+    </section>
+
+    <!-- CERTIFICADO -->
+    <section id="certificado">
+      <div class="modulo-tag">Ferramenta</div>
+      <h2>Certificado de conclusão</h2>
+      <div id="cert-locked" class="locked-msg">Complete as 16 aulas e os 5 testes rápidos dos módulos para desbloquear seu certificado.</div>
+      <div id="cert-unlocked" style="display:none;">
+        <p>Parabéns! Baixe seu certificado personalizado.</p>
+        <canvas id="certificate-canvas" width="800" height="560"></canvas>
+        <button class="save-btn" id="cert-download">Baixar certificado (PNG)</button>
+      </div>
     </section>
 
   </main>
@@ -399,38 +568,125 @@
 <script>
 (function(){
   var lessonIds = ['m1l1','m1l2','m1l3','m2l1','m2l2','m2l3','m3l1','m3l2','m3l3','m3l4','m4l1','m4l2','m4l3','m5l1','m5l2','m5l3'];
+  var quizIds = ['q1','q2','q3','q4','q5'];
   var STORAGE_KEY = 'desincha21_progress';
-  var TRACKER_KEY = 'desincha21_tracker';
+  var QUIZ_KEY = 'desincha21_quiz';
+  var DIARY_KEY = 'desincha21_diary';
+  var ONB_KEY = 'desincha21_onboarding';
 
-  function getProgress(){
-    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+  function getJSON(key){ try{ return JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ return {}; } }
+  function setJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+  // ---------- ONBOARDING ----------
+  var onb = getJSON(ONB_KEY);
+  var modal = document.getElementById('onboarding-modal');
+  var difficultyLabels = {
+    agua: 'beber mais água',
+    acucar: 'reduzir o açúcar',
+    sono: 'melhorar o sono',
+    exercicio: 'se movimentar mais',
+    rotina: 'criar uma rotina mais constante'
+  };
+
+  if(onb.name && onb.difficulty){
+    modal.style.display = 'none';
+  } else {
+    var nameInput = document.getElementById('onb-name');
+    var next1 = document.getElementById('onb-next-1');
+    nameInput.addEventListener('input', function(){
+      next1.disabled = nameInput.value.trim().length === 0;
+    });
+    next1.addEventListener('click', function(){
+      onb.name = nameInput.value.trim();
+      document.getElementById('onb-step-1').style.display = 'none';
+      document.getElementById('onb-step-2').style.display = 'block';
+    });
+    var selectedDifficulty = null;
+    var finishBtn = document.getElementById('onb-finish');
+    document.querySelectorAll('.onb-option').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.querySelectorAll('.onb-option').forEach(function(b){ b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        selectedDifficulty = btn.getAttribute('data-val');
+        finishBtn.disabled = false;
+      });
+    });
+    finishBtn.addEventListener('click', function(){
+      onb.difficulty = selectedDifficulty;
+      setJSON(ONB_KEY, onb);
+      modal.style.display = 'none';
+      renderDashboard();
+    });
   }
-  function saveProgress(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
 
+  function renderDashboard(){
+    var name = onb.name ? onb.name : '';
+    document.getElementById('dash-greeting').textContent = name ? ('Bem-vindo(a), ' + name + '!') : 'Seu guia de 21 dias começa agora';
+    var tip = document.getElementById('dash-tip');
+    if(onb.difficulty){
+      tip.innerHTML = '<strong>Dica personalizada:</strong> como sua maior dificuldade é <em>' + difficultyLabels[onb.difficulty] + '</em>, preste atenção redobrada nos módulos e aulas relacionados a esse ponto — é aí que seu maior ganho vai aparecer primeiro.';
+    } else {
+      tip.style.display = 'none';
+    }
+  }
+  renderDashboard();
+
+  // ---------- PROGRESSO DE AULAS ----------
   function updateProgressBar(){
-    var p = getProgress();
+    var p = getJSON(STORAGE_KEY);
     var done = lessonIds.filter(function(id){ return p[id]; }).length;
     var pct = Math.round((done / lessonIds.length) * 100);
     document.getElementById('progress-bar').style.width = pct + '%';
     document.getElementById('progress-label').textContent = pct + '% concluído (' + done + '/' + lessonIds.length + ' aulas)';
+    document.getElementById('dash-lessons').textContent = done + '/' + lessonIds.length;
     lessonIds.forEach(function(id){
       var link = document.querySelector('nav a[data-lesson="'+id+'"]');
       if(link){ link.classList.toggle('done', !!p[id]); }
     });
+    updateBadges();
+    updateCertificate();
   }
 
   document.querySelectorAll('[data-lesson-check]').forEach(function(box){
     var id = box.getAttribute('data-lesson-check');
-    var p = getProgress();
+    var p = getJSON(STORAGE_KEY);
     box.checked = !!p[id];
     box.addEventListener('change', function(){
-      var p = getProgress();
+      var p = getJSON(STORAGE_KEY);
       p[id] = box.checked;
-      saveProgress(p);
+      setJSON(STORAGE_KEY, p);
       updateProgressBar();
     });
   });
 
+  // ---------- QUIZZES ----------
+  document.querySelectorAll('.quiz').forEach(function(quizEl){
+    var qid = quizEl.getAttribute('data-quiz');
+    var quizState = getJSON(QUIZ_KEY);
+    var feedback = quizEl.querySelector('.quiz-feedback');
+    if(quizState[qid]){
+      feedback.textContent = 'Você já acertou este teste. ✓';
+      feedback.classList.add('correct');
+    }
+    quizEl.querySelectorAll('.quiz-option').forEach(function(opt){
+      opt.addEventListener('click', function(){
+        var correct = opt.getAttribute('data-correct') === 'true';
+        quizEl.querySelectorAll('.quiz-option').forEach(function(o){ o.classList.remove('correct','wrong'); });
+        opt.classList.add(correct ? 'correct' : 'wrong');
+        feedback.textContent = correct ? 'Certo! Você entendeu o conceito. ✓' : 'Quase — releia a aula acima e tente de novo.';
+        feedback.className = 'quiz-feedback ' + (correct ? 'correct' : 'wrong');
+        if(correct){
+          var qs = getJSON(QUIZ_KEY);
+          qs[qid] = true;
+          setJSON(QUIZ_KEY, qs);
+          updateBadges();
+          updateCertificate();
+        }
+      });
+    });
+  });
+
+  // ---------- NAVEGAÇÃO ----------
   function showSection(target){
     document.querySelectorAll('section').forEach(function(s){ s.classList.remove('active'); });
     var el = document.getElementById(target);
@@ -452,36 +708,265 @@
   });
 
   window.addEventListener('hashchange', function(){
-    var target = location.hash.replace('#','') || 'inicio';
+    var target = location.hash.replace('#','') || 'dashboard';
     showSection(target);
   });
 
-  // Tracker dos 21 dias
-  var grid = document.getElementById('tracker-grid');
-  function getTracker(){
-    try{ return JSON.parse(localStorage.getItem(TRACKER_KEY)) || {}; }catch(e){ return {}; }
-  }
-  function saveTracker(t){ localStorage.setItem(TRACKER_KEY, JSON.stringify(t)); }
-  var tracker = getTracker();
-  for(var i=1;i<=21;i++){
-    (function(day){
-      var div = document.createElement('div');
-      div.className = 'day' + (tracker[day] ? ' checked' : '');
-      div.textContent = 'Dia ' + day;
-      div.addEventListener('click', function(){
-        var t = getTracker();
-        t[day] = !t[day];
-        saveTracker(t);
-        div.classList.toggle('checked', !!t[day]);
-      });
-      grid.appendChild(div);
-    })(i);
+  // ---------- DIÁRIO ----------
+  var daySelect = document.getElementById('diary-day');
+  for(var d=1; d<=21; d++){
+    var opt = document.createElement('option');
+    opt.value = d; opt.textContent = 'Dia ' + d;
+    daySelect.appendChild(opt);
   }
 
-  // Init
-  var initial = location.hash.replace('#','') || 'inicio';
+  var cupsWrap = document.getElementById('water-cups');
+  var cupCount = 8;
+  var currentCups = 0;
+  for(var c=1; c<=cupCount; c++){
+    (function(n){
+      var cup = document.createElement('div');
+      cup.className = 'cup';
+      cup.textContent = '💧';
+      cup.addEventListener('click', function(){
+        currentCups = (currentCups === n) ? n - 1 : n;
+        refreshCups();
+      });
+      cupsWrap.appendChild(cup);
+    })(c);
+  }
+  function refreshCups(){
+    Array.prototype.forEach.call(cupsWrap.children, function(cupEl, idx){
+      cupEl.classList.toggle('filled', idx < currentCups);
+    });
+  }
+
+  var movedVal = null;
+  document.getElementById('moved-yes').addEventListener('click', function(){
+    movedVal = 'sim';
+    this.classList.add('active');
+    document.getElementById('moved-no').classList.remove('active');
+  });
+  document.getElementById('moved-no').addEventListener('click', function(){
+    movedVal = 'nao';
+    this.classList.add('active');
+    document.getElementById('moved-yes').classList.remove('active');
+  });
+
+  function loadDayIntoForm(day){
+    var diary = getJSON(DIARY_KEY);
+    var entry = diary[day] || {};
+    currentCups = entry.water || 0;
+    refreshCups();
+    document.getElementById('diary-sleep').value = entry.sleep || '';
+    document.getElementById('diary-weight').value = entry.weight || '';
+    movedVal = entry.moved || null;
+    document.getElementById('moved-yes').classList.toggle('active', movedVal === 'sim');
+    document.getElementById('moved-no').classList.toggle('active', movedVal === 'nao');
+  }
+  daySelect.addEventListener('change', function(){ loadDayIntoForm(daySelect.value); });
+  loadDayIntoForm(1);
+
+  document.getElementById('diary-save').addEventListener('click', function(){
+    var diary = getJSON(DIARY_KEY);
+    var day = daySelect.value;
+    diary[day] = {
+      water: currentCups,
+      sleep: parseFloat(document.getElementById('diary-sleep').value) || 0,
+      moved: movedVal,
+      weight: parseFloat(document.getElementById('diary-weight').value) || null
+    };
+    setJSON(DIARY_KEY, diary);
+    var msg = document.getElementById('diary-saved-msg');
+    msg.textContent = 'Salvo ✓';
+    setTimeout(function(){ msg.textContent = ''; }, 2000);
+    drawWeightChart();
+    updateDashboardDiaryStats();
+    updateBadges();
+  });
+
+  function drawWeightChart(){
+    var canvas = document.getElementById('weight-chart');
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    var diary = getJSON(DIARY_KEY);
+    var points = [];
+    for(var day=1; day<=21; day++){
+      if(diary[day] && diary[day].weight){ points.push({day: day, weight: diary[day].weight}); }
+    }
+    ctx.strokeStyle = '#e3ddd2';
+    ctx.beginPath(); ctx.moveTo(40, 10); ctx.lineTo(40, h-30); ctx.lineTo(w-10, h-30); ctx.stroke();
+    ctx.fillStyle = '#6b6b64'; ctx.font = '11px sans-serif';
+    ctx.fillText('Dia', w-30, h-10);
+    if(points.length < 2){
+      ctx.fillText('Registre o peso em pelo menos 2 dias para ver o gráfico de evolução.', 50, h/2);
+      return;
+    }
+    var weights = points.map(function(p){ return p.weight; });
+    var minW = Math.min.apply(null, weights) - 1;
+    var maxW = Math.max.apply(null, weights) + 1;
+    function x(day){ return 40 + (day-1) / 20 * (w - 60); }
+    function y(weight){ return (h-30) - (weight - minW) / (maxW - minW) * (h - 50); }
+    ctx.strokeStyle = '#2f6b4f'; ctx.lineWidth = 2; ctx.beginPath();
+    points.forEach(function(p, idx){
+      var px = x(p.day), py = y(p.weight);
+      if(idx === 0){ ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
+    });
+    ctx.stroke();
+    ctx.fillStyle = '#d97b4f';
+    points.forEach(function(p){
+      ctx.beginPath(); ctx.arc(x(p.day), y(p.weight), 4, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.fillStyle = '#2b2b28'; ctx.font = '11px sans-serif';
+    ctx.fillText(maxW.toFixed(1)+'kg', 4, y(maxW)+4);
+    ctx.fillText(minW.toFixed(1)+'kg', 4, y(minW)+4);
+  }
+
+  function updateDashboardDiaryStats(){
+    var diary = getJSON(DIARY_KEY);
+    var daysLogged = Object.keys(diary).length;
+    document.getElementById('dash-diary').textContent = daysLogged + '/21';
+    var streak = 0;
+    for(var day=21; day>=1; day--){
+      if(diary[day]) streak++; else break;
+    }
+    var maxStreak = 0, run = 0;
+    for(var d2=1; d2<=21; d2++){
+      if(diary[d2]){ run++; maxStreak = Math.max(maxStreak, run); } else { run = 0; }
+    }
+    document.getElementById('dash-streak').textContent = maxStreak;
+  }
+
+  // ---------- RECEITAS ----------
+  var recipes = [
+    {name:'Tapioca com ovo e legumes', tags:['rapida','vegetariana'], desc:'Tapioca recheada com ovo mexido, tomate e espinafre. Pronta em 10 minutos.'},
+    {name:'Frango grelhado com batata doce', tags:['proteica'], desc:'Peito de frango grelhado, batata doce assada e salada de folhas.'},
+    {name:'Omelete de legumes', tags:['rapida','vegetariana','proteica'], desc:'Ovos batidos com abobrinha, cenoura ralada e cebola, na frigideira.'},
+    {name:'Sopa de legumes com frango desfiado', tags:['proteica'], desc:'Legumes variados cozidos com frango desfiado, ideal para o jantar.'},
+    {name:'Salada de grão-de-bico', tags:['vegetariana','rapida'], desc:'Grão-de-bico, tomate, pepino, cebola roxa e azeite.'},
+    {name:'Peixe assado com brócolis', tags:['proteica'], desc:'Filé de peixe branco assado com brócolis e limão.'},
+    {name:'Creme de abóbora', tags:['rapida','vegetariana'], desc:'Abóbora cozida e batida com um fio de azeite, tempero natural.'},
+    {name:'Vitamina de fruta com aveia', tags:['rapida','vegetariana'], desc:'Fruta da estação batida com aveia e água ou leite vegetal.'},
+    {name:'Lentilha com arroz integral', tags:['vegetariana','proteica'], desc:'Clássico prato completo, rico em fibra e proteína vegetal.'}
+  ];
+  var recipeGrid = document.getElementById('recipe-grid');
+  function renderRecipes(filter){
+    recipeGrid.innerHTML = '';
+    recipes.filter(function(r){ return filter === 'todas' || r.tags.indexOf(filter) !== -1; })
+      .forEach(function(r){
+        var card = document.createElement('div');
+        card.className = 'recipe-card';
+        card.innerHTML = '<h4>' + r.name + '</h4><p style="font-size:0.85rem;color:var(--texto-suave);margin:0;">' + r.desc + '</p><div class="recipe-tags">' +
+          r.tags.map(function(t){ return '<span class="tag-pill">' + t + '</span>'; }).join('') + '</div>';
+        recipeGrid.appendChild(card);
+      });
+  }
+  document.querySelectorAll('#recipe-filters .filter-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('#recipe-filters .filter-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderRecipes(btn.getAttribute('data-tag'));
+    });
+  });
+  renderRecipes('todas');
+
+  // ---------- CONQUISTAS ----------
+  var badgeDefs = [
+    {id:'start', icon:'🌱', name:'Primeiro passo', desc:'Concluiu a primeira aula', check:function(p,q,diary){ return lessonIds.some(function(id){ return p[id]; }); }},
+    {id:'m1', icon:'📘', name:'Módulo 1 completo', desc:'Todas as aulas do módulo 1', check:function(p){ return p.m1l1 && p.m1l2 && p.m1l3; }},
+    {id:'m2', icon:'📗', name:'Módulo 2 completo', desc:'Todas as aulas do módulo 2', check:function(p){ return p.m2l1 && p.m2l2 && p.m2l3; }},
+    {id:'m3', icon:'📙', name:'Módulo 3 completo', desc:'Todas as aulas do módulo 3', check:function(p){ return p.m3l1 && p.m3l2 && p.m3l3 && p.m3l4; }},
+    {id:'m4', icon:'📕', name:'Módulo 4 completo', desc:'Todas as aulas do módulo 4', check:function(p){ return p.m4l1 && p.m4l2 && p.m4l3; }},
+    {id:'m5', icon:'📓', name:'Módulo 5 completo', desc:'Todas as aulas do módulo 5', check:function(p){ return p.m5l1 && p.m5l2 && p.m5l3; }},
+    {id:'diary7', icon:'📅', name:'Uma semana de diário', desc:'7 dias registrados', check:function(p,q,diary){ return Object.keys(diary).length >= 7; }},
+    {id:'diary21', icon:'🏆', name:'Desafio completo', desc:'21 dias registrados', check:function(p,q,diary){ return Object.keys(diary).length >= 21; }},
+    {id:'allquiz', icon:'🎯', name:'Sabe tudo', desc:'Acertou os 5 testes rápidos', check:function(p,q){ return quizIds.every(function(id){ return q[id]; }); }}
+  ];
+  var badgeGrid = document.getElementById('badge-grid');
+  badgeDefs.forEach(function(b){
+    var card = document.createElement('div');
+    card.className = 'badge-card';
+    card.id = 'badge-' + b.id;
+    card.innerHTML = '<div class="badge-icon">' + b.icon + '</div><h4>' + b.name + '</h4><p>' + b.desc + '</p>';
+    badgeGrid.appendChild(card);
+  });
+
+  function updateBadges(){
+    var p = getJSON(STORAGE_KEY);
+    var q = getJSON(QUIZ_KEY);
+    var diary = getJSON(DIARY_KEY);
+    var unlockedCount = 0;
+    badgeDefs.forEach(function(b){
+      var unlocked = b.check(p, q, diary);
+      if(unlocked) unlockedCount++;
+      var card = document.getElementById('badge-' + b.id);
+      if(card) card.classList.toggle('unlocked', !!unlocked);
+    });
+    document.getElementById('dash-badges').textContent = unlockedCount + '/' + badgeDefs.length;
+  }
+
+  // ---------- CERTIFICADO ----------
+  function allLessonsAndQuizzesDone(){
+    var p = getJSON(STORAGE_KEY);
+    var q = getJSON(QUIZ_KEY);
+    return lessonIds.every(function(id){ return p[id]; }) && quizIds.every(function(id){ return q[id]; });
+  }
+
+  function drawCertificate(){
+    var canvas = document.getElementById('certificate-canvas');
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    ctx.fillStyle = '#faf7f2'; ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle = '#2f6b4f'; ctx.lineWidth = 8; ctx.strokeRect(20,20,w-40,h-40);
+    ctx.strokeStyle = '#d97b4f'; ctx.lineWidth = 2; ctx.strokeRect(34,34,w-68,h-68);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#2f6b4f'; ctx.font = 'bold 34px Georgia, serif';
+    ctx.fillText('Certificado de Conclusão', w/2, 140);
+    ctx.fillStyle = '#2b2b28'; ctx.font = '18px sans-serif';
+    ctx.fillText('Desincha em 21 Dias', w/2, 180);
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Certificamos que', w/2, 250);
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillStyle = '#d97b4f';
+    ctx.fillText(onb.name || 'Participante', w/2, 300);
+    ctx.fillStyle = '#2b2b28'; ctx.font = '16px sans-serif';
+    ctx.fillText('concluiu com sucesso todos os módulos do programa,', w/2, 350);
+    ctx.fillText('desenvolvendo hábitos consistentes de alimentação e rotina.', w/2, 375);
+    var today = new Date();
+    var dateStr = today.toLocaleDateString('pt-BR');
+    ctx.font = '14px sans-serif'; ctx.fillStyle = '#6b6b64';
+    ctx.fillText(dateStr, w/2, 470);
+    ctx.textAlign = 'left';
+  }
+
+  function updateCertificate(){
+    if(allLessonsAndQuizzesDone()){
+      document.getElementById('cert-locked').style.display = 'none';
+      document.getElementById('cert-unlocked').style.display = 'block';
+      drawCertificate();
+    } else {
+      document.getElementById('cert-locked').style.display = 'block';
+      document.getElementById('cert-unlocked').style.display = 'none';
+    }
+  }
+
+  document.getElementById('cert-download').addEventListener('click', function(){
+    var canvas = document.getElementById('certificate-canvas');
+    var link = document.createElement('a');
+    link.download = 'certificado-desincha-21-dias.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // ---------- INIT ----------
+  var initial = location.hash.replace('#','') || 'dashboard';
   showSection(initial);
   updateProgressBar();
+  drawWeightChart();
+  updateDashboardDiaryStats();
+  updateBadges();
+  updateCertificate();
 })();
 </script>
 
