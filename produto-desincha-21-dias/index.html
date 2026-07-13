@@ -3,168 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desincha em 21 Dias</title>
+<title>Desincha em 21 Dias — Caderno de bordo</title>
 <style>
   :root{
-    --verde: #2f6b4f;
-    --verde-claro: #e8f3ec;
-    --creme: #faf7f2;
-    --texto: #2b2b28;
-    --texto-suave: #6b6b64;
-    --borda: #e3ddd2;
-    --branco: #ffffff;
-    --acento: #d97b4f;
-    --azul: #3a6ea5;
-    --erro: #c0553d;
+    /* ink & parchment ledger palette */
+    --paper: #EDE6D3;
+    --paper-card: #F6F1E4;
+    --paper-line: #DBCEA6;
+    --ink: #1E3434;
+    --ink-soft: #55706C;
+    --brass: #A8791E;
+    --brass-bright: #C79A3A;
+    --tide: #3E7C7C;
+    --clay: #A6503A;
+    --moss: #4B7A4E;
+    --spine-bg: #1E3434;
+    --spine-text: #EDE6D3;
+
+    --tab-1: #A8791E;
+    --tab-2: #3E7C7C;
+    --tab-3: #6E7C3E;
+    --tab-4: #8C5E3E;
+    --tab-5: #5E6E8C;
+    --tab-6: #7C5E8C;
+
+    --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
   }
-  *{box-sizing:border-box;}
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper: #16211F;
+      --paper-card: #1C2926;
+      --paper-line: #24352F;
+      --ink: #E8E2CF;
+      --ink-soft: #9FB6B0;
+      --brass: #D4A94A;
+      --brass-bright: #E6C169;
+      --tide: #6FA8A8;
+      --clay: #D9836A;
+      --moss: #7AB37E;
+      --spine-bg: #0F1917;
+      --spine-text: #E8E2CF;
+    }
+  }
+  *{ box-sizing:border-box; }
   body{
     margin:0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--creme);
-    color: var(--texto);
-    line-height:1.6;
+    font-family: var(--font-body);
+    background: var(--paper);
+    background-image: radial-gradient(circle, var(--paper-line) 1px, transparent 1.2px);
+    background-size: 20px 20px;
+    color: var(--ink);
+    line-height:1.65;
   }
+  h1,h2,h3,h4{ font-family: var(--font-display); text-wrap: balance; }
   .app{ display:flex; min-height:100vh; }
-  .sidebar{
-    width:260px;
-    background: var(--verde);
-    color: var(--branco);
-    padding:24px 18px;
+
+  /* ---- Spine (nav rail) ---- */
+  .spine{
+    width:270px;
+    background: var(--spine-bg);
+    color: var(--spine-text);
+    padding:28px 20px;
     flex-shrink:0;
     position:fixed;
     top:0; left:0; bottom:0;
     overflow-y:auto;
+    border-right:3px solid var(--brass);
   }
-  .sidebar h1{ font-size:1.25rem; margin:0 0 4px; }
-  .sidebar .sub{ font-size:0.8rem; opacity:0.8; margin-bottom:20px; }
-  .progress-wrap{ background:rgba(255,255,255,0.2); border-radius:8px; height:8px; overflow:hidden; margin-bottom:24px; }
-  .progress-bar{ background: var(--acento); height:100%; width:0%; transition:width .3s; }
-  .progress-label{ font-size:0.75rem; opacity:0.85; margin-top:6px; margin-bottom:20px; }
+  .spine h1{ font-size:1.3rem; margin:0 0 4px; color:var(--spine-text); }
+  .spine .sub{ font-size:0.8rem; opacity:0.75; margin-bottom:22px; font-family:var(--font-body); }
+  .progress-wrap{ background:rgba(237,230,211,0.15); border-radius:3px; height:6px; overflow:hidden; margin-bottom:8px; }
+  .progress-bar{ background: var(--brass-bright); height:100%; width:0%; transition:width .4s ease; }
+  .progress-label{ font-size:0.72rem; opacity:0.8; margin-bottom:22px; font-family:var(--font-mono); font-variant-numeric: tabular-nums; }
   nav ul{ list-style:none; padding:0; margin:0; }
-  nav .grupo{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; opacity:0.6; margin:16px 0 6px; }
-  nav a{
-    display:block; color:var(--branco); text-decoration:none;
-    padding:8px 10px; border-radius:8px; font-size:0.92rem; opacity:0.9;
+  nav .grupo{
+    font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.85;
+    margin:18px 0 6px; padding-left:10px; border-left:3px solid var(--tab-1); font-family:var(--font-mono);
   }
-  nav a:hover, nav a.active{ background:rgba(255,255,255,0.15); opacity:1; }
-  nav a.done::after{ content:" ✓"; color:#c9f2d8; }
+  nav .tab-1{ border-color: var(--tab-1); }
+  nav .tab-2{ border-color: var(--tab-2); }
+  nav .tab-3{ border-color: var(--tab-3); }
+  nav .tab-4{ border-color: var(--tab-4); }
+  nav .tab-5{ border-color: var(--tab-5); }
+  nav .tab-6{ border-color: var(--tab-6); }
+  nav a{
+    display:block; color:var(--spine-text); text-decoration:none;
+    padding:7px 10px; border-radius:4px; font-size:0.92rem; opacity:0.88;
+  }
+  nav a:hover, nav a.active{ background:rgba(237,230,211,0.12); opacity:1; }
+  nav a.done{ opacity:0.65; }
+  nav a.done::after{ content:" ✓"; color:var(--brass-bright); }
+
+  /* ---- Page (content) ---- */
   .content{
-    margin-left:260px;
-    padding:40px 48px;
-    max-width:780px;
+    margin-left:270px;
+    padding:48px 56px;
+    max-width:800px;
     width:100%;
   }
   .menu-toggle{ display:none; }
   section{ display:none; }
-  section.active{ display:block; animation: fadein .25s ease; }
-  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-  h2{ color:var(--verde); font-size:1.6rem; margin-bottom:4px; }
-  .modulo-tag{ font-size:0.8rem; color:var(--acento); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
+  section.active{ display:block; animation: settle .3s ease; }
+  @keyframes settle{ from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){ section.active{ animation:none; } }
+
+  h2{ color:var(--ink); font-size:1.7rem; margin:0 0 6px; }
+  h2::after{ content:""; display:block; width:48px; height:3px; background:var(--brass); margin-top:10px; }
+  .modulo-tag{
+    font-size:0.72rem; color:var(--tide); font-weight:600; text-transform:uppercase;
+    letter-spacing:0.06em; font-family:var(--font-mono);
+  }
+
   .lesson{
-    background:var(--branco); border:1px solid var(--borda); border-radius:12px;
-    padding:20px 22px; margin:18px 0;
+    background:var(--paper-card); border:1px solid var(--paper-line); border-radius:6px;
+    padding:22px 24px; margin:20px 0;
   }
-  .lesson h3{ margin-top:0; color:var(--texto); font-size:1.1rem; }
-  .lesson p{ color:var(--texto); }
-  .lesson label{ display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--texto-suave); margin-top:12px; cursor:pointer; }
-  .lesson input[type=checkbox]{ width:16px; height:16px; accent-color: var(--verde); }
-  .card{ background:var(--verde-claro); border-radius:12px; padding:18px 20px; margin:16px 0; }
-  .badge{ display:inline-block; background:var(--acento); color:white; font-size:0.7rem; padding:3px 10px; border-radius:999px; margin-bottom:10px; }
+  .lesson h3{ margin-top:0; color:var(--ink); font-size:1.08rem; }
+  .lesson p{ color:var(--ink); max-width:65ch; }
+  .lesson label{ display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--ink-soft); margin-top:14px; cursor:pointer; }
+  .lesson input[type=checkbox]{ width:16px; height:16px; accent-color: var(--brass); }
+  .card{ background:var(--paper); border:1px solid var(--paper-line); border-left:3px solid var(--tide); border-radius:4px; padding:18px 20px; margin:16px 0; }
   table{ width:100%; border-collapse:collapse; margin:16px 0; }
-  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--borda); font-size:0.92rem; }
-  th{ color:var(--texto-suave); font-weight:600; font-size:0.8rem; text-transform:uppercase; }
-  .disclaimer{ font-size:0.8rem; color:var(--texto-suave); background:#fff8ee; border:1px solid #f0e2c8; border-radius:10px; padding:14px 16px; margin-top:28px; }
-  .welcome-hero{ background:var(--verde); color:white; border-radius:16px; padding:32px; margin-bottom:24px; }
-  .welcome-hero h2{ color:white; }
-  .cta-list{ margin:0; padding-left:20px; }
+  th,td{ text-align:left; padding:9px 10px; border-bottom:1px solid var(--paper-line); font-size:0.92rem; }
+  th{ color:var(--ink-soft); font-weight:600; font-size:0.75rem; text-transform:uppercase; font-family:var(--font-mono); letter-spacing:0.04em; }
+  .disclaimer{ font-size:0.8rem; color:var(--ink-soft); background:var(--paper-card); border:1px dashed var(--paper-line); border-radius:6px; padding:16px 18px; margin-top:30px; }
+  .welcome-hero{
+    background: var(--spine-bg); color: var(--spine-text); border-radius:8px; padding:34px; margin-bottom:26px;
+    border:1px solid var(--brass);
+  }
+  .welcome-hero h2{ color:var(--spine-text); }
+  .welcome-hero h2::after{ background: var(--brass-bright); }
 
-  /* Quiz */
-  .quiz{ background:#fdf6ec; border:1px solid #ecdcb9; border-radius:12px; padding:18px 20px; margin:18px 0; }
-  .quiz h4{ margin:0 0 10px; font-size:0.95rem; }
+  /* ---- Quiz (lettered like an exam) ---- */
+  .quiz{ background:var(--paper-card); border:1px solid var(--paper-line); border-radius:6px; padding:20px 22px; margin:20px 0; counter-reset:qopt; }
+  .quiz h4{ margin:0 0 12px; font-size:0.95rem; font-family:var(--font-body); font-weight:600; }
   .quiz-option{
-    display:block; width:100%; text-align:left; background:var(--branco); border:1px solid var(--borda);
-    border-radius:8px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:0.9rem;
+    display:block; width:100%; text-align:left; background:var(--paper); border:1px solid var(--paper-line);
+    border-radius:4px; padding:10px 14px 10px 40px; margin-bottom:8px; cursor:pointer; font-size:0.9rem;
+    position:relative; color:var(--ink); font-family:var(--font-body);
   }
-  .quiz-option:hover{ border-color:var(--verde); }
-  .quiz-option.correct{ background:#e6f4ea; border-color:#4a9a63; }
-  .quiz-option.wrong{ background:#fbe9e6; border-color:var(--erro); }
+  .quiz-option::before{
+    counter-increment:qopt; content: counter(qopt, upper-alpha) ".";
+    position:absolute; left:14px; top:10px; font-family:var(--font-mono); color:var(--brass); font-weight:700;
+  }
+  .quiz-option:hover{ border-color:var(--tide); }
+  .quiz-option.correct{ background:rgba(75,122,78,0.12); border-color:var(--moss); }
+  .quiz-option.wrong{ background:rgba(166,80,58,0.1); border-color:var(--clay); }
   .quiz-feedback{ font-size:0.88rem; margin-top:8px; font-weight:600; }
-  .quiz-feedback.correct{ color:#2f6b4f; }
-  .quiz-feedback.wrong{ color:var(--erro); }
+  .quiz-feedback.correct{ color:var(--moss); }
+  .quiz-feedback.wrong{ color:var(--clay); }
 
-  /* Dashboard */
-  .rings{ display:flex; gap:28px; flex-wrap:wrap; margin:20px 0; }
-  .ring-box{ text-align:center; }
-  .ring-box .num{ font-size:1.3rem; font-weight:700; color:var(--verde); }
-  .ring-box .lbl{ font-size:0.78rem; color:var(--texto-suave); margin-top:4px; }
-  .tip-card{ background:var(--verde-claro); border-left:4px solid var(--verde); border-radius:8px; padding:16px 18px; margin:18px 0; }
+  /* ---- Dashboard ---- */
+  .rings{ display:flex; gap:14px; flex-wrap:wrap; margin:22px 0; }
+  .ring-box{
+    text-align:left; background:var(--paper-card); border:1px solid var(--paper-line); border-radius:6px;
+    padding:14px 18px; min-width:150px; flex:1;
+  }
+  .ring-box .num{ font-size:1.5rem; font-weight:700; color:var(--ink); font-family:var(--font-mono); font-variant-numeric: tabular-nums; }
+  .ring-box .lbl{ font-size:0.76rem; color:var(--ink-soft); margin-top:4px; }
+  .tip-card{ background:var(--paper-card); border-left:3px solid var(--brass); border-radius:4px; padding:16px 20px; margin:18px 0; }
 
-  /* Diario */
-  .diary-form{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:20px 22px; margin:16px 0; }
-  .diary-form label{ display:block; font-size:0.85rem; color:var(--texto-suave); margin-top:14px; margin-bottom:4px; }
+  /* ---- Diario ---- */
+  .diary-form{ background:var(--paper-card); border:1px solid var(--paper-line); border-radius:6px; padding:22px 24px; margin:18px 0; }
+  .diary-form label{ display:block; font-size:0.82rem; color:var(--ink-soft); margin-top:16px; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.03em; font-family:var(--font-mono); }
   .diary-form select, .diary-form input[type=number]{
-    width:100%; padding:8px 10px; border:1px solid var(--borda); border-radius:8px; font-size:0.95rem;
+    width:100%; padding:9px 11px; border:1px solid var(--paper-line); border-radius:4px; font-size:0.95rem;
+    background:var(--paper); color:var(--ink); font-family:var(--font-body);
   }
-  .water-row{ display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .water-row{ display:flex; gap:7px; margin-top:6px; flex-wrap:wrap; }
   .cup{
-    width:34px; height:34px; border-radius:8px; border:1px solid var(--borda); background:var(--branco);
-    cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; border-radius:50%; border:2px solid var(--paper-line); background:var(--paper);
+    cursor:pointer; font-size:0.95rem; display:flex; align-items:center; justify-content:center; transition:background .15s, border-color .15s;
   }
-  .cup.filled{ background:var(--azul); border-color:var(--azul); color:white; }
+  .cup.filled{ background:var(--tide); border-color:var(--tide); filter:none; }
   .toggle-row{ display:flex; gap:10px; margin-top:6px; }
-  .toggle-btn{ flex:1; padding:8px; border-radius:8px; border:1px solid var(--borda); background:var(--branco); cursor:pointer; font-size:0.88rem; }
-  .toggle-btn.active{ background:var(--verde); color:white; border-color:var(--verde); }
-  .save-btn{ margin-top:18px; background:var(--verde); color:white; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-size:0.92rem; }
-  .save-btn:hover{ background:#245a41; }
-  #diary-saved-msg{ font-size:0.85rem; color:var(--verde); margin-left:10px; }
-  canvas#weight-chart{ width:100%; max-width:100%; height:220px; background:var(--branco); border:1px solid var(--borda); border-radius:12px; margin-top:16px; }
+  .toggle-btn{ flex:1; padding:9px; border-radius:4px; border:1px solid var(--paper-line); background:var(--paper); color:var(--ink); cursor:pointer; font-size:0.88rem; font-family:var(--font-body); }
+  .toggle-btn.active{ background:var(--tide); color:var(--paper-card); border-color:var(--tide); }
+  .save-btn{
+    margin-top:20px; background:var(--brass); color:#2a1e08; border:none; padding:11px 20px; border-radius:4px;
+    cursor:pointer; font-size:0.92rem; font-weight:600; font-family:var(--font-body);
+  }
+  .save-btn:hover{ background:var(--brass-bright); }
+  #diary-saved-msg{ font-size:0.85rem; color:var(--moss); margin-left:10px; font-family:var(--font-mono); }
 
-  /* Receitas */
-  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 20px; }
-  .filter-btn{ background:var(--branco); border:1px solid var(--borda); border-radius:999px; padding:6px 14px; font-size:0.85rem; cursor:pointer; }
-  .filter-btn.active{ background:var(--verde); color:white; border-color:var(--verde); }
-  .recipe-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
-  .recipe-card{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:16px; }
+  .chart-wrap{
+    background:var(--paper-card); border:1px solid var(--paper-line); border-radius:6px; padding:16px; margin-top:16px;
+  }
+  .chart-wrap canvas{ width:100%; display:block; opacity:0; transition:opacity .5s ease; }
+  .chart-wrap canvas.ready{ opacity:1; }
+  .chart-caption{ font-size:0.74rem; color:var(--ink-soft); font-family:var(--font-mono); margin-top:8px; display:flex; justify-content:space-between; }
+
+  /* ---- Receitas ---- */
+  .filter-row{ display:flex; gap:4px; border-bottom:1px solid var(--paper-line); margin:16px 0 22px; }
+  .filter-btn{
+    background:none; border:none; border-bottom:2px solid transparent; padding:8px 4px; margin-right:18px;
+    font-size:0.86rem; cursor:pointer; color:var(--ink-soft); font-family:var(--font-body);
+  }
+  .filter-btn.active{ color:var(--ink); border-color:var(--brass); font-weight:600; }
+  .recipe-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
+  .recipe-card{
+    background:var(--paper-card); border:1px solid var(--paper-line); border-radius:4px; padding:16px 18px;
+    border-top:3px solid var(--tide);
+  }
   .recipe-card h4{ margin:0 0 6px; font-size:1rem; }
-  .recipe-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-  .tag-pill{ font-size:0.68rem; background:var(--verde-claro); color:var(--verde); padding:2px 8px; border-radius:999px; }
+  .recipe-card p{ font-size:0.85rem; color:var(--ink-soft); margin:0; }
+  .recipe-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .tag-pill{ font-size:0.65rem; color:var(--brass); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.03em; }
+  .tag-pill::before{ content:"· "; }
 
-  /* Conquistas */
-  .badge-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin-top:18px; }
-  .badge-card{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:16px; text-align:center; opacity:0.45; }
-  .badge-card.unlocked{ opacity:1; border-color:var(--acento); }
-  .badge-icon{ font-size:1.8rem; margin-bottom:8px; }
-  .badge-card h4{ margin:0 0 4px; font-size:0.9rem; }
-  .badge-card p{ font-size:0.75rem; color:var(--texto-suave); margin:0; }
+  /* ---- Conquistas (wax-seal medallions) ---- */
+  .badge-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:18px; margin-top:20px; }
+  .badge-card{ text-align:center; }
+  .badge-seal{
+    width:66px; height:66px; border-radius:50%; margin:0 auto 10px;
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem;
+    background: radial-gradient(circle at 32% 28%, var(--paper-card), var(--paper-line));
+    border:3px solid var(--paper-line); color:var(--ink-soft); filter:grayscale(1); opacity:0.5;
+    transition: all .25s ease;
+  }
+  .badge-card.unlocked .badge-seal{
+    background: radial-gradient(circle at 32% 28%, var(--brass-bright), var(--brass));
+    border-color:var(--brass); color:#2a1e08; filter:none; opacity:1;
+    box-shadow:0 0 0 4px rgba(168,121,30,0.15);
+  }
+  .badge-card h4{ margin:0 0 3px; font-size:0.85rem; }
+  .badge-card p{ font-size:0.72rem; color:var(--ink-soft); margin:0; }
 
-  /* Certificado */
-  #certificate-canvas{ width:100%; max-width:640px; border:1px solid var(--borda); border-radius:12px; display:block; margin:16px 0; }
-  .locked-msg{ background:#fff8ee; border:1px solid #f0e2c8; border-radius:10px; padding:16px; font-size:0.9rem; }
+  /* ---- Certificado ---- */
+  #certificate-canvas{ width:100%; max-width:680px; border:1px solid var(--paper-line); border-radius:6px; display:block; margin:16px 0; }
+  .locked-msg{ background:var(--paper-card); border:1px dashed var(--paper-line); border-radius:6px; padding:18px; font-size:0.9rem; color:var(--ink-soft); }
 
-  /* Onboarding modal */
+  /* ---- Onboarding ---- */
   .modal-overlay{
-    position:fixed; inset:0; background:rgba(20,20,18,0.55); display:flex; align-items:center; justify-content:center;
+    position:fixed; inset:0; background:rgba(15,22,21,0.6); display:flex; align-items:center; justify-content:center;
     z-index:100; padding:20px;
   }
-  .modal-box{ background:var(--branco); border-radius:16px; padding:30px; max-width:420px; width:100%; }
+  .modal-box{
+    background:var(--paper-card); border:1px solid var(--brass); border-radius:8px; padding:34px; max-width:420px; width:100%;
+  }
   .modal-box h2{ margin-top:0; }
-  .modal-box input[type=text]{ width:100%; padding:10px 12px; border:1px solid var(--borda); border-radius:8px; font-size:0.95rem; margin-bottom:16px; }
-  .onb-option{ display:block; width:100%; text-align:left; background:var(--creme); border:1px solid var(--borda); border-radius:8px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:0.9rem; }
-  .onb-option.selected{ background:var(--verde-claro); border-color:var(--verde); }
-  .modal-next{ margin-top:14px; background:var(--verde); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; width:100%; font-size:0.95rem; }
-  .modal-next:disabled{ opacity:0.5; cursor:not-allowed; }
+  .modal-box h2::after{ margin-top:8px; }
+  .modal-box input[type=text]{
+    width:100%; padding:11px 12px; border:1px solid var(--paper-line); border-radius:4px; font-size:0.95rem;
+    margin-bottom:18px; background:var(--paper); color:var(--ink); font-family:var(--font-body);
+  }
+  .onb-option{
+    display:block; width:100%; text-align:left; background:var(--paper); border:1px solid var(--paper-line);
+    border-radius:4px; padding:10px 14px; margin-bottom:8px; cursor:pointer; font-size:0.9rem; color:var(--ink);
+    font-family:var(--font-body);
+  }
+  .onb-option.selected{ background:rgba(62,124,124,0.14); border-color:var(--tide); }
+  .modal-next{
+    margin-top:16px; background:var(--brass); color:#2a1e08; border:none; padding:11px 20px; border-radius:4px;
+    cursor:pointer; width:100%; font-size:0.95rem; font-weight:600; font-family:var(--font-body);
+  }
+  .modal-next:disabled{ opacity:0.45; cursor:not-allowed; }
 
   @media (max-width:860px){
-    .sidebar{
-      width:220px; transform:translateX(-100%); transition:transform .25s; z-index:20;
-    }
-    .sidebar.open{ transform:translateX(0); }
-    .content{ margin-left:0; padding:24px; padding-top:64px; }
+    .spine{ width:230px; transform:translateX(-100%); transition:transform .25s; z-index:20; }
+    .spine.open{ transform:translateX(0); }
+    .content{ margin-left:0; padding:26px; padding-top:70px; }
     .menu-toggle{
-      display:block; position:fixed; top:14px; left:14px; z-index:30;
-      background:var(--verde); color:white; border:none; border-radius:8px;
-      width:40px; height:40px; font-size:1.2rem;
+      display:block; position:fixed; top:16px; left:16px; z-index:30;
+      background:var(--spine-bg); color:var(--spine-text); border:1px solid var(--brass); border-radius:4px;
+      width:40px; height:40px; font-size:1.1rem;
     }
   }
 </style>
@@ -175,7 +279,7 @@
   <div class="modal-box">
     <div id="onb-step-1">
       <h2>Antes de começar</h2>
-      <p style="color:var(--texto-suave); font-size:0.9rem;">Como podemos te chamar?</p>
+      <p style="color:var(--ink-soft); font-size:0.9rem;">Como podemos te chamar?</p>
       <input type="text" id="onb-name" placeholder="Seu nome">
       <button class="modal-next" id="onb-next-1" disabled>Continuar</button>
     </div>
@@ -193,12 +297,12 @@
   </div>
 </div>
 
-<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<button class="menu-toggle" onclick="document.querySelector('.spine').classList.toggle('open')">☰</button>
 
 <div class="app">
-  <aside class="sidebar">
+  <aside class="spine">
     <h1>Desincha em 21 Dias</h1>
-    <div class="sub">Hábitos simples para emagrecer sem dieta radical</div>
+    <div class="sub">Caderno de bordo — hábitos sem dieta radical</div>
 
     <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
     <div class="progress-label" id="progress-label">0% concluído</div>
@@ -206,33 +310,33 @@
     <nav>
       <ul>
         <li><a href="#dashboard" data-target="dashboard">Meu Painel</a></li>
-        <li class="grupo">Módulo 1</li>
+        <li class="grupo tab-1">Módulo 1 · Fundamentos</li>
         <li><a href="#m1l1" data-target="m1l1" data-lesson="m1l1">Os 3 erros mais comuns</a></li>
         <li><a href="#m1l2" data-target="m1l2" data-lesson="m1l2">Por que dietas radicais falham</a></li>
         <li><a href="#m1l3" data-target="m1l3" data-lesson="m1l3">O que causa o inchaço</a></li>
 
-        <li class="grupo">Módulo 2</li>
+        <li class="grupo tab-2">Módulo 2 · Alimentação</li>
         <li><a href="#m2l1" data-target="m2l1" data-lesson="m2l1">Trocas simples no prato</a></li>
         <li><a href="#m2l2" data-target="m2l2" data-lesson="m2l2">Água, sal e açúcar</a></li>
         <li><a href="#m2l3" data-target="m2l3" data-lesson="m2l3">O prato desincha</a></li>
 
-        <li class="grupo">Módulo 3</li>
+        <li class="grupo tab-3">Módulo 3 · Rotina</li>
         <li><a href="#m3l1" data-target="m3l1" data-lesson="m3l1">Como funciona o desafio</a></li>
         <li><a href="#m3l2" data-target="m3l2" data-lesson="m3l2">Hábito da manhã</a></li>
         <li><a href="#m3l3" data-target="m3l3" data-lesson="m3l3">Hábito da noite</a></li>
         <li><a href="#m3l4" data-target="m3l4" data-lesson="m3l4">Lidando com recaídas</a></li>
 
-        <li class="grupo">Módulo 4</li>
+        <li class="grupo tab-4">Módulo 4 · Movimento</li>
         <li><a href="#m4l1" data-target="m4l1" data-lesson="m4l1">Sem academia, sem desculpa</a></li>
         <li><a href="#m4l2" data-target="m4l2" data-lesson="m4l2">3 exercícios de 10 min</a></li>
         <li><a href="#m4l3" data-target="m4l3" data-lesson="m4l3">Constância na prática</a></li>
 
-        <li class="grupo">Módulo 5</li>
+        <li class="grupo tab-5">Módulo 5 · Manutenção</li>
         <li><a href="#m5l1" data-target="m5l1" data-lesson="m5l1">Não recuperar o peso</a></li>
         <li><a href="#m5l2" data-target="m5l2" data-lesson="m5l2">Hábitos de longo prazo</a></li>
         <li><a href="#m5l3" data-target="m5l3" data-lesson="m5l3">Seus próximos passos</a></li>
 
-        <li class="grupo">Ferramentas</li>
+        <li class="grupo tab-6">Ferramentas</li>
         <li><a href="#diario" data-target="diario">Diário de 21 dias</a></li>
         <li><a href="#receitas" data-target="receitas">Receitas</a></li>
         <li><a href="#compras" data-target="compras">Lista de compras</a></li>
@@ -246,7 +350,6 @@
 
     <section id="dashboard">
       <div class="welcome-hero">
-        <span class="badge">Bem-vindo(a)</span>
         <h2 id="dash-greeting">Seu guia de 21 dias começa agora</h2>
         <p>Este programa foi criado para te ajudar a desinchar e emagrecer com hábitos simples, sem dietas radicais e sem passar fome.</p>
       </div>
@@ -256,7 +359,7 @@
       <div class="rings">
         <div class="ring-box"><div class="num" id="dash-lessons">0/16</div><div class="lbl">Aulas concluídas</div></div>
         <div class="ring-box"><div class="num" id="dash-diary">0/21</div><div class="lbl">Dias registrados no diário</div></div>
-        <div class="ring-box"><div class="num" id="dash-streak">0</div><div class="lbl">Sequência atual (dias)</div></div>
+        <div class="ring-box"><div class="num" id="dash-streak">0</div><div class="lbl">Maior sequência (dias)</div></div>
         <div class="ring-box"><div class="num" id="dash-badges">0/9</div><div class="lbl">Conquistas desbloqueadas</div></div>
       </div>
 
@@ -488,7 +591,7 @@
     <section id="diario">
       <div class="modulo-tag">Ferramenta</div>
       <h2>Diário de 21 dias</h2>
-      <p>Registre seu dia para acompanhar sua evolução real, não só o que você "acha" que fez.</p>
+      <p>Registre seu dia para acompanhar sua evolução real — a maré só baixa com registro constante, não com esforço de um dia só.</p>
       <div class="diary-form">
         <label>Dia do desafio</label>
         <select id="diary-day"></select>
@@ -512,8 +615,17 @@
         <span id="diary-saved-msg"></span>
       </div>
 
-      <h3 style="margin-top:28px; font-size:1.05rem;">Evolução do peso</h3>
-      <canvas id="weight-chart" width="700" height="220"></canvas>
+      <h3 style="margin-top:30px; font-size:1.05rem;">A maré dos 21 dias</h3>
+      <p style="font-size:0.85rem; color:var(--ink-soft); margin-top:-6px;">Cada marca cheia é um dia registrado — acompanhe a maré baixar conforme os dias se acumulam.</p>
+      <div class="chart-wrap">
+        <canvas id="tide-canvas" width="700" height="170"></canvas>
+        <div class="chart-caption"><span>Dia 1</span><span>Dia 7</span><span>Dia 14</span><span>Dia 21</span></div>
+      </div>
+
+      <h3 style="margin-top:24px; font-size:1.05rem;">Evolução do peso</h3>
+      <div class="chart-wrap">
+        <canvas id="weight-chart" width="700" height="220"></canvas>
+      </div>
     </section>
 
     <!-- RECEITAS -->
@@ -546,7 +658,7 @@
     <section id="conquistas">
       <div class="modulo-tag">Ferramenta</div>
       <h2>Suas conquistas</h2>
-      <p>Desbloqueadas conforme você avança nas aulas e no diário.</p>
+      <p>Selos desbloqueados conforme você avança nas aulas e no diário.</p>
       <div class="badge-grid" id="badge-grid"></div>
     </section>
 
@@ -576,6 +688,7 @@
 
   function getJSON(key){ try{ return JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ return {}; } }
   function setJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
   // ---------- ONBOARDING ----------
   var onb = getJSON(ONB_KEY);
@@ -637,7 +750,7 @@
     var done = lessonIds.filter(function(id){ return p[id]; }).length;
     var pct = Math.round((done / lessonIds.length) * 100);
     document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('progress-label').textContent = pct + '% concluído (' + done + '/' + lessonIds.length + ' aulas)';
+    document.getElementById('progress-label').textContent = pct + '% concluído (' + done + '/' + lessonIds.length + ')';
     document.getElementById('dash-lessons').textContent = done + '/' + lessonIds.length;
     lessonIds.forEach(function(id){
       var link = document.querySelector('nav a[data-lesson="'+id+'"]');
@@ -694,7 +807,7 @@
     document.querySelectorAll('nav a').forEach(function(a){
       a.classList.toggle('active', a.getAttribute('data-target') === target);
     });
-    document.querySelector('.sidebar').classList.remove('open');
+    document.querySelector('.spine').classList.remove('open');
     window.scrollTo(0,0);
   }
 
@@ -727,7 +840,7 @@
     (function(n){
       var cup = document.createElement('div');
       cup.className = 'cup';
-      cup.textContent = '💧';
+      cup.textContent = '';
       cup.addEventListener('click', function(){
         currentCups = (currentCups === n) ? n - 1 : n;
         refreshCups();
@@ -781,9 +894,81 @@
     msg.textContent = 'Salvo ✓';
     setTimeout(function(){ msg.textContent = ''; }, 2000);
     drawWeightChart();
+    drawTideCurve();
     updateDashboardDiaryStats();
     updateBadges();
   });
+
+  // ---------- GRÁFICO: MARÉ DOS 21 DIAS ----------
+  function drawTideCurve(){
+    var canvas = document.getElementById('tide-canvas');
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    var diary = getJSON(DIARY_KEY);
+    var padding = 26, top = 16, bottom = h - 26;
+    var points = [];
+    var lastLoggedDay = 0;
+    for(var day=1; day<=21; day++){
+      var logged = !!diary[day];
+      if(logged) lastLoggedDay = day;
+      var y = logged ? (top + (bottom-top)*0.74) : (top + (bottom-top)*0.2);
+      points.push({day:day, y:y, logged:logged});
+    }
+    var stepX = (w - padding*2) / 20;
+    function xFor(day){ return padding + (day-1)*stepX; }
+
+    // baseline sea-level guide
+    ctx.strokeStyle = cssVar('--paper-line'); ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(padding, top + (bottom-top)*0.2); ctx.lineTo(w-padding, top + (bottom-top)*0.2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // smoothed area fill (the tide)
+    ctx.beginPath();
+    ctx.moveTo(xFor(1), points[0].y);
+    for(var i=1;i<points.length;i++){
+      var xc = (xFor(points[i-1].day) + xFor(points[i].day)) / 2;
+      var yc = (points[i-1].y + points[i].y) / 2;
+      ctx.quadraticCurveTo(xFor(points[i-1].day), points[i-1].y, xc, yc);
+    }
+    ctx.lineTo(xFor(21), points[20].y);
+    var curvePathEnd = { x:xFor(21), y:points[20].y };
+    ctx.lineTo(xFor(21), bottom);
+    ctx.lineTo(xFor(1), bottom);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(62,124,124,0.16)';
+    ctx.fill();
+
+    // stroke the curve line itself
+    ctx.beginPath();
+    ctx.moveTo(xFor(1), points[0].y);
+    for(var j=1;j<points.length;j++){
+      var xc2 = (xFor(points[j-1].day) + xFor(points[j].day)) / 2;
+      var yc2 = (points[j-1].y + points[j].y) / 2;
+      ctx.quadraticCurveTo(xFor(points[j-1].day), points[j-1].y, xc2, yc2);
+    }
+    ctx.lineTo(curvePathEnd.x, curvePathEnd.y);
+    ctx.strokeStyle = cssVar('--tide'); ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // day markers
+    points.forEach(function(p){
+      var isLast = p.day === lastLoggedDay && lastLoggedDay > 0;
+      ctx.beginPath();
+      ctx.arc(xFor(p.day), p.y, isLast ? 6 : 3.5, 0, Math.PI*2);
+      ctx.fillStyle = p.logged ? cssVar('--brass') : cssVar('--paper-card');
+      ctx.strokeStyle = p.logged ? cssVar('--brass') : cssVar('--paper-line');
+      ctx.lineWidth = 1.5;
+      ctx.fill(); ctx.stroke();
+      if(isLast){
+        ctx.beginPath();
+        ctx.arc(xFor(p.day), p.y, 10, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(168,121,30,0.35)'; ctx.lineWidth = 2; ctx.stroke();
+      }
+    });
+
+    canvas.classList.add('ready');
+  }
 
   function drawWeightChart(){
     var canvas = document.getElementById('weight-chart');
@@ -795,42 +980,53 @@
     for(var day=1; day<=21; day++){
       if(diary[day] && diary[day].weight){ points.push({day: day, weight: diary[day].weight}); }
     }
-    ctx.strokeStyle = '#e3ddd2';
-    ctx.beginPath(); ctx.moveTo(40, 10); ctx.lineTo(40, h-30); ctx.lineTo(w-10, h-30); ctx.stroke();
-    ctx.fillStyle = '#6b6b64'; ctx.font = '11px sans-serif';
-    ctx.fillText('Dia', w-30, h-10);
+    ctx.strokeStyle = cssVar('--paper-line'); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(44, 12); ctx.lineTo(44, h-32); ctx.lineTo(w-14, h-32); ctx.stroke();
+    ctx.fillStyle = cssVar('--ink-soft'); ctx.font = '11px ' + cssVar('--font-mono');
+    ctx.fillText('dia', w-32, h-12);
     if(points.length < 2){
-      ctx.fillText('Registre o peso em pelo menos 2 dias para ver o gráfico de evolução.', 50, h/2);
+      ctx.fillText('Registre o peso em pelo menos 2 dias para ver a evolução.', 54, h/2);
+      canvas.classList.add('ready');
       return;
     }
     var weights = points.map(function(p){ return p.weight; });
     var minW = Math.min.apply(null, weights) - 1;
     var maxW = Math.max.apply(null, weights) + 1;
-    function x(day){ return 40 + (day-1) / 20 * (w - 60); }
-    function y(weight){ return (h-30) - (weight - minW) / (maxW - minW) * (h - 50); }
-    ctx.strokeStyle = '#2f6b4f'; ctx.lineWidth = 2; ctx.beginPath();
+    function x(day){ return 44 + (day-1) / 20 * (w - 60); }
+    function y(weight){ return (h-32) - (weight - minW) / (maxW - minW) * (h - 50); }
+
+    // area fill under the line
+    ctx.beginPath();
+    ctx.moveTo(x(points[0].day), h-32);
+    points.forEach(function(p){ ctx.lineTo(x(p.day), y(p.weight)); });
+    ctx.lineTo(x(points[points.length-1].day), h-32);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(168,121,30,0.10)';
+    ctx.fill();
+
+    ctx.strokeStyle = cssVar('--brass'); ctx.lineWidth = 2.5; ctx.beginPath();
     points.forEach(function(p, idx){
       var px = x(p.day), py = y(p.weight);
       if(idx === 0){ ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
     });
     ctx.stroke();
-    ctx.fillStyle = '#d97b4f';
-    points.forEach(function(p){
-      ctx.beginPath(); ctx.arc(x(p.day), y(p.weight), 4, 0, Math.PI*2); ctx.fill();
+    points.forEach(function(p, idx){
+      var isLast = idx === points.length - 1;
+      ctx.beginPath();
+      ctx.arc(x(p.day), y(p.weight), isLast ? 5.5 : 3.5, 0, Math.PI*2);
+      ctx.fillStyle = isLast ? cssVar('--clay') : cssVar('--tide');
+      ctx.fill();
     });
-    ctx.fillStyle = '#2b2b28'; ctx.font = '11px sans-serif';
+    ctx.fillStyle = cssVar('--ink'); ctx.font = '11px ' + cssVar('--font-mono');
     ctx.fillText(maxW.toFixed(1)+'kg', 4, y(maxW)+4);
     ctx.fillText(minW.toFixed(1)+'kg', 4, y(minW)+4);
+    canvas.classList.add('ready');
   }
 
   function updateDashboardDiaryStats(){
     var diary = getJSON(DIARY_KEY);
     var daysLogged = Object.keys(diary).length;
     document.getElementById('dash-diary').textContent = daysLogged + '/21';
-    var streak = 0;
-    for(var day=21; day>=1; day--){
-      if(diary[day]) streak++; else break;
-    }
     var maxStreak = 0, run = 0;
     for(var d2=1; d2<=21; d2++){
       if(diary[d2]){ run++; maxStreak = Math.max(maxStreak, run); } else { run = 0; }
@@ -857,7 +1053,7 @@
       .forEach(function(r){
         var card = document.createElement('div');
         card.className = 'recipe-card';
-        card.innerHTML = '<h4>' + r.name + '</h4><p style="font-size:0.85rem;color:var(--texto-suave);margin:0;">' + r.desc + '</p><div class="recipe-tags">' +
+        card.innerHTML = '<h4>' + r.name + '</h4><p>' + r.desc + '</p><div class="recipe-tags">' +
           r.tags.map(function(t){ return '<span class="tag-pill">' + t + '</span>'; }).join('') + '</div>';
         recipeGrid.appendChild(card);
       });
@@ -873,7 +1069,7 @@
 
   // ---------- CONQUISTAS ----------
   var badgeDefs = [
-    {id:'start', icon:'🌱', name:'Primeiro passo', desc:'Concluiu a primeira aula', check:function(p,q,diary){ return lessonIds.some(function(id){ return p[id]; }); }},
+    {id:'start', icon:'🌱', name:'Primeiro passo', desc:'Concluiu a primeira aula', check:function(p){ return lessonIds.some(function(id){ return p[id]; }); }},
     {id:'m1', icon:'📘', name:'Módulo 1 completo', desc:'Todas as aulas do módulo 1', check:function(p){ return p.m1l1 && p.m1l2 && p.m1l3; }},
     {id:'m2', icon:'📗', name:'Módulo 2 completo', desc:'Todas as aulas do módulo 2', check:function(p){ return p.m2l1 && p.m2l2 && p.m2l3; }},
     {id:'m3', icon:'📙', name:'Módulo 3 completo', desc:'Todas as aulas do módulo 3', check:function(p){ return p.m3l1 && p.m3l2 && p.m3l3 && p.m3l4; }},
@@ -888,7 +1084,7 @@
     var card = document.createElement('div');
     card.className = 'badge-card';
     card.id = 'badge-' + b.id;
-    card.innerHTML = '<div class="badge-icon">' + b.icon + '</div><h4>' + b.name + '</h4><p>' + b.desc + '</p>';
+    card.innerHTML = '<div class="badge-seal">' + b.icon + '</div><h4>' + b.name + '</h4><p>' + b.desc + '</p>';
     badgeGrid.appendChild(card);
   });
 
@@ -917,26 +1113,34 @@
     var canvas = document.getElementById('certificate-canvas');
     var ctx = canvas.getContext('2d');
     var w = canvas.width, h = canvas.height;
-    ctx.fillStyle = '#faf7f2'; ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle = '#2f6b4f'; ctx.lineWidth = 8; ctx.strokeRect(20,20,w-40,h-40);
-    ctx.strokeStyle = '#d97b4f'; ctx.lineWidth = 2; ctx.strokeRect(34,34,w-68,h-68);
+    ctx.fillStyle = cssVar('--paper'); ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle = cssVar('--ink'); ctx.lineWidth = 6; ctx.strokeRect(22,22,w-44,h-44);
+    ctx.strokeStyle = cssVar('--brass'); ctx.lineWidth = 2; ctx.strokeRect(34,34,w-68,h-68);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#2f6b4f'; ctx.font = 'bold 34px Georgia, serif';
+    ctx.fillStyle = cssVar('--ink'); ctx.font = 'bold 34px ' + cssVar('--font-display');
     ctx.fillText('Certificado de Conclusão', w/2, 140);
-    ctx.fillStyle = '#2b2b28'; ctx.font = '18px sans-serif';
-    ctx.fillText('Desincha em 21 Dias', w/2, 180);
-    ctx.font = '16px sans-serif';
+    ctx.font = '18px ' + cssVar('--font-body');
+    ctx.fillText('Desincha em 21 Dias — Caderno de Bordo', w/2, 180);
+    ctx.font = '16px ' + cssVar('--font-body');
     ctx.fillText('Certificamos que', w/2, 250);
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.fillStyle = '#d97b4f';
+    ctx.font = 'bold 28px ' + cssVar('--font-display');
+    ctx.fillStyle = cssVar('--brass');
     ctx.fillText(onb.name || 'Participante', w/2, 300);
-    ctx.fillStyle = '#2b2b28'; ctx.font = '16px sans-serif';
+    ctx.fillStyle = cssVar('--ink'); ctx.font = '16px ' + cssVar('--font-body');
     ctx.fillText('concluiu com sucesso todos os módulos do programa,', w/2, 350);
     ctx.fillText('desenvolvendo hábitos consistentes de alimentação e rotina.', w/2, 375);
+
+    // wax-seal decoration
+    ctx.beginPath();
+    ctx.arc(w/2, 440, 30, 0, Math.PI*2);
+    ctx.fillStyle = cssVar('--brass'); ctx.fill();
+    ctx.fillStyle = cssVar('--paper'); ctx.font = 'bold 20px ' + cssVar('--font-display');
+    ctx.fillText('21', w/2, 448);
+
     var today = new Date();
     var dateStr = today.toLocaleDateString('pt-BR');
-    ctx.font = '14px sans-serif'; ctx.fillStyle = '#6b6b64';
-    ctx.fillText(dateStr, w/2, 470);
+    ctx.font = '13px ' + cssVar('--font-mono'); ctx.fillStyle = cssVar('--ink-soft');
+    ctx.fillText(dateStr, w/2, 500);
     ctx.textAlign = 'left';
   }
 
@@ -963,6 +1167,7 @@
   var initial = location.hash.replace('#','') || 'dashboard';
   showSection(initial);
   updateProgressBar();
+  drawTideCurve();
   drawWeightChart();
   updateDashboardDiaryStats();
   updateBadges();
