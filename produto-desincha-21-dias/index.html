@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desincha em 21 Dias</title>
+<style>
+  :root{
+    --verde: #2f6b4f;
+    --verde-claro: #e8f3ec;
+    --creme: #faf7f2;
+    --texto: #2b2b28;
+    --texto-suave: #6b6b64;
+    --borda: #e3ddd2;
+    --branco: #ffffff;
+    --acento: #d97b4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--creme);
+    color: var(--texto);
+    line-height:1.6;
+  }
+  .app{ display:flex; min-height:100vh; }
+  .sidebar{
+    width:260px;
+    background: var(--verde);
+    color: var(--branco);
+    padding:24px 18px;
+    flex-shrink:0;
+    position:fixed;
+    top:0; left:0; bottom:0;
+    overflow-y:auto;
+  }
+  .sidebar h1{ font-size:1.25rem; margin:0 0 4px; }
+  .sidebar .sub{ font-size:0.8rem; opacity:0.8; margin-bottom:20px; }
+  .progress-wrap{ background:rgba(255,255,255,0.2); border-radius:8px; height:8px; overflow:hidden; margin-bottom:24px; }
+  .progress-bar{ background: var(--acento); height:100%; width:0%; transition:width .3s; }
+  .progress-label{ font-size:0.75rem; opacity:0.85; margin-top:6px; margin-bottom:20px; }
+  nav ul{ list-style:none; padding:0; margin:0; }
+  nav .grupo{ font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; opacity:0.6; margin:16px 0 6px; }
+  nav a{
+    display:block; color:var(--branco); text-decoration:none;
+    padding:8px 10px; border-radius:8px; font-size:0.92rem; opacity:0.9;
+  }
+  nav a:hover, nav a.active{ background:rgba(255,255,255,0.15); opacity:1; }
+  nav a.done::after{ content:" ✓"; color:#c9f2d8; }
+  .content{
+    margin-left:260px;
+    padding:40px 48px;
+    max-width:760px;
+    width:100%;
+  }
+  .menu-toggle{ display:none; }
+  section{ display:none; }
+  section.active{ display:block; animation: fadein .25s ease; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  h2{ color:var(--verde); font-size:1.6rem; margin-bottom:4px; }
+  .modulo-tag{ font-size:0.8rem; color:var(--acento); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
+  .lesson{
+    background:var(--branco); border:1px solid var(--borda); border-radius:12px;
+    padding:20px 22px; margin:18px 0;
+  }
+  .lesson h3{ margin-top:0; color:var(--texto); font-size:1.1rem; }
+  .lesson p{ color:var(--texto); }
+  .lesson label{ display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--texto-suave); margin-top:12px; cursor:pointer; }
+  .lesson input[type=checkbox]{ width:16px; height:16px; accent-color: var(--verde); }
+  .card{ background:var(--verde-claro); border-radius:12px; padding:18px 20px; margin:16px 0; }
+  .badge{ display:inline-block; background:var(--acento); color:white; font-size:0.7rem; padding:3px 10px; border-radius:999px; margin-bottom:10px; }
+  table{ width:100%; border-collapse:collapse; margin:16px 0; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--borda); font-size:0.92rem; }
+  th{ color:var(--texto-suave); font-weight:600; font-size:0.8rem; text-transform:uppercase; }
+  .tracker-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(70px,1fr)); gap:8px; margin:16px 0; }
+  .day{
+    background:var(--branco); border:1px solid var(--borda); border-radius:10px;
+    text-align:center; padding:10px 4px; cursor:pointer; font-size:0.85rem; user-select:none;
+  }
+  .day.checked{ background:var(--verde); color:white; border-color:var(--verde); }
+  .disclaimer{ font-size:0.8rem; color:var(--texto-suave); background:#fff8ee; border:1px solid #f0e2c8; border-radius:10px; padding:14px 16px; margin-top:28px; }
+  .welcome-hero{ background:var(--verde); color:white; border-radius:16px; padding:32px; margin-bottom:24px; }
+  .welcome-hero h2{ color:white; }
+  .cta-list{ margin:0; padding-left:20px; }
+  @media (max-width:860px){
+    .sidebar{
+      width:220px; transform:translateX(-100%); transition:transform .25s; z-index:20;
+    }
+    .sidebar.open{ transform:translateX(0); }
+    .content{ margin-left:0; padding:24px; padding-top:64px; }
+    .menu-toggle{
+      display:block; position:fixed; top:14px; left:14px; z-index:30;
+      background:var(--verde); color:white; border:none; border-radius:8px;
+      width:40px; height:40px; font-size:1.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<div class="app">
+  <aside class="sidebar">
+    <h1>Desincha em 21 Dias</h1>
+    <div class="sub">Hábitos simples para emagrecer sem dieta radical</div>
+
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="progress-label" id="progress-label">0% concluído</div>
+
+    <nav>
+      <ul>
+        <li><a href="#inicio" data-target="inicio">Início</a></li>
+        <li class="grupo">Módulo 1</li>
+        <li><a href="#m1l1" data-target="m1l1" data-lesson="m1l1">Os 3 erros mais comuns</a></li>
+        <li><a href="#m1l2" data-target="m1l2" data-lesson="m1l2">Por que dietas radicais falham</a></li>
+        <li><a href="#m1l3" data-target="m1l3" data-lesson="m1l3">O que causa o inchaço</a></li>
+
+        <li class="grupo">Módulo 2</li>
+        <li><a href="#m2l1" data-target="m2l1" data-lesson="m2l1">Trocas simples no prato</a></li>
+        <li><a href="#m2l2" data-target="m2l2" data-lesson="m2l2">Água, sal e açúcar</a></li>
+        <li><a href="#m2l3" data-target="m2l3" data-lesson="m2l3">O prato desincha</a></li>
+
+        <li class="grupo">Módulo 3</li>
+        <li><a href="#m3l1" data-target="m3l1" data-lesson="m3l1">Como funciona o desafio</a></li>
+        <li><a href="#m3l2" data-target="m3l2" data-lesson="m3l2">Hábito da manhã</a></li>
+        <li><a href="#m3l3" data-target="m3l3" data-lesson="m3l3">Hábito da noite</a></li>
+        <li><a href="#m3l4" data-target="m3l4" data-lesson="m3l4">Lidando com recaídas</a></li>
+
+        <li class="grupo">Módulo 4</li>
+        <li><a href="#m4l1" data-target="m4l1" data-lesson="m4l1">Sem academia, sem desculpa</a></li>
+        <li><a href="#m4l2" data-target="m4l2" data-lesson="m4l2">3 exercícios de 10 min</a></li>
+        <li><a href="#m4l3" data-target="m4l3" data-lesson="m4l3">Constância na prática</a></li>
+
+        <li class="grupo">Módulo 5</li>
+        <li><a href="#m5l1" data-target="m5l1" data-lesson="m5l1">Não recuperar o peso</a></li>
+        <li><a href="#m5l2" data-target="m5l2" data-lesson="m5l2">Hábitos de longo prazo</a></li>
+        <li><a href="#m5l3" data-target="m5l3" data-lesson="m5l3">Seus próximos passos</a></li>
+
+        <li class="grupo">Ferramentas</li>
+        <li><a href="#tracker" data-target="tracker">Tracker dos 21 dias</a></li>
+        <li><a href="#cardapio" data-target="cardapio">Cardápio de 3 dias</a></li>
+        <li><a href="#compras" data-target="compras">Lista de compras</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <section id="inicio">
+      <div class="welcome-hero">
+        <span class="badge">Bem-vindo(a)</span>
+        <h2>Seu guia de 21 dias começa agora</h2>
+        <p>Este programa foi criado para te ajudar a desinchar e emagrecer com hábitos simples, sem dietas radicais e sem passar fome. São 5 módulos curtos + ferramentas práticas que você pode acessar quando quiser, no seu ritmo.</p>
+        <ul class="cta-list">
+          <li>Assista/leia um módulo por vez, na ordem do menu ao lado</li>
+          <li>Marque as aulas como concluídas para acompanhar seu progresso</li>
+          <li>Use o Tracker dos 21 dias para manter a constância</li>
+        </ul>
+      </div>
+      <div class="disclaimer">
+        Este conteúdo é educacional e tem foco em hábitos alimentares e de rotina. Ele não substitui acompanhamento médico ou nutricional individualizado. Consulte um profissional de saúde antes de iniciar mudanças significativas na alimentação ou rotina de exercícios.
+      </div>
+    </section>
+
+    <!-- MÓDULO 1 -->
+    <section id="m1l1">
+      <div class="modulo-tag">Módulo 1 · Aula 1</div>
+      <h2>Os 3 erros mais comuns de quem tenta emagrecer sozinho</h2>
+      <div class="lesson">
+        <h3>1. Cortar tudo de uma vez</h3>
+        <p>Quando você elimina carboidratos, açúcar e praticamente tudo que gosta no mesmo dia, seu corpo e sua mente entram em modo de resistência. A vontade de comer aumenta, a ansiedade sobe, e em poucos dias vem a desistência. Mudança que dura é mudança gradual.</p>
+        <h3>2. Focar só na balança</h3>
+        <p>O peso varia por retenção de líquido, ciclo hormonal, sono e estresse — não só por gordura. Quem só olha a balança se frustra rápido e abandona hábitos que estavam funcionando. Medidas, roupas e disposição também contam a história.</p>
+        <h3>3. Não ter uma rotina, só "força de vontade"</h3>
+        <p>Força de vontade acaba. Rotina não. Quem cria pequenos hábitos fixos (um copo d'água ao acordar, um prato mais colorido no almoço) sustenta o resultado muito mais que quem depende de disciplina pura todos os dias.</p>
+        <label><input type="checkbox" data-lesson-check="m1l1"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m1l2">
+      <div class="modulo-tag">Módulo 1 · Aula 2</div>
+      <h2>Por que dietas radicais falham (e o efeito sanfona)</h2>
+      <div class="lesson">
+        <p>Dietas muito restritivas costumam gerar perda de peso rápida no início — mas boa parte dela é água e massa muscular, não gordura. Quando a rotina restritiva não é sustentável, a pessoa volta a comer como antes, e o corpo, que ficou em "modo de economia", tende a recuperar o peso com facilidade — muitas vezes ultrapassando o peso inicial. É o chamado efeito sanfona.</p>
+        <div class="card">
+          <strong>O que fazer em vez disso:</strong> priorizar mudanças pequenas e mantíveis por meses, não por dias. É melhor perder peso mais devagar de forma consistente do que rápido de forma insustentável.
+        </div>
+        <label><input type="checkbox" data-lesson-check="m1l2"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m1l3">
+      <div class="modulo-tag">Módulo 1 · Aula 3</div>
+      <h2>O que realmente causa inchaço e retenção de líquido</h2>
+      <div class="lesson">
+        <p>Inchaço nem sempre é gordura — muitas vezes é retenção de líquido causada por excesso de sódio, baixa ingestão de água (o corpo retém mais água quando acha que vai faltar), noites mal dormidas e longos períodos sentado. Entender isso ajuda a não se frustrar com variações normais do corpo de um dia para o outro.</p>
+        <p>Nos próximos módulos você vai aprender ajustes simples de alimentação e rotina que atacam diretamente essas causas.</p>
+        <label><input type="checkbox" data-lesson-check="m1l3"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <!-- MÓDULO 2 -->
+    <section id="m2l1">
+      <div class="modulo-tag">Módulo 2 · Aula 1</div>
+      <h2>Trocas simples: o que tirar e o que colocar no prato</h2>
+      <div class="lesson">
+        <table>
+          <tr><th>Em vez de</th><th>Prefira</th></tr>
+          <tr><td>Refrigerante</td><td>Água com limão ou água saborizada natural</td></tr>
+          <tr><td>Pão branco</td><td>Pão integral ou tapioca</td></tr>
+          <tr><td>Frituras</td><td>Assados ou grelhados</td></tr>
+          <tr><td>Suco de caixinha</td><td>Fruta inteira ou suco natural sem açúcar</td></tr>
+          <tr><td>Molhos industrializados</td><td>Azeite, ervas e temperos naturais</td></tr>
+        </table>
+        <p>Você não precisa fazer todas as trocas de uma vez. Escolha uma por semana e torne-a automática antes de seguir para a próxima.</p>
+        <label><input type="checkbox" data-lesson-check="m2l1"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m2l2">
+      <div class="modulo-tag">Módulo 2 · Aula 2</div>
+      <h2>Água, sal e açúcar: os 3 fatores que mais inflam seu corpo</h2>
+      <div class="lesson">
+        <p><strong>Água:</strong> beber pouco faz o corpo reter mais líquido, não menos. A meta prática é acompanhar a cor da urina — quanto mais clara, melhor hidratado você está.</p>
+        <p><strong>Sal:</strong> alimentos industrializados costumam ter sódio escondido em quantidade alta (embutidos, temperos prontos, salgadinhos). Reduzir esses itens já causa efeito visível em poucos dias.</p>
+        <p><strong>Açúcar:</strong> além das calorias, picos de açúcar no sangue geram mais fome horas depois, criando um ciclo de compulsão. Reduzir açúcar refinado ajuda a estabilizar o apetite ao longo do dia.</p>
+        <label><input type="checkbox" data-lesson-check="m2l2"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m2l3">
+      <div class="modulo-tag">Módulo 2 · Aula 3</div>
+      <h2>Montando um prato "desincha" em 5 minutos</h2>
+      <div class="lesson">
+        <div class="card">
+          <strong>Regra prática do prato:</strong><br>
+          ½ prato de vegetais e folhas · ¼ de proteína (carne, ovo, frango, peixe ou leguminosa) · ¼ de carboidrato de boa qualidade (arroz, batata, mandioca, tapioca)
+        </div>
+        <p>Essa proporção simples, sem precisar pesar nada ou contar calorias, já é suficiente para reduzir inchaço e manter saciedade por mais tempo.</p>
+        <label><input type="checkbox" data-lesson-check="m2l3"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <!-- MÓDULO 3 -->
+    <section id="m3l1">
+      <div class="modulo-tag">Módulo 3 · Aula 1</div>
+      <h2>Como funciona o desafio de 21 dias</h2>
+      <div class="lesson">
+        <p>21 dias é o tempo aproximado que leva para um comportamento novo começar a virar hábito automático. O desafio está dividido em 3 semanas:</p>
+        <p><strong>Semana 1 — Ajuste:</strong> foco em água, redução de sal/açúcar e montagem do prato.<br>
+        <strong>Semana 2 — Rotina:</strong> inclusão dos hábitos de manhã e noite, e movimento diário.<br>
+        <strong>Semana 3 — Consolidação:</strong> manter tudo funcionando mesmo com imprevistos da rotina.</p>
+        <p>Use o Tracker (na aba Ferramentas) para marcar seu progresso dia a dia.</p>
+        <label><input type="checkbox" data-lesson-check="m3l1"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m3l2">
+      <div class="modulo-tag">Módulo 3 · Aula 2</div>
+      <h2>O hábito da manhã que ajuda a começar o dia leve</h2>
+      <div class="lesson">
+        <p>Ao acordar, antes do café: um copo de água (pode ser morna com limão, se preferir). Isso reidrata o corpo após horas de sono e ajuda a "ligar" o metabolismo antes da primeira refeição.</p>
+        <p>Evite pular o café da manhã completamente — isso costuma gerar mais fome e escolhas piores no almoço.</p>
+        <label><input type="checkbox" data-lesson-check="m3l2"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m3l3">
+      <div class="modulo-tag">Módulo 3 · Aula 3</div>
+      <h2>O hábito da noite que evita a compulsão alimentar</h2>
+      <div class="lesson">
+        <p>Boa parte da compulsão alimentar acontece à noite, quando o cansaço do dia baixa a nossa capacidade de tomar decisões. Duas práticas ajudam bastante:</p>
+        <p>1. Jantar em horário fixo, evitando ficar muitas horas sem comer antes de dormir.<br>
+        2. Reduzir telas 30 minutos antes de dormir — sono ruim está diretamente ligado a mais fome e mais vontade de doce no dia seguinte.</p>
+        <label><input type="checkbox" data-lesson-check="m3l3"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m3l4">
+      <div class="modulo-tag">Módulo 3 · Aula 4</div>
+      <h2>Lidando com recaídas sem desistir de tudo</h2>
+      <div class="lesson">
+        <p>Comer algo fora do planejado não apaga o seu progresso. O erro mais comum é pensar "já estraguei, então posso continuar estragando o resto do dia/semana". Isso é o que realmente sabota resultados — não o deslize em si.</p>
+        <p>Regra simples: depois de uma recaída, a próxima refeição já volta ao normal. Não existe "compensar" pulando refeições ou se punindo — isso só alimenta o ciclo de culpa e compulsão.</p>
+        <label><input type="checkbox" data-lesson-check="m3l4"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <!-- MÓDULO 4 -->
+    <section id="m4l1">
+      <div class="modulo-tag">Módulo 4 · Aula 1</div>
+      <h2>Você não precisa de academia para começar</h2>
+      <div class="lesson">
+        <p>Movimento diário importa mais do que treino perfeito. Subir escada em vez de elevador, caminhar 15–20 minutos, alongar ao acordar — tudo isso soma ao longo da semana e ajuda a reduzir o inchaço e melhorar a circulação.</p>
+        <p>A meta aqui não é "treino intenso", é criar o hábito de se movimentar todos os dias, mesmo que pouco.</p>
+        <label><input type="checkbox" data-lesson-check="m4l1"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m4l2">
+      <div class="modulo-tag">Módulo 4 · Aula 2</div>
+      <h2>3 exercícios simples de 10 minutos (sem equipamento)</h2>
+      <div class="lesson">
+        <p><strong>1. Agachamento livre</strong> — 3 séries de 12 repetições, fortalece pernas e glúteos.</p>
+        <p><strong>2. Prancha abdominal</strong> — 3 séries de 20-30 segundos, fortalece o core e melhora a postura.</p>
+        <p><strong>3. Caminhada no lugar ou polichinelo</strong> — 3 séries de 30 segundos, ativa a circulação e o sistema cardiovascular.</p>
+        <p>Faça essa sequência em dias alternados. O objetivo é consistência, não intensidade.</p>
+        <label><input type="checkbox" data-lesson-check="m4l2"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m4l3">
+      <div class="modulo-tag">Módulo 4 · Aula 3</div>
+      <h2>Mantendo constância mesmo com a rotina corrida</h2>
+      <div class="lesson">
+        <p>Defina um horário fixo (mesmo que curto) para se movimentar — de preferência associado a algo que você já faz, como logo depois de escovar os dentes pela manhã. Hábitos "grudados" em rotinas existentes têm muito mais chance de continuar depois dos 21 dias.</p>
+        <label><input type="checkbox" data-lesson-check="m4l3"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <!-- MÓDULO 5 -->
+    <section id="m5l1">
+      <div class="modulo-tag">Módulo 5 · Aula 1</div>
+      <h2>Como não recuperar o peso perdido</h2>
+      <div class="lesson">
+        <p>A maior parte do efeito sanfona acontece porque a pessoa trata o processo como algo temporário ("depois que emagrecer, volto ao normal"). Os hábitos que trouxeram o resultado precisam continuar sendo, em versão mais leve, o seu "normal" — não uma fase.</p>
+        <label><input type="checkbox" data-lesson-check="m5l1"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m5l2">
+      <div class="modulo-tag">Módulo 5 · Aula 2</div>
+      <h2>Ajustando hábitos para o longo prazo</h2>
+      <div class="lesson">
+        <p>Depois dos 21 dias, você pode flexibilizar — comer fora com mais liberdade, por exemplo — desde que a base (água, prato balanceado, movimento diário, sono) continue firme na maior parte da semana. 80% de consistência é mais sustentável (e mais realista) do que 100% de rigidez.</p>
+        <label><input type="checkbox" data-lesson-check="m5l2"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <section id="m5l3">
+      <div class="modulo-tag">Módulo 5 · Aula 3</div>
+      <h2>Seus próximos passos</h2>
+      <div class="lesson">
+        <p>Parabéns por chegar até aqui. Revise os módulos sempre que precisar de reforço, use o Tracker para acompanhar novas rodadas de 21 dias, e lembre-se: progresso consistente vale mais que perfeição.</p>
+        <label><input type="checkbox" data-lesson-check="m5l3"> Marcar aula como concluída</label>
+      </div>
+    </section>
+
+    <!-- FERRAMENTAS -->
+    <section id="tracker">
+      <div class="modulo-tag">Ferramenta</div>
+      <h2>Tracker dos 21 dias</h2>
+      <p>Clique em cada dia conforme for cumprindo os hábitos da semana. Seu progresso fica salvo neste navegador.</p>
+      <div class="tracker-grid" id="tracker-grid"></div>
+    </section>
+
+    <section id="cardapio">
+      <div class="modulo-tag">Ferramenta</div>
+      <h2>Cardápio exemplo de 3 dias</h2>
+      <p>Um modelo de referência — adapte às suas preferências e restrições alimentares.</p>
+      <div class="card">
+        <strong>Dia 1</strong><br>
+        Café da manhã: tapioca com ovo + café sem açúcar<br>
+        Almoço: arroz, feijão, frango grelhado, salada variada<br>
+        Jantar: sopa de legumes com frango desfiado
+      </div>
+      <div class="card">
+        <strong>Dia 2</strong><br>
+        Café da manhã: vitamina de fruta com aveia<br>
+        Almoço: batata doce, peixe assado, brócolis e cenoura<br>
+        Jantar: omelete de legumes + salada verde
+      </div>
+      <div class="card">
+        <strong>Dia 3</strong><br>
+        Café da manhã: pão integral com ovo mexido<br>
+        Almoço: arroz integral, lentilha, carne magra grelhada, salada<br>
+        Jantar: creme de abóbora com frango desfiado
+      </div>
+      <label><input type="checkbox" data-lesson-check="cardapio"> Marcar como visto</label>
+    </section>
+
+    <section id="compras">
+      <div class="modulo-tag">Ferramenta</div>
+      <h2>Lista de compras "desincha"</h2>
+      <div class="card">
+        <strong>Proteínas:</strong> ovos, frango, peixe, carne magra, feijão, lentilha<br><br>
+        <strong>Vegetais e folhas:</strong> alface, rúcula, brócolis, cenoura, abobrinha, tomate<br><br>
+        <strong>Carboidratos:</strong> batata doce, arroz integral, tapioca, pão integral, aveia<br><br>
+        <strong>Temperos naturais:</strong> alho, cebola, limão, ervas frescas, azeite<br><br>
+        <strong>Frutas:</strong> variedade da estação (maçã, banana, mamão, melancia)
+      </div>
+      <label><input type="checkbox" data-lesson-check="compras"> Marcar como visto</label>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  var lessonIds = ['m1l1','m1l2','m1l3','m2l1','m2l2','m2l3','m3l1','m3l2','m3l3','m3l4','m4l1','m4l2','m4l3','m5l1','m5l2','m5l3'];
+  var STORAGE_KEY = 'desincha21_progress';
+  var TRACKER_KEY = 'desincha21_tracker';
+
+  function getProgress(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveProgress(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+
+  function updateProgressBar(){
+    var p = getProgress();
+    var done = lessonIds.filter(function(id){ return p[id]; }).length;
+    var pct = Math.round((done / lessonIds.length) * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = pct + '% concluído (' + done + '/' + lessonIds.length + ' aulas)';
+    lessonIds.forEach(function(id){
+      var link = document.querySelector('nav a[data-lesson="'+id+'"]');
+      if(link){ link.classList.toggle('done', !!p[id]); }
+    });
+  }
+
+  document.querySelectorAll('[data-lesson-check]').forEach(function(box){
+    var id = box.getAttribute('data-lesson-check');
+    var p = getProgress();
+    box.checked = !!p[id];
+    box.addEventListener('change', function(){
+      var p = getProgress();
+      p[id] = box.checked;
+      saveProgress(p);
+      updateProgressBar();
+    });
+  });
+
+  function showSection(target){
+    document.querySelectorAll('section').forEach(function(s){ s.classList.remove('active'); });
+    var el = document.getElementById(target);
+    if(el){ el.classList.add('active'); }
+    document.querySelectorAll('nav a').forEach(function(a){
+      a.classList.toggle('active', a.getAttribute('data-target') === target);
+    });
+    document.querySelector('.sidebar').classList.remove('open');
+    window.scrollTo(0,0);
+  }
+
+  document.querySelectorAll('nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      var target = a.getAttribute('data-target');
+      location.hash = target;
+      showSection(target);
+    });
+  });
+
+  window.addEventListener('hashchange', function(){
+    var target = location.hash.replace('#','') || 'inicio';
+    showSection(target);
+  });
+
+  // Tracker dos 21 dias
+  var grid = document.getElementById('tracker-grid');
+  function getTracker(){
+    try{ return JSON.parse(localStorage.getItem(TRACKER_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveTracker(t){ localStorage.setItem(TRACKER_KEY, JSON.stringify(t)); }
+  var tracker = getTracker();
+  for(var i=1;i<=21;i++){
+    (function(day){
+      var div = document.createElement('div');
+      div.className = 'day' + (tracker[day] ? ' checked' : '');
+      div.textContent = 'Dia ' + day;
+      div.addEventListener('click', function(){
+        var t = getTracker();
+        t[day] = !t[day];
+        saveTracker(t);
+        div.classList.toggle('checked', !!t[day]);
+      });
+      grid.appendChild(div);
+    })(i);
+  }
+
+  // Init
+  var initial = location.hash.replace('#','') || 'inicio';
+  showSection(initial);
+  updateProgressBar();
+})();
+</script>
+
+</body>
+</html>
