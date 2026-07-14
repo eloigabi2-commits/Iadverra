@@ -1,0 +1,105 @@
+// Schema baseado no layout dos "Dados Abertos do CNPJ" da Receita Federal
+// https://dadosabertos.rfb.gov.br/CNPJ/
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Tabela "Cnaes": código (7 dígitos) + descrição da atividade econômica
+model Cnae {
+  codigo    String @id @db.VarChar(7)
+  descricao String
+
+  estabelecimentos Estabelecimento[]
+
+  @@index([descricao])
+}
+
+// Tabela "Natureza Jurídica"
+model NaturezaJuridica {
+  codigo    String @id @db.VarChar(4)
+  descricao String
+
+  empresas Empresa[]
+}
+
+// Tabela "Municípios"
+model Municipio {
+  codigo    String @id @db.VarChar(4)
+  descricao String
+
+  estabelecimentos Estabelecimento[]
+}
+
+// Tabela "Empresas": dados cadastrais no nível de matriz (cnpj_basico)
+model Empresa {
+  cnpjBasico             String  @id @map("cnpj_basico") @db.VarChar(8)
+  razaoSocial            String  @map("razao_social")
+  naturezaJuridicaCod    String? @map("natureza_juridica_cod") @db.VarChar(4)
+  qualificacaoResponsavel String? @map("qualificacao_responsavel") @db.VarChar(2)
+  capitalSocial          Decimal? @map("capital_social") @db.Decimal(18, 2)
+  porteEmpresa           String?  @map("porte_empresa") @db.VarChar(2)
+
+  naturezaJuridica  NaturezaJuridica? @relation(fields: [naturezaJuridicaCod], references: [codigo])
+  estabelecimentos  Estabelecimento[]
+  socios            Socio[]
+
+  @@index([razaoSocial])
+}
+
+// Tabela "Estabelecimentos": unidades (matriz/filial) de cada empresa, com o CNAE, endereço e contato
+model Estabelecimento {
+  cnpjBasico              String  @map("cnpj_basico") @db.VarChar(8)
+  cnpjOrdem               String  @map("cnpj_ordem") @db.VarChar(4)
+  cnpjDv                  String  @map("cnpj_dv") @db.VarChar(2)
+  cnpjCompleto            String  @unique @map("cnpj_completo") @db.VarChar(14)
+  identificadorMatrizFilial String? @map("identificador_matriz_filial") @db.VarChar(1)
+  nomeFantasia            String? @map("nome_fantasia")
+  situacaoCadastral       String? @map("situacao_cadastral") @db.VarChar(2)
+  dataInicioAtividade     DateTime? @map("data_inicio_atividade") @db.Date
+  cnaeFiscalPrincipal     String? @map("cnae_fiscal_principal") @db.VarChar(7)
+  cnaeFiscalSecundaria    String? @map("cnae_fiscal_secundaria")
+  logradouro              String?
+  numero                  String?
+  complemento             String?
+  bairro                  String?
+  cep                     String? @db.VarChar(8)
+  uf                      String? @db.VarChar(2)
+  municipioCod            String? @map("municipio_cod") @db.VarChar(4)
+  ddd1                    String? @db.VarChar(4)
+  telefone1               String? @db.VarChar(10)
+  ddd2                    String? @db.VarChar(4)
+  telefone2               String? @db.VarChar(10)
+  correioEletronico       String? @map("correio_eletronico")
+
+  empresa   Empresa @relation(fields: [cnpjBasico], references: [cnpjBasico])
+  cnae      Cnae?      @relation(fields: [cnaeFiscalPrincipal], references: [codigo])
+  municipio Municipio? @relation(fields: [municipioCod], references: [codigo])
+
+  @@id([cnpjBasico, cnpjOrdem])
+  @@index([cnaeFiscalPrincipal])
+  @@index([uf])
+  @@index([situacaoCadastral])
+}
+
+// Tabela "Sócios": pessoas físicas/jurídicas ligadas a uma empresa (os "donos")
+model Socio {
+  id                       Int      @id @default(autoincrement())
+  cnpjBasico               String   @map("cnpj_basico") @db.VarChar(8)
+  identificadorSocio       String?  @map("identificador_socio") @db.VarChar(1)
+  nomeSocio                String   @map("nome_socio")
+  cpfCnpjSocio             String?  @map("cpf_cnpj_socio") @db.VarChar(14)
+  qualificacaoSocio        String?  @map("qualificacao_socio") @db.VarChar(2)
+  dataEntradaSociedade     DateTime? @map("data_entrada_sociedade") @db.Date
+  faixaEtaria              String?  @map("faixa_etaria") @db.VarChar(1)
+
+  empresa Empresa @relation(fields: [cnpjBasico], references: [cnpjBasico])
+
+  @@index([cnpjBasico])
+  @@index([nomeSocio])
+}
