@@ -37,6 +37,29 @@ exportar para CSV.
    npm run dev
    ```
 
+## Deploy grátis (Vercel + Neon)
+
+Sobe uma versão pública da plataforma sem custo, populada com os dados
+fictícios do seed (dados reais da Receita Federal continuam sendo um passo
+separado — veja a próxima seção).
+
+1. Crie um banco Postgres grátis em [neon.tech](https://neon.tech) (sem
+   cartão) e copie a connection string (a variante *pooled*, com
+   `?sslmode=require` no final).
+2. Em [vercel.com](https://vercel.com), crie uma conta grátis com o GitHub,
+   clique em **Add New Project** e importe o repositório `Iadverra`
+   (branch `claude/business-owner-filter-platform-infd0x`, ou `main` depois
+   do merge).
+3. Em **Environment Variables**, adicione `DATABASE_URL` com a connection
+   string do Neon.
+4. Clique em **Deploy**.
+
+Não precisa rodar nenhum comando manualmente: o script `vercel-build`
+(`prisma migrate deploy && npm run db:seed && next build`) aplica as
+migrations e popula o banco automaticamente a cada deploy — e é seguro
+rodar de novo em deploys futuros, porque o seed pula a inserção se o banco
+já tiver dados (`prisma/seed.ts` verifica isso antes de inserir).
+
 ## Importando os dados reais da Receita Federal
 
 Os dados fictícios do seed servem só para desenvolver a interface. Para usar

@@ -50,6 +50,12 @@ function pick<T>(arr: T[], i: number): T {
 }
 
 async function main() {
+  const existing = await prisma.empresa.count();
+  if (existing > 0) {
+    console.log(`Banco já populado (${existing} empresas) — pulando seed.`);
+    return;
+  }
+
   console.log("Seeding CNAEs, municípios e naturezas jurídicas...");
   await prisma.cnae.createMany({ data: CNAES, skipDuplicates: true });
   await prisma.municipio.createMany({ data: MUNICIPIOS, skipDuplicates: true });

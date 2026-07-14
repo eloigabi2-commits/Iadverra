@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
-    "db:import-rfb": "tsx scripts/import-rfb.ts"
+    "db:import-rfb": "tsx scripts/import-rfb.ts",
+    "vercel-build": "prisma migrate deploy && npm run db:seed && next build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
