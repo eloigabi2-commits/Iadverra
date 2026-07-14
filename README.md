@@ -55,8 +55,9 @@ separado — veja a próxima seção).
 4. Clique em **Deploy**.
 
 Não precisa rodar nenhum comando manualmente: o script `vercel-build`
-(`prisma migrate deploy && npm run db:seed && next build`) aplica as
-migrations e popula o banco automaticamente a cada deploy — e é seguro
+(`prisma generate && prisma migrate deploy && npm run db:seed && next build`)
+gera o client do Prisma, aplica as migrations e popula o banco
+automaticamente a cada deploy — e é seguro
 rodar de novo em deploys futuros, porque o seed pula a inserção se o banco
 já tiver dados (`prisma/seed.ts` verifica isso antes de inserir).
 
