@@ -1,125 +1,99 @@
-// Seed com dados FICTÍCIOS para desenvolvimento local, sem depender do
-// download dos dumps completos da Receita Federal (veja scripts/import-rfb.ts
-// para a importação dos dados reais).
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const CNAES = [
-  { codigo: "6201500", descricao: "Desenvolvimento de programas de computador sob encomenda" },
-  { codigo: "6202300", descricao: "Desenvolvimento e licenciamento de programas de computador customizáveis" },
-  { codigo: "4711302", descricao: "Comércio varejista de mercadorias em geral - supermercados" },
-  { codigo: "5611203", descricao: "Lanchonetes, casas de chá, de sucos e similares" },
-  { codigo: "8630501", descricao: "Atividade médica ambulatorial com recursos para realização de exames complementares" },
-  { codigo: "4120400", descricao: "Construção de edifícios" },
-  { codigo: "6920601", descricao: "Atividades de contabilidade" },
-  { codigo: "4530703", descricao: "Comércio a varejo de peças e acessórios novos para veículos automotores" },
-];
-
-const MUNICIPIOS = [
-  { codigo: "7107", descricao: "SAO PAULO" },
-  { codigo: "6001", descricao: "RIO DE JANEIRO" },
-  { codigo: "4123", descricao: "BELO HORIZONTE" },
-  { codigo: "8905", descricao: "CURITIBA" },
-];
-
-const UFS = ["SP", "RJ", "MG", "PR"];
-
-const NATUREZAS = [
-  { codigo: "2062", descricao: "Sociedade Empresária Limitada" },
-  { codigo: "2135", descricao: "Empresário Individual" },
-];
-
-const NOMES = [
-  "Ana Souza", "Bruno Lima", "Carla Mendes", "Diego Alves", "Elaine Costa",
-  "Fabio Ribeiro", "Gabriela Rocha", "Hugo Martins", "Isabela Freitas", "Joao Pereira",
-  "Karina Duarte", "Lucas Barbosa", "Mariana Teixeira", "Nelson Cardoso", "Olivia Nunes",
-  "Paulo Henrique", "Queila Santos", "Rafael Correia", "Sabrina Gomes", "Tiago Moreira",
-];
-
-const RAZOES = [
-  "Comercial", "Servicos", "Solucoes", "Tecnologia", "Alimentos", "Construtora",
-  "Contabil", "Auto Pecas", "Clinica", "Sistemas",
-];
-
-function pick<T>(arr: T[], i: number): T {
-  return arr[i % arr.length];
-}
-
 async function main() {
-  const existing = await prisma.empresa.count();
-  if (existing > 0) {
-    console.log(`Banco já populado (${existing} empresas) — pulando seed.`);
+  const existing = await prisma.user.findFirst();
+  if (existing) {
+    console.log("Banco já populado, pulando seed.");
     return;
   }
 
-  console.log("Seeding CNAEs, municípios e naturezas jurídicas...");
-  await prisma.cnae.createMany({ data: CNAES, skipDuplicates: true });
-  await prisma.municipio.createMany({ data: MUNICIPIOS, skipDuplicates: true });
-  await prisma.naturezaJuridica.createMany({ data: NATUREZAS, skipDuplicates: true });
+  const passwordHash = await bcrypt.hash("senha1234", 10);
 
-  console.log("Seeding empresas, estabelecimentos e sócios fictícios...");
-  const total = 60;
-  for (let i = 0; i < total; i++) {
-    const cnpjBasico = String(10000000 + i).padStart(8, "0");
-    const cnae = pick(CNAES, i);
-    const municipio = pick(MUNICIPIOS, i);
-    const uf = pick(UFS, i);
-    const natureza = pick(NATUREZAS, i);
-    const razaoSocial = `${pick(RAZOES, i)} ${pick(RAZOES, i + 3)} ${i + 1} LTDA`;
+  const ash = await prisma.user.create({
+    data: {
+      name: "Ash Ketchum",
+      email: "ash@example.com",
+      passwordHash,
+      phone: "11999990001",
+      city: "São Paulo",
+      state: "SP",
+    },
+  });
 
-    await prisma.empresa.create({
-      data: {
-        cnpjBasico,
-        razaoSocial,
-        naturezaJuridicaCod: natureza.codigo,
-        porteEmpresa: i % 5 === 0 ? "05" : "03",
-        capitalSocial: 10000 + i * 1000,
-        estabelecimentos: {
-          create: {
-            cnpjOrdem: "0001",
-            cnpjDv: "00",
-            cnpjCompleto: `${cnpjBasico}000100`.slice(0, 14),
-            identificadorMatrizFilial: "1",
-            nomeFantasia: razaoSocial.split(" ").slice(0, 2).join(" "),
-            situacaoCadastral: "02",
-            dataInicioAtividade: new Date(2015 + (i % 8), i % 12, 1),
-            cnaeFiscalPrincipal: cnae.codigo,
-            uf,
-            municipioCod: municipio.codigo,
-            bairro: "Centro",
-            ddd1: "11",
-            telefone1: String(30000000 + i).padStart(8, "0"),
-            correioEletronico: `contato${i}@empresa${i}.com.br`,
-          },
-        },
-        socios: {
-          create: [
-            {
-              identificadorSocio: "2",
-              nomeSocio: pick(NOMES, i),
-              cpfCnpjSocio: `***${String(100000 + i).padStart(6, "0")}**`,
-              qualificacaoSocio: "49",
-              dataEntradaSociedade: new Date(2015 + (i % 8), i % 12, 1),
-              faixaEtaria: String(4 + (i % 5)),
-            },
-          ],
-        },
+  const misty = await prisma.user.create({
+    data: {
+      name: "Misty Waterflower",
+      email: "misty@example.com",
+      passwordHash,
+      phone: "21999990002",
+      city: "Rio de Janeiro",
+      state: "RJ",
+    },
+  });
+
+  const folder = await prisma.folder.create({
+    data: {
+      userId: ash.id,
+      name: "Coleção Base Set",
+      description: "Cartas da primeira edição do Base Set em bom estado.",
+    },
+  });
+
+  await prisma.listing.createMany({
+    data: [
+      {
+        userId: ash.id,
+        folderId: folder.id,
+        type: "CARTA",
+        title: "Charizard Base Set 4/102 Holo",
+        description: "Carta clássica, sem dobras, cantos levemente batidos.",
+        setName: "Base Set",
+        cardNumber: "4/102",
+        rarity: "Rara Holo",
+        language: "Inglês",
+        condition: "EXCELENTE",
+        quantity: 1,
+        priceCents: 150000,
       },
-    });
-  }
+      {
+        userId: ash.id,
+        folderId: folder.id,
+        type: "CARTA",
+        title: "Blastoise Base Set 2/102 Holo",
+        setName: "Base Set",
+        cardNumber: "2/102",
+        rarity: "Rara Holo",
+        language: "Inglês",
+        condition: "BOA",
+        quantity: 1,
+        priceCents: 90000,
+      },
+      {
+        userId: misty.id,
+        type: "PACOTE",
+        title: "Booster Escarlate e Violeta lacrado",
+        description: "Pacote lacrado de fábrica, direto da caixa.",
+        setName: "Escarlate e Violeta",
+        language: "Português",
+        condition: "LACRADO",
+        quantity: 3,
+        priceCents: 4500,
+      },
+    ],
+  });
 
-  console.log(`Seed concluído: ${total} empresas fictícias criadas.`);
+  console.log("Seed concluído.");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch((err) => {
+    console.error(err);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());
