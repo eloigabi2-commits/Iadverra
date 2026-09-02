@@ -568,3 +568,45 @@ export async function getAnnualSummary(year: number): Promise<ResumoAnual> {
     categorias: categoriaLinhas,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Gastos por quinzena: compara a 1ª metade (dias 1-15) com a 2ª metade
+// (dias 16 em diante) de cada mês, pra ver se o gasto se concentra no
+// começo ou no fim do mês.
+// ---------------------------------------------------------------------------
+
+export interface QuinzenaMes {
+  month: number;
+  quinzena1: number;
+  quinzena2: number;
+}
+
+export async function getGastosQuinzenais(year: number): Promise<QuinzenaMes[]> {
+  const { start, end } = monthRange(year);
+  const despesas = await prisma.lancamento.findMany({
+    where: {
+      data: { gte: start, lt: end },
+      status: "CONFIRMADO",
+      categoria: { tipo: "DESPESA" },
+    },
+    select: { data: true, valor: true },
+  });
+
+  const meses: QuinzenaMes[] = Array.from({ length: 12 }, (_, i) => ({
+    month: i + 1,
+    quinzena1: 0,
+    quinzena2: 0,
+  }));
+
+  for (const despesa of despesas) {
+    const mes = meses[despesa.data.getUTCMonth()];
+    if (despesa.data.getUTCDate() <= 15) mes.quinzena1 += Number(despesa.valor);
+    else mes.quinzena2 += Number(despesa.valor);
+  }
+
+  return meses.map((m) => ({
+    month: m.month,
+    quinzena1: round2(m.quinzena1),
+    quinzena2: round2(m.quinzena2),
+  }));
+}

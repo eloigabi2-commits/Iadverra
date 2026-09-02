@@ -216,6 +216,10 @@ export default function FinanceDashboard() {
 
   const exportUrl =
     tab === "ano" ? `/api/finance/export?year=${year}` : `/api/finance/export?year=${year}&month=${tab}`;
+  const exportPdfUrl =
+    tab === "ano"
+      ? `/api/finance/export-pdf?year=${year}`
+      : `/api/finance/export-pdf?year=${year}&month=${tab}`;
 
   const receitasLancamentos = resumo?.lancamentos.filter((l) => l.tipo === "RECEITA") ?? [];
   const despesasLancamentos = resumo?.lancamentos.filter((l) => l.tipo === "DESPESA") ?? [];
@@ -251,9 +255,15 @@ export default function FinanceDashboard() {
           </button>
           <a
             href={exportUrl}
-            className="rounded-md bg-[#1B4D2E] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#163D25] dark:bg-[#2F7A4D] dark:hover:bg-[#28683F]"
+            className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             Exportar CSV
+          </a>
+          <a
+            href={exportPdfUrl}
+            className="rounded-md bg-[#1B4D2E] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#163D25] dark:bg-[#2F7A4D] dark:hover:bg-[#28683F]"
+          >
+            Baixar fatura (PDF)
           </a>
         </div>
       </header>

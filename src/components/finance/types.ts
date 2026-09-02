@@ -104,3 +104,9 @@ export interface Configuracao {
   anoReferencia: number;
   saldoInicial: number;
 }
+
+export interface QuinzenaMes {
+  month: number;
+  quinzena1: number;
+  quinzena2: number;
+}

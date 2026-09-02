@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { MONTHS_SHORT, formatBRL, formatPct } from "@/lib/format";
-import { LineChart, MonthlyBarChart } from "./charts";
-import type { ResumoAnual } from "./types";
+import { LineChart, MonthlyBarChart, QuinzenaBarChart } from "./charts";
+import type { QuinzenaMes, ResumoAnual } from "./types";
 
 export default function AnnualView({ year }: { year: number }) {
   const [resumo, setResumo] = useState<ResumoAnual | null>(null);
+  const [quinzenas, setQuinzenas] = useState<QuinzenaMes[] | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -15,11 +16,13 @@ export default function AnnualView({ year }: { year: number }) {
       await Promise.resolve();
       if (cancelled) return;
       setLoading(true);
-      const data: ResumoAnual = await fetch(`/api/finance/resumo-anual?year=${year}`).then((r) =>
-        r.json(),
-      );
+      const [resumoData, quinzenaData]: [ResumoAnual, { meses: QuinzenaMes[] }] = await Promise.all([
+        fetch(`/api/finance/resumo-anual?year=${year}`).then((r) => r.json()),
+        fetch(`/api/finance/gastos-quinzenais?year=${year}`).then((r) => r.json()),
+      ]);
       if (cancelled) return;
-      setResumo(data);
+      setResumo(resumoData);
+      setQuinzenas(quinzenaData.meses);
       setLoading(false);
     })();
     return () => {
@@ -42,6 +45,12 @@ export default function AnnualView({ year }: { year: number }) {
   }));
 
   const saldoPontos = resumo.meses.map((m) => m.saldoFinal);
+
+  const quinzenaMonths = (quinzenas ?? []).map((q, i) => ({
+    label: MONTHS_SHORT[i],
+    quinzena1: q.quinzena1,
+    quinzena2: q.quinzena2,
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -71,6 +80,16 @@ export default function AnnualView({ year }: { year: number }) {
           </h3>
           <LineChart points={saldoPontos} />
         </div>
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <h3 className="mb-1 text-xs font-medium uppercase text-zinc-500 dark:text-zinc-400">
+          Gastos: início x fim do mês
+        </h3>
+        <p className="mb-3 text-[11px] text-zinc-500 dark:text-zinc-400">
+          Compara quanto foi gasto na 1ª e na 2ª quinzena de cada mês do ano.
+        </p>
+        <QuinzenaBarChart months={quinzenaMonths} />
       </section>
 
       <section className="overflow-x-auto rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">

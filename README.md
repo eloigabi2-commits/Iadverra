@@ -34,20 +34,27 @@ tudo automaticamente.
 - **Visão anual**: réplica do "FC Anual" da planilha — todas as categorias
   por mês, totais e saldo acumulado — mas gerada automaticamente, sem copiar
   fórmulas.
+- **Gastos por quinzena**: gráfico comparando quanto foi gasto na 1ª (dias
+  1-15) e na 2ª quinzena (dias 16+) de cada mês do ano, além do gráfico
+  mensal de receitas x despesas já existente.
 - **Assistente de IA**: botão flutuante que abre um chat (Claude, via
   `@anthropic-ai/sdk`) capaz de responder tanto perguntas sobre os números
   reais da empresa ("quanto lucrei este mês?", consultando o banco através
   de ferramentas) quanto dúvidas gerais de contabilidade ("o que é DAS do
   Simples Nacional?"). Requer a variável `ANTHROPIC_API_KEY` (veja
   `.env.example`) — sem ela, a UI mostra um erro claro em vez de travar.
-- **Exportar CSV** dos lançamentos de um mês ou do ano inteiro.
+- **Exportar CSV** dos lançamentos de um mês ou do ano inteiro, ou **baixar
+  uma fatura em PDF** (`@react-pdf/renderer`) — um documento simples, com
+  logo, resumo do período e os lançamentos (ou o mês a mês, na versão
+  anual), pra guardar ou compartilhar sem precisar abrir planilha nenhuma.
 - **Identidade visual própria**: logo e verde de marca (`#1B4D2E`) só nessa
   seção — o Filtro de CNAE mantém a identidade neutra do Iadverra.
 
 Os modelos ficam em `prisma/schema.prisma` (`Configuracao`, `Categoria`,
 `Lancamento`, `Ajuste`), a lógica de cálculo em `src/lib/finance.ts`, o
-assistente em `src/lib/assistant.ts`, as rotas em `src/app/api/finance/*` e
-a UI em `src/components/finance/`.
+assistente em `src/lib/assistant.ts`, a fatura em PDF em
+`src/lib/invoice-pdf.tsx`, as rotas em `src/app/api/finance/*` e a UI em
+`src/components/finance/`.
 
 ## Stack
 

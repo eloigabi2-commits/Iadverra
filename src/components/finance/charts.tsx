@@ -92,6 +92,48 @@ interface MonthBar {
   despesas: number;
 }
 
+interface QuinzenaBar {
+  label: string;
+  quinzena1: number;
+  quinzena2: number;
+}
+
+export function QuinzenaBarChart({ months }: { months: QuinzenaBar[] }) {
+  const max = Math.max(1, ...months.flatMap((m) => [m.quinzena1, m.quinzena2]));
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-3 text-[11px] text-zinc-500 dark:text-zinc-400">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-amber-400" /> 1ª quinzena (dias 1-15)
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-amber-700" /> 2ª quinzena (dias 16+)
+        </span>
+      </div>
+      <div className="flex h-40 items-end gap-1.5 sm:gap-2">
+        {months.map((m) => (
+          <div key={m.label} className="flex flex-1 flex-col items-center gap-1">
+            <div className="flex h-32 w-full items-end justify-center gap-0.5">
+              <div
+                className="w-2 rounded-t bg-amber-400 sm:w-2.5"
+                style={{ height: `${(m.quinzena1 / max) * 100}%` }}
+                title={`1ª quinzena de ${m.label}: ${formatBRL(m.quinzena1)}`}
+              />
+              <div
+                className="w-2 rounded-t bg-amber-700 sm:w-2.5"
+                style={{ height: `${(m.quinzena2 / max) * 100}%` }}
+                title={`2ª quinzena de ${m.label}: ${formatBRL(m.quinzena2)}`}
+              />
+            </div>
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{m.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function MonthlyBarChart({ months }: { months: MonthBar[] }) {
   const max = Math.max(1, ...months.flatMap((m) => [m.receitas, m.despesas]));
 
