@@ -37,7 +37,7 @@ function CategoriaRow({
         onClick={() => onToggleAtiva(categoria)}
         className="shrink-0 rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
       >
-        {categoria.ativa ? "Arquivar" : "Reativar"}
+        {categoria.ativa ? "Ocultar" : "Mostrar"}
       </button>
       <button
         type="button"

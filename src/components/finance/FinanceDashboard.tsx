@@ -24,6 +24,23 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
+function monthBounds(year: number, month: number): { min: string; max: string } {
+  return {
+    min: `${year}-${pad2(month)}-01`,
+    max: `${year}-${pad2(month)}-${pad2(daysInMonth(year, month))}`,
+  };
+}
+
+// Sugere hoje como data padrão do lançamento (se hoje cair no mês selecionado)
+// para o cliente raramente precisar mexer nesse campo.
+function defaultDateFor(year: number, month: number): string {
+  const today = new Date();
+  if (today.getFullYear() === year && today.getMonth() + 1 === month) {
+    return `${year}-${pad2(month)}-${pad2(today.getDate())}`;
+  }
+  return `${year}-${pad2(month)}-01`;
+}
+
 export default function FinanceDashboard() {
   const now = useMemo(() => new Date(), []);
   const [config, setConfig] = useState<Configuracao | null>(null);
@@ -37,14 +54,14 @@ export default function FinanceDashboard() {
 
   const [formTipo, setFormTipo] = useState<CategoriaTipo>("RECEITA");
   const [formCategoriaId, setFormCategoriaId] = useState<number | "">("");
-  const [formDia, setFormDia] = useState(1);
+  const [formData, setFormData] = useState(() => defaultDateFor(now.getFullYear(), now.getMonth() + 1));
   const [formDescricao, setFormDescricao] = useState("");
   const [formValor, setFormValor] = useState("");
-  const [formStatus, setFormStatus] = useState<LancamentoStatus>("CONFIRMADO");
+  const [formPendente, setFormPendente] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [ajusteTipo, setAjusteTipo] = useState<AjusteTipo>("RETIRADA");
-  const [ajusteDia, setAjusteDia] = useState(1);
+  const [ajusteData, setAjusteData] = useState(() => defaultDateFor(now.getFullYear(), now.getMonth() + 1));
   const [ajusteValor, setAjusteValor] = useState("");
   const [ajusteSubmitting, setAjusteSubmitting] = useState(false);
 
@@ -120,7 +137,9 @@ export default function FinanceDashboard() {
     (async () => {
       await Promise.resolve();
       if (cancelled) return;
-      if (tab !== "ano") setFormDia((d) => Math.min(d, daysInMonth(year, tab)));
+      if (tab === "ano") return;
+      setFormData(defaultDateFor(year, tab));
+      setAjusteData(defaultDateFor(year, tab));
     })();
     return () => {
       cancelled = true;
@@ -131,22 +150,22 @@ export default function FinanceDashboard() {
     e.preventDefault();
     if (tab === "ano" || !formCategoriaId || !formValor) return;
     setSubmitting(true);
-    const dataStr = `${year}-${pad2(tab)}-${pad2(formDia)}`;
     const res = await fetch("/api/finance/lancamentos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         categoriaId: formCategoriaId,
-        data: dataStr,
+        data: formData,
         descricao: formDescricao,
         valor: Number(formValor.replace(",", ".")),
-        status: formStatus,
+        status: formPendente ? "PENDENTE" : "CONFIRMADO",
       }),
     });
     setSubmitting(false);
     if (res.ok) {
       setFormDescricao("");
       setFormValor("");
+      setFormPendente(false);
       await loadResumo();
     } else {
       const err = await res.json().catch(() => ({}));
@@ -173,13 +192,12 @@ export default function FinanceDashboard() {
     e.preventDefault();
     if (tab === "ano" || !ajusteValor) return;
     setAjusteSubmitting(true);
-    const dataStr = `${year}-${pad2(tab)}-${pad2(ajusteDia)}`;
     const res = await fetch("/api/finance/ajustes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tipo: ajusteTipo,
-        data: dataStr,
+        data: ajusteData,
         valor: Number(ajusteValor.replace(",", ".")),
       }),
     });
@@ -215,8 +233,7 @@ export default function FinanceDashboard() {
             Fluxo de Caixa{config?.nomeEmpresa ? ` · ${config.nomeEmpresa}` : ""}
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Lance receitas e despesas do dia a dia — saldo, lucro, margem e gráficos são calculados
-            automaticamente, sem fórmulas de planilha para manter.
+            Anote o que entrou e o que saiu — saldo, lucro e gráficos o sistema calcula sozinho.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -307,9 +324,8 @@ export default function FinanceDashboard() {
 
               {(resumo.pendentesReceitas > 0 || resumo.pendentesDespesas > 0) && (
                 <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
-                  Pendente de confirmação: {formatBRL(resumo.pendentesReceitas)} a receber e{" "}
-                  {formatBRL(resumo.pendentesDespesas)} a pagar — não entram no saldo até serem
-                  confirmados.
+                  Ainda não entra no saldo: {formatBRL(resumo.pendentesReceitas)} a receber e{" "}
+                  {formatBRL(resumo.pendentesDespesas)} a pagar.
                 </p>
               )}
 
@@ -357,14 +373,14 @@ export default function FinanceDashboard() {
                   </select>
 
                   <label className="flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-                    Dia
+                    Data
                     <input
-                      type="number"
-                      min={1}
-                      max={daysInMonth(year, tab)}
-                      value={formDia}
-                      onChange={(e) => setFormDia(Number(e.target.value))}
-                      className="w-16 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                      type="date"
+                      value={formData}
+                      min={monthBounds(year, tab).min}
+                      max={monthBounds(year, tab).max}
+                      onChange={(e) => setFormData(e.target.value)}
+                      className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                     />
                   </label>
 
@@ -388,23 +404,24 @@ export default function FinanceDashboard() {
                     />
                   </label>
 
-                  <select
-                    value={formStatus}
-                    onChange={(e) => setFormStatus(e.target.value as LancamentoStatus)}
-                    className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                  >
-                    <option value="CONFIRMADO">Confirmado</option>
-                    <option value="PENDENTE">Pendente</option>
-                  </select>
-
                   <button
                     type="submit"
                     disabled={submitting || !formCategoriaId || !formValor}
-                    className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                    className="rounded-md bg-zinc-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
                   >
                     Adicionar
                   </button>
                 </form>
+
+                <label className="mt-2 flex w-fit items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={formPendente}
+                    onChange={(e) => setFormPendente(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-zinc-300 dark:border-zinc-700"
+                  />
+                  {formTipo === "RECEITA" ? "Ainda não recebi esse dinheiro" : "Ainda não paguei essa conta"}
+                </label>
               </section>
 
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -422,77 +439,91 @@ export default function FinanceDashboard() {
                 />
               </section>
 
-              <section className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 className="mb-3 text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                  Retiradas para aplicações / distribuições de lucros
-                </h2>
-                <form onSubmit={handleAddAjuste} className="mb-3 flex flex-wrap items-end gap-2">
-                  <select
-                    value={ajusteTipo}
-                    onChange={(e) => setAjusteTipo(e.target.value as AjusteTipo)}
-                    className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                  >
-                    <option value="RETIRADA">Retirada p/ aplicações</option>
-                    <option value="DISTRIBUICAO">Distribuição de lucros</option>
-                  </select>
-                  <label className="flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-                    Dia
-                    <input
-                      type="number"
-                      min={1}
-                      max={daysInMonth(year, tab)}
-                      value={ajusteDia}
-                      onChange={(e) => setAjusteDia(Number(e.target.value))}
-                      className="w-16 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
-                    Valor (R$)
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="0,00"
-                      value={ajusteValor}
-                      onChange={(e) => setAjusteValor(e.target.value)}
-                      className="w-28 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={ajusteSubmitting || !ajusteValor}
-                    className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                  >
-                    Adicionar
-                  </button>
-                </form>
-                {resumo.ajustes.length > 0 ? (
-                  <ul className="divide-y divide-zinc-100 text-sm dark:divide-zinc-800">
-                    {resumo.ajustes.map((a) => (
-                      <li key={a.id} className="flex items-center justify-between gap-2 py-1.5">
-                        <span className="text-zinc-600 dark:text-zinc-400">
-                          Dia {a.data.slice(-2)} ·{" "}
-                          {a.tipo === "RETIRADA" ? "Retirada p/ aplicações" : "Distribuição de lucros"}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <span className="font-mono text-zinc-900 dark:text-zinc-50">
-                            {formatBRL(a.valor)}
+              <details className="group rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+                <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-zinc-700 marker:content-none dark:text-zinc-300">
+                  <span className="mr-1.5 inline-block text-zinc-400 transition-transform group-open:rotate-90">
+                    ›
+                  </span>
+                  Tirei dinheiro da empresa (opcional)
+                  {resumo.ajustes.length > 0 && (
+                    <span className="ml-2 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                      {resumo.ajustes.length} lançado{resumo.ajustes.length > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </summary>
+                <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
+                  <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
+                    Só preencha se você tirou dinheiro da empresa para investir ou para dividir com
+                    sócios — isso sai do caixa mas não conta como despesa.
+                  </p>
+                  <form onSubmit={handleAddAjuste} className="mb-3 flex flex-wrap items-end gap-2">
+                    <select
+                      value={ajusteTipo}
+                      onChange={(e) => setAjusteTipo(e.target.value as AjusteTipo)}
+                      className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                    >
+                      <option value="RETIRADA">Tirei para investir</option>
+                      <option value="DISTRIBUICAO">Dividi com os sócios</option>
+                    </select>
+                    <label className="flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+                      Data
+                      <input
+                        type="date"
+                        value={ajusteData}
+                        min={monthBounds(year, tab).min}
+                        max={monthBounds(year, tab).max}
+                        onChange={(e) => setAjusteData(e.target.value)}
+                        className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1 text-[11px] text-zinc-500 dark:text-zinc-400">
+                      Valor (R$)
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="0,00"
+                        value={ajusteValor}
+                        onChange={(e) => setAjusteValor(e.target.value)}
+                        className="w-28 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={ajusteSubmitting || !ajusteValor}
+                      className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    >
+                      Adicionar
+                    </button>
+                  </form>
+                  {resumo.ajustes.length > 0 ? (
+                    <ul className="divide-y divide-zinc-100 text-sm dark:divide-zinc-800">
+                      {resumo.ajustes.map((a) => (
+                        <li key={a.id} className="flex items-center justify-between gap-2 py-1.5">
+                          <span className="text-zinc-600 dark:text-zinc-400">
+                            Dia {a.data.slice(-2)} ·{" "}
+                            {a.tipo === "RETIRADA" ? "Tirei para investir" : "Dividi com os sócios"}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteAjuste(a.id)}
-                            aria-label="Remover"
-                            className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Nenhum ajuste neste mês.</p>
-                )}
-              </section>
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono text-zinc-900 dark:text-zinc-50">
+                              {formatBRL(a.valor)}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAjuste(a.id)}
+                              aria-label="Remover"
+                              className="text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Nada lançado neste mês.</p>
+                  )}
+                </div>
+              </details>
 
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
@@ -595,7 +626,10 @@ function LancamentosTable({
                 </td>
               </tr>
             ) : (
-              lancamentos.map((l) => (
+              lancamentos.map((l) => {
+                const confirmedLabel = l.tipo === "RECEITA" ? "Recebido" : "Pago";
+                const pendingLabel = l.tipo === "RECEITA" ? "A receber" : "A pagar";
+                return (
                 <tr key={l.id}>
                   <td className="px-3 py-1.5 font-mono text-xs">{l.data.slice(-2)}</td>
                   <td className="px-3 py-1.5">{l.categoriaNome}</td>
@@ -613,7 +647,7 @@ function LancamentosTable({
                           : "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
                       }`}
                     >
-                      {l.status === "CONFIRMADO" ? "Confirmado" : "Pendente"}
+                      {l.status === "CONFIRMADO" ? confirmedLabel : pendingLabel}
                     </button>
                   </td>
                   <td className="px-3 py-1.5 text-right">
@@ -627,7 +661,8 @@ function LancamentosTable({
                     </button>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>
