@@ -165,7 +165,7 @@ export default function SettingsPanel({ config, categorias, onClose, onChanged }
               type="button"
               onClick={saveConfig}
               disabled={savingConfig}
-              className="w-fit rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+              className="w-fit rounded-md bg-[#1B4D2E] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#163D25] disabled:opacity-50 dark:bg-[#2F7A4D] dark:hover:bg-[#28683F]"
             >
               {savingConfig ? "Salvando..." : "Salvar"}
             </button>
@@ -236,7 +236,7 @@ export default function SettingsPanel({ config, categorias, onClose, onChanged }
                 type="button"
                 onClick={addCategoria}
                 disabled={addingCategoria || !novoNome.trim()}
-                className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                className="rounded-md bg-[#1B4D2E] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#163D25] disabled:opacity-50 dark:bg-[#2F7A4D] dark:hover:bg-[#28683F]"
               >
                 Adicionar
               </button>

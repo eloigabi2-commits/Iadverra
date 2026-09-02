@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MONTHS, MONTHS_SHORT, formatBRL, formatPct } from "@/lib/format";
 import { CategoryBars, LineChart } from "./charts";
 import AnnualView from "./AnnualView";
+import AssistantChat from "./AssistantChat";
 import SettingsPanel from "./SettingsPanel";
 import type {
   AjusteTipo,
@@ -222,19 +223,23 @@ export default function FinanceDashboard() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-10">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <Link
-            href="/"
-            className="text-xs text-zinc-500 hover:underline dark:text-zinc-400"
-          >
-            ← Filtro de sócios por CNAE
-          </Link>
-          <h1 className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            Fluxo de Caixa{config?.nomeEmpresa ? ` · ${config.nomeEmpresa}` : ""}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Anote o que entrou e o que saiu — saldo, lucro e gráficos o sistema calcula sozinho.
-          </p>
+        <div className="flex items-start gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-tile.svg" alt="" className="mt-0.5 h-11 w-11 shrink-0 rounded-lg" />
+          <div>
+            <Link
+              href="/"
+              className="text-xs text-zinc-500 hover:underline dark:text-zinc-400"
+            >
+              ← Filtro de sócios por CNAE
+            </Link>
+            <h1 className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              Contabilidade Conforme{config?.nomeEmpresa ? ` · ${config.nomeEmpresa}` : ""}
+            </h1>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              Anote o que entrou e o que saiu — saldo, lucro e gráficos o sistema calcula sozinho.
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -246,7 +251,7 @@ export default function FinanceDashboard() {
           </button>
           <a
             href={exportUrl}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            className="rounded-md bg-[#1B4D2E] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#163D25] dark:bg-[#2F7A4D] dark:hover:bg-[#28683F]"
           >
             Exportar CSV
           </a>
@@ -281,7 +286,7 @@ export default function FinanceDashboard() {
               onClick={() => setTab(i + 1)}
               className={`rounded-md px-2.5 py-1.5 text-xs font-medium ${
                 tab === i + 1
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  ? "bg-[#1B4D2E] text-white dark:bg-[#2F7A4D]"
                   : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
               }`}
             >
@@ -407,7 +412,7 @@ export default function FinanceDashboard() {
                   <button
                     type="submit"
                     disabled={submitting || !formCategoriaId || !formValor}
-                    className="rounded-md bg-zinc-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                    className="rounded-md bg-[#1B4D2E] px-4 py-1.5 text-xs font-medium text-white hover:bg-[#163D25] disabled:opacity-50 dark:bg-[#2F7A4D] dark:hover:bg-[#28683F]"
                   >
                     Adicionar
                   </button>
@@ -559,6 +564,8 @@ export default function FinanceDashboard() {
           }}
         />
       )}
+
+      <AssistantChat year={year} month={tab === "ano" ? now.getMonth() + 1 : tab} />
     </div>
   );
 }
