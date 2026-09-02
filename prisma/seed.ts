@@ -49,7 +49,41 @@ function pick<T>(arr: T[], i: number): T {
   return arr[i % arr.length];
 }
 
+const CATEGORIAS_RECEITA = ["Clientes", "Infoprodutos", "Comissão", "Outros"];
+const CATEGORIAS_DESPESA = [
+  "Tráfego",
+  "Imposto",
+  "Contabilidade",
+  "Salários",
+  "Prolabore",
+  "Outros",
+];
+
+async function seedFinance() {
+  const existing = await prisma.categoria.count();
+  if (existing > 0) {
+    console.log(`Fluxo de caixa já populado (${existing} categorias) — pulando seed.`);
+    return;
+  }
+
+  console.log("Seeding configuração e plano de contas padrão do fluxo de caixa...");
+  await prisma.configuracao.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1, anoReferencia: new Date().getFullYear() },
+  });
+
+  await prisma.categoria.createMany({
+    data: [
+      ...CATEGORIAS_RECEITA.map((nome, i) => ({ tipo: "RECEITA" as const, nome, ordem: i })),
+      ...CATEGORIAS_DESPESA.map((nome, i) => ({ tipo: "DESPESA" as const, nome, ordem: i })),
+    ],
+  });
+}
+
 async function main() {
+  await seedFinance();
+
   const existing = await prisma.empresa.count();
   if (existing > 0) {
     console.log(`Banco já populado (${existing} empresas) — pulando seed.`);
