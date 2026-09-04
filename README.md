@@ -131,29 +131,31 @@ este repositório aberto.
 
 Só funciona se o Claude (Desktop ou Code) rodar na **mesma máquina** onde o
 Roblox Studio está aberto — não funciona em ambientes remotos/sandbox como
-o Claude Code on the web, já que o Studio expõe o servidor em
-`http://localhost:3004`.
+o Claude Code on the web, já que o servidor roda como um processo local
+(`StudioMCP`) iniciado via stdio, não como um serviço de rede.
 
 Para usar:
 
 1. Atualize o Roblox Studio para a versão mais recente (não precisa baixar
    nada além disso — o servidor já vem embutido).
-2. No Studio, ative o MCP Server: **File → Studio Settings → Beta Features
-   → "MCP Server"** (ou, no painel do Assistant, no menu de três pontos →
-   **"Manage MCP Servers"** → ative **"Enable Studio as MCP server"**). Por
-   padrão ele escuta em `localhost:3004`.
-3. Abra o place em que você quer trabalhar e deixe o Studio aberto.
-4. No Claude (Desktop ou Code), rodando na mesma máquina, a configuração em
-   `.mcp.json` já aponta para `http://localhost:3004/mcp` — no Claude Code
-   isso é reconhecido automaticamente ao abrir este repositório; no Claude
-   Desktop, adicione o mesmo servidor em **Configurações → Developer →
-   Local MCP servers → Edit Config**, ou via terminal:
-   ```
-   claude mcp add roblox-studio --transport http http://localhost:3004/mcp
-   ```
-5. Teste pedindo algo simples, tipo "insira uma Part na cena" — se o Studio
-   estiver com o MCP Server ativo, o Claude deve conseguir executar direto
-   no lugar aberto.
+2. Abra o place em que você quer trabalhar e deixe o Studio aberto.
+3. No painel **Assistant** do Studio, clique no menu **"…"** → **"Manage
+   MCP Servers"** → ative o toggle **"Enable Studio as MCP server"**.
+4. Nesse mesmo painel aparecem as opções de conexão:
+   - **Quick connect**: se o seu cliente (Claude Desktop, VS Code, Cursor
+     etc.) estiver na lista, é só clicar — reinicie o Studio depois pra ele
+     aparecer no dropdown.
+   - **JSON manual**: é o que já está em `.mcp.json` deste repositório
+     (comando `cmd.exe /c %LOCALAPPDATA%\Roblox\mcp.bat`, no Windows). No
+     macOS o comando é
+     `/Applications/RobloxStudio.app/Contents/MacOS/StudioMCP` em vez do
+     `cmd.exe`.
+   - **CLI**: no Windows, `claude mcp add --transport stdio Roblox_Studio -- "cmd.exe" "/c" "%LOCALAPPDATA%\Roblox\mcp.bat"`.
+5. Verifique a conexão voltando em **Assistant → Manage MCP Servers**: um
+   indicador verde mostra os clientes conectados.
+6. Teste pedindo algo simples, tipo "insira uma Part na cena" — o Claude
+   deve conseguir ler/editar scripts, criar instances, rodar Luau, tirar
+   screenshot do viewport e até rodar playtests direto no lugar aberto.
 
 ## Estrutura
 

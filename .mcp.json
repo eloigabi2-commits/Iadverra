@@ -8,8 +8,8 @@
       }
     },
     "Roblox_Studio": {
-      "type": "http",
-      "url": "http://localhost:3004/mcp"
+      "command": "cmd.exe",
+      "args": ["/c", "%LOCALAPPDATA%\\Roblox\\mcp.bat"]
     }
   }
 }
