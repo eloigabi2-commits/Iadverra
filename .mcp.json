@@ -6,6 +6,10 @@
       "headers": {
         "Authorization": "Bearer ${N8N_API_KEY}"
       }
+    },
+    "Roblox_Studio": {
+      "command": "${ROBLOX_STUDIO_MCP_PATH}",
+      "args": ["--stdio"]
     }
   }
 }

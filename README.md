@@ -115,6 +115,31 @@ opt-out em contatos comerciais, não usar para spam em massa) e, se o
 volume de prospecção for grande, vale consultar um jurídico para adequar o
 processo à LGPD antes de operar em escala.
 
+## Integração com Roblox Studio (MCP)
+
+Este repositório também traz, em `.mcp.json`, a configuração do servidor MCP
+oficial da Roblox ([`Roblox/studio-rust-mcp-server`](https://github.com/Roblox/studio-rust-mcp-server)),
+que permite ao Claude interagir com o Roblox Studio (inserir objetos, editar
+scripts, rodar comandos etc.) — sem relação com a plataforma de CNAE deste
+projeto; está aqui só porque a sessão do Claude usada para configurar isso
+tinha este repositório aberto.
+
+Só funciona se o Claude (Desktop ou Code) rodar na **mesma máquina** onde o
+Roblox Studio está instalado — não funciona em ambientes remotos/sandbox
+como o Claude Code on the web.
+
+Para usar:
+
+1. Baixe o instalador do `rbx-studio-mcp` para o seu sistema operacional na
+   [página de releases](https://github.com/Roblox/studio-rust-mcp-server/releases)
+   (ou rode `cargo run` a partir do código-fonte). Isso instala o plugin no
+   Roblox Studio e configura o binário localmente.
+2. Defina `ROBLOX_STUDIO_MCP_PATH` no seu `.env` (ou nas variáveis de
+   ambiente do seu cliente MCP) apontando para o executável instalado — veja
+   os exemplos em `.env.example`.
+3. Abra o Roblox Studio e confirme que o plugin aparece na aba **Plugins**
+   antes de usar.
+
 ## Estrutura
 
 - `prisma/schema.prisma` — modelo de dados (Empresa, Estabelecimento,
