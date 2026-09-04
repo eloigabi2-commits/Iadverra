@@ -8,8 +8,8 @@
       }
     },
     "Roblox_Studio": {
-      "command": "${ROBLOX_STUDIO_MCP_PATH}",
-      "args": ["--stdio"]
+      "type": "http",
+      "url": "http://localhost:3004/mcp"
     }
   }
 }

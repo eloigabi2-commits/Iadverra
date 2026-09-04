@@ -118,27 +118,42 @@ processo à LGPD antes de operar em escala.
 ## Integração com Roblox Studio (MCP)
 
 Este repositório também traz, em `.mcp.json`, a configuração do servidor MCP
-oficial da Roblox ([`Roblox/studio-rust-mcp-server`](https://github.com/Roblox/studio-rust-mcp-server)),
-que permite ao Claude interagir com o Roblox Studio (inserir objetos, editar
-scripts, rodar comandos etc.) — sem relação com a plataforma de CNAE deste
-projeto; está aqui só porque a sessão do Claude usada para configurar isso
-tinha este repositório aberto.
+**embutido no próprio Roblox Studio** (desde fev/2026), que permite ao
+Claude interagir com o Studio (inspecionar o DataModel, ler/editar scripts,
+criar/modificar instances, rodar Luau, ver o output, capturar o viewport,
+rodar playtests etc.) — sem relação com a plataforma de CNAE deste projeto;
+está aqui só porque a sessão do Claude usada para configurar isso tinha
+este repositório aberto.
+
+> O projeto standalone antigo (`Roblox/studio-rust-mcp-server`, que exigia
+> baixar um binário `rbx-studio-mcp`) foi **descontinuado** pela Roblox em
+> abril/2026 em favor deste servidor embutido — não use mais aquele.
 
 Só funciona se o Claude (Desktop ou Code) rodar na **mesma máquina** onde o
-Roblox Studio está instalado — não funciona em ambientes remotos/sandbox
-como o Claude Code on the web.
+Roblox Studio está aberto — não funciona em ambientes remotos/sandbox como
+o Claude Code on the web, já que o Studio expõe o servidor em
+`http://localhost:3004`.
 
 Para usar:
 
-1. Baixe o instalador do `rbx-studio-mcp` para o seu sistema operacional na
-   [página de releases](https://github.com/Roblox/studio-rust-mcp-server/releases)
-   (ou rode `cargo run` a partir do código-fonte). Isso instala o plugin no
-   Roblox Studio e configura o binário localmente.
-2. Defina `ROBLOX_STUDIO_MCP_PATH` no seu `.env` (ou nas variáveis de
-   ambiente do seu cliente MCP) apontando para o executável instalado — veja
-   os exemplos em `.env.example`.
-3. Abra o Roblox Studio e confirme que o plugin aparece na aba **Plugins**
-   antes de usar.
+1. Atualize o Roblox Studio para a versão mais recente (não precisa baixar
+   nada além disso — o servidor já vem embutido).
+2. No Studio, ative o MCP Server: **File → Studio Settings → Beta Features
+   → "MCP Server"** (ou, no painel do Assistant, no menu de três pontos →
+   **"Manage MCP Servers"** → ative **"Enable Studio as MCP server"**). Por
+   padrão ele escuta em `localhost:3004`.
+3. Abra o place em que você quer trabalhar e deixe o Studio aberto.
+4. No Claude (Desktop ou Code), rodando na mesma máquina, a configuração em
+   `.mcp.json` já aponta para `http://localhost:3004/mcp` — no Claude Code
+   isso é reconhecido automaticamente ao abrir este repositório; no Claude
+   Desktop, adicione o mesmo servidor em **Configurações → Developer →
+   Local MCP servers → Edit Config**, ou via terminal:
+   ```
+   claude mcp add roblox-studio --transport http http://localhost:3004/mcp
+   ```
+5. Teste pedindo algo simples, tipo "insira uma Part na cena" — se o Studio
+   estiver com o MCP Server ativo, o Claude deve conseguir executar direto
+   no lugar aberto.
 
 ## Estrutura
 
