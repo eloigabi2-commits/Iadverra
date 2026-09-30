@@ -512,3 +512,15 @@ strong { color: #fff; font-weight: 700; }
       #000;
   }
 }
+
+/* cadeia Atrair → Converter → ... */
+.chain { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted-2); }
+.chain span {
+  padding: 3px 9px;
+  border: 1px solid rgba(78, 131, 255, 0.6);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue-light);
+}
+.lead p + p { margin-top: 8px; }
