@@ -1,0 +1,5 @@
+Coloque aqui as imagens do site (mesmos nomes):
+  hero.jpg      -> foto do topo (Lucas à direita, fundo escritório)
+  sobre.jpg     -> foto da seção "Sobre" (opcional)
+  lucas-01.jpg ... lucas-08.jpg -> fotos dos cards de "O que entrego" (800x551)
+Sem as imagens o site continua funcionando, com fundos em gradiente azul.
