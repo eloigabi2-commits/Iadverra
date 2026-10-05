@@ -14,3 +14,5 @@ Não existe conector do Google Ads nesta sessão: o acesso é feito pela API RES
 - `node scripts/google-ads.mjs query "SELECT ..."` — qualquer consulta GAQL (`--customer <id>` troca a conta)
 
 Conta padrão: 2955725842 (Dra Jessica). MCC: 3069154123. Nunca imprima os valores das credenciais.
+
+As skills em `.claude/skills/google-ads-*` (de itallstartedwithaidea/google-ads-skills, Apache 2.0) trazem os roteiros de análise, auditoria, matemática de PPC e o protocolo de alterações. Rode as consultas GAQL delas com `scripts/google-ads.mjs query`. A conta é em reais (BRL), não em dólares. O script só faz leitura: alterações na conta ainda não estão implementadas.
