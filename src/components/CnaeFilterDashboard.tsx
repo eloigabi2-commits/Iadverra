@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { trackExportConversion } from "@/lib/google-ads";
 
 interface Cnae {
   codigo: string;
@@ -233,6 +234,7 @@ export default function CnaeFilterDashboard() {
               </h2>
               <a
                 href={exportUrl}
+                onClick={trackExportConversion}
                 className="rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
               >
                 Exportar CSV

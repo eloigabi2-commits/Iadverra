@@ -105,6 +105,24 @@ O script (`scripts/import-rfb.ts`):
   do Postgres); busque sem preocupação de maiúsculas, mas com acentos
   corretos (ex: "Comércio", não "Comercio").
 
+## Google Ads
+
+A tag global do Google Ads (gtag.js) é carregada em todas as páginas quando
+`NEXT_PUBLIC_GOOGLE_ADS_ID` está definido (ex: `AW-123456789`). Sem essa
+variável (ou com um valor fora do formato `AW-<números>`), nada é carregado.
+
+Para medir conversões, crie uma ação de conversão no Google Ads (Metas →
+Conversões → Nova ação → Site → configuração manual), copie o **rótulo de
+conversão** e defina `NEXT_PUBLIC_GOOGLE_ADS_EXPORT_CONVERSION_LABEL`. A
+conversão é disparada quando o usuário clica em **Exportar CSV**.
+
+Na Vercel, adicione as duas variáveis em **Environment Variables** e faça um
+novo deploy (variáveis `NEXT_PUBLIC_*` são embutidas no build). Para conferir
+em produção, use o [Google Tag Assistant](https://tagassistant.google.com).
+
+- `src/lib/google-ads.ts` — leitura da configuração e disparo da conversão.
+- `src/components/GoogleAds.tsx` — carrega o gtag.js no layout raiz.
+
 ## Uso responsável / LGPD
 
 Os Dados Abertos do CNPJ são públicos e sua publicação é amparada por lei.
