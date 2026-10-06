@@ -1,0 +1,281 @@
+{
+  "name": "Planilha de leads → WhatsApp com IA (sem app da Meta)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1rJJgT0qyK4xZRmz9xLSnxSKEzLQUXHHBsLsvWNVNwHc/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "b1",
+      "name": "Nova linha na planilha",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets Trigger"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.telefone }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2",
+      "name": "Só linhas novas com telefone",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Completa os dados de cada linha nova da planilha (vinda do Make ou colada à mão)\nconst r = $json;\nconst nome = String(r.nome || '').trim();\nlet telefone = String(r.telefone || '').replace(/\\D/g, '');\nif (telefone && !telefone.startsWith('55')) telefone = '55' + telefone;\nconst t = s => String(s || '').toLowerCase();\nlet prioridade = 'MORNO';\nif (t(r.avaliacao_200).includes('não no momento') || t(r.quando).includes('pesquisando') || t(r.regiao).includes('fora')) prioridade = 'FRIO';\nelse if (t(r.avaliacao_200).includes('quero agendar') && t(r.quando).includes('30 dias')) prioridade = 'QUENTE';\nreturn { ...r, primeiro_nome: nome.split(' ')[0] || '', telefone, prioridade };"
+      },
+      "id": "b3",
+      "name": "Completar dados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é a assistente da equipe da Dra. Jessica Cavalcante (Allure Clinic, Moema – Zona Sul de SP), especialista em Full Face e rejuvenescimento facial natural.\n\nUma paciente acabou de preencher nosso formulário no Instagram/Facebook. Escreva a PRIMEIRA mensagem de WhatsApp para ela.\n\nDados do formulário:\n- Nome: {{ $json.primeiro_nome }}\n- O que gostaria de melhorar: {{ $json.melhorar }}\n- O que mais incomoda (palavras dela): {{ $json.o_que_incomoda }}\n- Quando quer começar: {{ $json.quando }}\n- Sobre a avaliação de R$ 200: {{ $json.avaliacao_200 }}\n- Prioridade: {{ $json.prioridade }}\n\nRegras:\n- Português do Brasil, tom acolhedor, elegante e humano. Nada de parecer robô ou vendedor insistente.\n- No máximo 4 frases curtas e no máximo 1 emoji (🤍 ou ✨).\n- Cumprimente pelo primeiro nome e mencione de forma natural o que ela quer melhorar.\n- Objetivo: agendar a avaliação presencial (R$ 200, com plano personalizado). Termine com UMA pergunta simples que convide a responder, por exemplo oferecendo período da manhã ou da tarde nesta semana.\n- Se a prioridade for FRIO, não pressione: ofereça tirar dúvidas e diga que fica à disposição.\n- Se ela marcou \"tenho dúvidas antes\", convide-a a mandar as dúvidas.\n- Não prometa resultados, não fale de preço de procedimento, não invente horários específicos.\n- Responda SOMENTE com o texto da mensagem, sem aspas e sem explicações."
+      },
+      "id": "b4",
+      "name": "IA escreve a mensagem",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        660,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-opus-5-5",
+          "cachedResultName": "Claude Opus 5.5"
+        },
+        "options": {
+          "maxTokensToSample": 600
+        }
+      },
+      "id": "b5",
+      "name": "Claude",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        660,
+        500
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=COLE_AQUI_A_URL_DA_EVOLUTION/message/sendText/COLE_AQUI_O_NOME_DA_INSTANCIA",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "COLE_AQUI_A_APIKEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Completar dados').item.json.telefone, text: $json.text }) }}",
+        "options": {}
+      },
+      "id": "b6",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1rJJgT0qyK4xZRmz9xLSnxSKEzLQUXHHBsLsvWNVNwHc/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Completar dados').item.json.row_number }}",
+            "primeiro_nome": "={{ $('Completar dados').item.json.primeiro_nome }}",
+            "telefone": "={{ $('Completar dados').item.json.telefone }}",
+            "prioridade": "={{ $('Completar dados').item.json.prioridade }}",
+            "status": "MENSAGEM ENVIADA",
+            "mensagem_enviada": "={{ $('IA escreve a mensagem').item.json.text }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "b7",
+      "name": "Marcar como contatado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1100,
+        280
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Nova linha na planilha": {
+      "main": [
+        [
+          {
+            "node": "Só linhas novas com telefone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Só linhas novas com telefone": {
+      "main": [
+        [
+          {
+            "node": "Completar dados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Completar dados": {
+      "main": [
+        [
+          {
+            "node": "IA escreve a mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA escreve a mensagem": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA escreve a mensagem",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Marcar como contatado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo"
+  }
+}
