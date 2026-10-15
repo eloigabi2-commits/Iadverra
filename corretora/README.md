@@ -15,7 +15,7 @@ hospedagem estática.
 | `config/assets` (156 ativos, payout, expirações, horários) | `data.js` com os 78 ativos ativos, payout, expirações, valores mín./máx. e horários por dia (UTC) |
 | Pusher `AAPL-OTC` (tick a cada 500 ms) + `market-historic-api` | Cotações sintéticas com tick de 500 ms e 3 h de histórico por ativo |
 | Gráfico | Candles, área e barras; 5s a 15m; zoom, arrastar, mira com OHLC, linha de expiração, marcadores das operações |
-| `trade-api/op` | Acima/Abaixo, expirações 3s a 1h, retorno por ativo, resultado com som e popup |
+| `trade-api/op` | Acima/Abaixo, expirações de 30s (mínimo) a 1h, retorno por ativo, resultado com som e popup |
 | `allow_sheduled_trade`, `allow_op_auto_trade` | Operações agendadas e auto-trade com stop de ganho/perda |
 | `allow_op_norisk`, `roulettes` | Roleta Standard, Raspadinha secreta, operação sem risco, boost OTC, cupons |
 | `wallet-api/balance` | Conta real e demo (R$ 50.000), troca de conta e recarga da demo |

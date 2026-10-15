@@ -80,8 +80,9 @@ function saveNow() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch
 addEventListener('beforeunload', saveNow);
 
 /* ---------- ativos ---------- */
+const MIN_EXP = 30; // expiração mínima em segundos
 const ASSETS = (window.ASSETS || []).map(r => ({
-  sym: r[0], name: r[1], market: r[2], payout: r[3], opts: r[5], min: r[6], max: r[7],
+  sym: r[0], name: r[1], market: r[2], payout: r[3], opts: r[5].filter(o => o >= MIN_EXP), min: r[6], max: r[7],
   sched: r[8].map(d => d ? d.split(',').map(x => x.split('-').map(t => { const [h, m] = t.split(':'); return +h * 60 + +m; })) : []),
   base: r[9], dec: r[10], pop: r[11], vol: r[12], otc: /-OTC$/.test(r[0])
 }));
@@ -343,7 +344,7 @@ function openPicker() {
 }
 
 /* ---------- gráfico ---------- */
-const CH = { cv: null, ctx: null, w: 0, h: 0, dpr: 1, n: 64, offset: 0, yMin: null, yMax: null, hover: null, preview: null, drag: null, bg: null, col: {} };
+const CH = { cv: null, ctx: null, w: 0, h: 0, dpr: 1, n: 110, offset: 0, yMin: null, yMax: null, hover: null, preview: null, drag: null, bg: null, col: {} };
 const TFS = [[5, '5s'], [15, '15s'], [30, '30s'], [60, '1m'], [300, '5m'], [900, '15m']];
 function readColors() {
   const cs = getComputedStyle(document.documentElement);
@@ -482,7 +483,7 @@ function drawChart() {
   }
 
   // série
-  const type = S.chart.type, bw = Math.max(1, Math.min(18, slot * 0.68));
+  const type = S.chart.type, bw = Math.max(1, slot - clamp(slot * 0.12, 1, 3)); // candles colados: só 1–3 px de respiro
   if (type === 'area') {
     ctx.beginPath(); let first = true, fx = 0;
     for (const c of cs) { const x = xT(c.t) + slot / 2; if (x < -slot) continue; if (first) { ctx.moveTo(x, Y(c.c)); fx = x; first = false; } else ctx.lineTo(x, Y(c.c)); }
@@ -1398,6 +1399,7 @@ function welcome() {
 /* ---------- inicialização ---------- */
 function init() {
   if (!BY[S.active]) S.active = ASSETS[0].sym;
+  if (!BY[S.active].opts.includes(S.expiry)) S.expiry = BY[S.active].opts.includes(60) ? 60 : BY[S.active].opts[0];
   S.tabs = S.tabs.filter(x => BY[x]); if (!S.tabs.length) S.tabs = [S.active];
   applySkin(S.skin);
   initChart();
