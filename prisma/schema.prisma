@@ -103,3 +103,75 @@ model Socio {
   @@index([cnpjBasico])
   @@index([nomeSocio])
 }
+
+// ---------------------------------------------------------------------------
+// Fluxo de Caixa: versão em app da planilha "Painel Financeiro - Contabilidade
+// Conforme" (@rodrigomedeirosr) — lançamentos de receita/despesa por
+// categoria, com saldo e resumo calculados automaticamente em vez de fórmulas.
+// ---------------------------------------------------------------------------
+
+enum CategoriaTipo {
+  RECEITA
+  DESPESA
+}
+
+enum LancamentoStatus {
+  CONFIRMADO
+  PENDENTE
+}
+
+enum AjusteTipo {
+  RETIRADA
+  DISTRIBUICAO
+}
+
+// Configuração única do painel (nome da empresa, ano corrente, saldo inicial).
+model Configuracao {
+  id            Int     @id @default(1)
+  nomeEmpresa   String  @default("")
+  anoReferencia Int     @default(2026)
+  saldoInicial  Decimal @default(0) @db.Decimal(14, 2)
+}
+
+// Plano de contas: categorias de receita/despesa, editável pelo usuário
+// (substitui as 15/20 linhas fixas "Receita 5", "Despesa 7" etc. da planilha).
+model Categoria {
+  id     Int           @id @default(autoincrement())
+  tipo   CategoriaTipo
+  nome   String
+  ordem  Int           @default(0)
+  ativa  Boolean       @default(true)
+
+  lancamentos Lancamento[]
+
+  @@index([tipo, ordem])
+}
+
+// Um lançamento de receita ou despesa em um dia específico.
+model Lancamento {
+  id          Int              @id @default(autoincrement())
+  categoriaId Int
+  data        DateTime         @db.Date
+  descricao   String           @default("")
+  valor       Decimal          @db.Decimal(14, 2)
+  status      LancamentoStatus @default(CONFIRMADO)
+  createdAt   DateTime         @default(now())
+
+  categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+
+  @@index([data])
+  @@index([categoriaId])
+}
+
+// Retiradas para aplicações / distribuições de lucros: saem do caixa mas não
+// entram no cálculo do lucro líquido (mesma lógica das linhas correspondentes
+// no "FC Anual" da planilha).
+model Ajuste {
+  id        Int        @id @default(autoincrement())
+  tipo      AjusteTipo
+  data      DateTime   @db.Date
+  descricao String     @default("")
+  valor     Decimal    @db.Decimal(14, 2)
+
+  @@index([data])
+}

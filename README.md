@@ -1,12 +1,60 @@
 # Iadverra
 
 Plataforma para filtrar donos (sócios) de empresas brasileiras por CNAE,
-usando os Dados Abertos do CNPJ da Receita Federal como fonte.
+usando os Dados Abertos do CNPJ da Receita Federal como fonte — e um painel
+de Fluxo de Caixa para controle financeiro mensal/anual.
+
+## Filtro de sócios por CNAE
 
 Você pesquisa um ou mais CNAEs, opcionalmente filtra por UF, e a plataforma
 mostra quantos sócios existem nas empresas correspondentes, com nome,
 empresa, CNPJ, CNAE, localização e contato disponível — com opção de
 exportar para CSV.
+
+## Contabilidade Conforme — Fluxo de Caixa (`/financas`)
+
+Versão em app da planilha "Painel Financeiro | Contabilidade Conforme"
+(@rodrigomedeirosr): em vez de preencher abas mensais e manter fórmulas de
+saldo/margem, você só lança receitas e despesas do dia a dia e o app calcula
+tudo automaticamente.
+
+- **Lançamentos**: cada receita/despesa tem categoria, data (com calendário,
+  já vem preenchida com hoje), descrição, valor e um checkbox simples pra
+  marcar quando ainda não recebeu/pagou — sem esses casos entrando no saldo
+  até serem confirmados.
+- **Plano de contas editável**: adicione, renomeie ou oculte categorias de
+  receita/despesa a qualquer momento (sem as linhas fixas "Receita 5",
+  "Despesa 7" da planilha original).
+- **Retiradas/distribuições**: numa seção separada e recolhida por padrão
+  (opcional) — saem do caixa mas não entram no cálculo do lucro líquido,
+  mesma lógica da planilha.
+- **Resumo mensal**: saldo inicial (herdado automaticamente do saldo final
+  do mês anterior), receitas e despesas por categoria, lucro líquido,
+  margem %, saldo final, fluxo de caixa diário e gráficos.
+- **Visão anual**: réplica do "FC Anual" da planilha — todas as categorias
+  por mês, totais e saldo acumulado — mas gerada automaticamente, sem copiar
+  fórmulas.
+- **Gastos por quinzena**: gráfico comparando quanto foi gasto na 1ª (dias
+  1-15) e na 2ª quinzena (dias 16+) de cada mês do ano, além do gráfico
+  mensal de receitas x despesas já existente.
+- **Assistente de IA**: botão flutuante que abre um chat (Claude, via
+  `@anthropic-ai/sdk`) capaz de responder tanto perguntas sobre os números
+  reais da empresa ("quanto lucrei este mês?", consultando o banco através
+  de ferramentas) quanto dúvidas gerais de contabilidade ("o que é DAS do
+  Simples Nacional?"). Requer a variável `ANTHROPIC_API_KEY` (veja
+  `.env.example`) — sem ela, a UI mostra um erro claro em vez de travar.
+- **Exportar CSV** dos lançamentos de um mês ou do ano inteiro, ou **baixar
+  uma fatura em PDF** (`@react-pdf/renderer`) — um documento simples, com
+  logo, resumo do período e os lançamentos (ou o mês a mês, na versão
+  anual), pra guardar ou compartilhar sem precisar abrir planilha nenhuma.
+- **Identidade visual própria**: logo e verde de marca (`#1B4D2E`) só nessa
+  seção — o Filtro de CNAE mantém a identidade neutra do Iadverra.
+
+Os modelos ficam em `prisma/schema.prisma` (`Configuracao`, `Categoria`,
+`Lancamento`, `Ajuste`), a lógica de cálculo em `src/lib/finance.ts`, o
+assistente em `src/lib/assistant.ts`, a fatura em PDF em
+`src/lib/invoice-pdf.tsx`, as rotas em `src/app/api/finance/*` e a UI em
+`src/components/finance/`.
 
 ## Stack
 
@@ -15,8 +63,11 @@ exportar para CSV.
 
 ## Setup local
 
-1. Suba um Postgres (local ou Docker), copie `.env.example` para `.env` e
-   ajuste `DATABASE_URL` se necessário.
+1. Suba um Postgres (local, Docker, [Supabase](https://supabase.com) ou
+   [Neon](https://neon.tech) — o Prisma só precisa de uma connection string
+   Postgres padrão), copie `.env.example` para `.env` e ajuste
+   `DATABASE_URL`. No Supabase, use a connection string em
+   Project Settings → Database → Connection string → **URI**.
 2. Instale as dependências e aplique as migrations:
 
    ```bash
@@ -125,3 +176,10 @@ processo à LGPD antes de operar em escala.
 - `src/app/api/*` — endpoints REST (`/api/cnaes`, `/api/owners`,
   `/api/owners/summary`, `/api/owners/export`).
 - `src/components/CnaeFilterDashboard.tsx` — UI de filtro.
+- `src/lib/finance.ts` — CRUD e cálculo de resumos (mensal/anual) do fluxo
+  de caixa.
+- `src/app/api/finance/*` — endpoints REST do fluxo de caixa (`config`,
+  `categorias`, `lancamentos`, `ajustes`, `resumo-mensal`, `resumo-anual`,
+  `export`).
+- `src/app/financas/page.tsx` + `src/components/finance/` — UI do fluxo de
+  caixa.
