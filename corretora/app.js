@@ -939,6 +939,7 @@ function pageDeposit() {
             <div class="total"><span>Total na conta</span><span class="mono">${brl(st.amt + bonus)}</span></div>
           </div>
           <p class="hint">O bônus pode ser usado para operar, mas não pode ser sacado.</p>
+          ${(window.PREGAO_CONFIG || {}).n8nWebhookUrl ? (S.user?.email ? `<p class="hint">Você recebe um aviso em ${esc(S.user.email)} quando o saldo cair.</p>` : '<p class="hint">Cadastre seu e-mail em <a href="#account">Conta</a> para receber o aviso do depósito.</p>') : ''}
           <button class="btn btn-primary" type="button" id="dep-go" ${st.amt < MIN || st.amt > MAX ? 'disabled' : ''}>Depositar ${brl(st.amt)}</button>
           <p class="hint">Nível ${tier.name}${next ? ` · faltam ${brl(next.min - total)} em depósitos nos últimos 30 dias para o nível ${next.name}` : ''}. <a href="#account/vip">Programa VIP</a></p>
         </div>
@@ -952,6 +953,30 @@ function pageDeposit() {
     $('#dep-go').onclick = () => confirmDeposit(st.amt, c && !c.error ? c : null, bonus);
   };
   draw();
+}
+/* aviso de depósito simulado por e-mail via webhook do n8n */
+async function sendDepositWebhook(amt, bonus) {
+  const url = (window.PREGAO_CONFIG || {}).n8nWebhookUrl;
+  const email = S.user?.email;
+  if (!url || !email) return false;
+  const payload = {
+    evento: 'deposito_simulado',
+    simulacao: true,
+    usuario: { id: S.user.id, nome: [S.user.first, S.user.last].filter(Boolean).join(' '), email },
+    valor: amt / 100,
+    valor_formatado: brl(amt),
+    bonus: bonus / 100,
+    bonus_formatado: brl(bonus),
+    saldo: acctBalance('real') / 100,
+    saldo_formatado: brl(acctBalance('real')),
+    data: new Date().toISOString()
+  };
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    return r.ok;
+  } catch {
+    return false;
+  }
 }
 function confirmDeposit(amt, coupon, bonus) {
   const m = openModal(`<div class="modal-head"><h2>Processando PIX</h2></div>
@@ -971,6 +996,10 @@ function confirmDeposit(amt, coupon, bonus) {
       <div class="filters" style="justify-content:center"><a class="btn btn-primary" href="#trade" data-close>Negociar agora</a><button class="btn" type="button" data-close>Fechar</button></div>`;
     $$('[data-close]', m.el).forEach(b => b.addEventListener('click', m.close));
     if (location.hash === '#deposit') pageDeposit();
+    sendDepositWebhook(amt, bonus).then(ok => {
+      if (ok) toast(`Aviso do depósito enviado para ${esc(S.user.email)}.`, 'ok');
+      else if ((window.PREGAO_CONFIG || {}).n8nWebhookUrl && S.user?.email) toast('Não foi possível enviar o aviso por e-mail. Confira a URL do webhook do n8n.', 'bad');
+    });
   }, 1800);
 }
 

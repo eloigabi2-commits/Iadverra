@@ -29,6 +29,23 @@ hospedagem estática.
 | `history` | Histórico de operações e transações com filtros |
 | Sons `trade-*`, `deposit-*`, `welcome` | Sons sintetizados com Web Audio |
 
+## Aviso de depósito por e-mail (n8n)
+
+Quando um depósito simulado é confirmado, o site envia um POST para a URL em
+`config.js` (`n8nWebhookUrl`) com este JSON:
+
+```json
+{"evento":"deposito_simulado","simulacao":true,
+ "usuario":{"id":"…","nome":"Gabriel Eloi","email":"…"},
+ "valor":100,"valor_formatado":"R$ 100,00","bonus":100,"bonus_formatado":"R$ 100,00",
+ "saldo":200,"saldo_formatado":"R$ 200,00","data":"2026-10-15T02:34:11.295Z"}
+```
+
+O aviso só sai se o usuário tiver e-mail cadastrado. `n8n/aviso-deposito.json` é um
+workflow pronto para importar (Webhook → filtro `deposito_simulado` → e-mail); troque o
+remetente e escolha a credencial SMTP no nó "Enviar e-mail". Como o envio sai do
+navegador, o nó Webhook precisa aceitar CORS (opção *Allowed Origins* = `*`).
+
 Atalhos: Shift + ↑ abre Acima, Shift + ↓ abre Abaixo.
 
 Os dados (conta, saldos, histórico, prêmios) ficam no `localStorage` do navegador.
