@@ -16,3 +16,7 @@ Não existe conector do Google Ads nesta sessão: o acesso é feito pela API RES
 Conta padrão: 2955725842 (Dra Jessica). MCC: 3069154123. Nunca imprima os valores das credenciais.
 
 A skill `.claude/skills/google-ads-manager` (de thalesholleben/skill-google-ads, licença MIT) traz os roteiros de diagnóstico, criação de campanhas, lances, palavras-chave e relatórios. Rode as consultas GAQL dela com `scripts/google-ads.mjs query`. A conta é em reais (BRL). O script só faz leitura: alterações na conta ainda não estão implementadas.
+
+# Copywriting
+
+A skill `.claude/skills/copywriting` (de coreyhaines31/marketingskills, licença MIT) orienta a escrita e revisão de textos de marketing: landing pages, headlines, CTAs, propostas de valor, e evita marcas de texto gerado por IA.
