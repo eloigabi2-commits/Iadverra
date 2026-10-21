@@ -700,15 +700,16 @@ const Cta: React.FC = () => {
 
 const sound = (f: string) => staticFile(`nfc-audio/${f}`);
 
-// Narração (Kokoro, voz pf_dora), trilha e efeitos gerados localmente
-const Soundtrack: React.FC = () => {
+// Narração (Kokoro), trilha e efeitos gerados localmente.
+// `voz` é a subpasta da narração em nfc-audio/ ("" = pf_dora, "pm_alex/", "pm_santa/").
+const Soundtrack: React.FC<{ voz: string }> = ({ voz }) => {
   const tap = S2[0] + 50;
   return (
     <>
       <Audio src={sound("musica.wav")} volume={0.22} />
       {[S1, S2, S3, S4, S5].map((sc, i) => (
         <Sequence key={i} from={sc[0] + VOICE_DELAY}>
-          <Audio src={sound(`voz${i + 1}.wav`)} />
+          <Audio src={sound(`${voz}voz${i + 1}.wav`)} />
         </Sequence>
       ))}
       {[S2, S3, S4, S5].map((sc, i) => (
@@ -728,7 +729,9 @@ const Soundtrack: React.FC = () => {
   );
 };
 
-export const NfcAd: React.FC = () => {
+export type NfcAdProps = { voz: string };
+
+export const NfcAd: React.FC<NfcAdProps> = ({ voz }) => {
   return (
     <AbsoluteFill style={{ background: C.bg }}>
       <Scene at={S1}>
@@ -746,7 +749,7 @@ export const NfcAd: React.FC = () => {
       <Scene at={S5}>
         <Cta />
       </Scene>
-      <Soundtrack />
+      <Soundtrack voz={voz} />
     </AbsoluteFill>
   );
 };

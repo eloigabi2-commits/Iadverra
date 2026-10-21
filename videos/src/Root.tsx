@@ -8,6 +8,7 @@ export const RemotionRoot: React.FC = () => {
     <Composition
       id="NfcAd"
       component={NfcAd}
+      defaultProps={{ voz: "" }}
       durationInFrames={NFC_DURATION}
       fps={30}
       width={1080}
