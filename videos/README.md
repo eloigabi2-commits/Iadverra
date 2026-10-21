@@ -64,3 +64,17 @@ done
 ```bash
 .tts/venv/bin/python -I scripts/musica.py public/nfc-audio <duracao_s> <inicio_bateria_s>
 ```
+
+### Narração com OmniVoice (motor do VoiceStudio) — só para teste
+
+Voz mais natural que a do Kokoro, mas os pesos do modelo são **CC-BY-NC (não
+comercial)**: não use em anúncio pago. Precisa liberar `huggingface.co` e
+`us.aws.cdn.hf.co` na rede do ambiente. Sem GPU, leva ~45 s por fala.
+
+```bash
+git clone --depth 1 https://github.com/debpalash/VoiceStudio.git .tts/VoiceStudio
+python3 -m venv .tts/omni && .tts/omni/bin/pip install torch==2.8.0 torchaudio==2.8.0 transformers huggingface_hub pydub audioop-lts soundfile
+HF_HUB_DISABLE_XET=1 .tts/omni/bin/python -c "from huggingface_hub import snapshot_download; snapshot_download('k2-fsa/OmniVoice', local_dir='.tts/omnivoice-model')"
+.tts/omni/bin/python scripts/omnivoice.py .tts/VoiceStudio .tts/omnivoice-model narracao/placa-nfc.txt public/nfc-audio/omnivoice "female, young adult, moderate pitch"
+npm run render -- NfcAd out/placa-nfc.mp4 --props='{"voz":"omnivoice/"}'
+```
