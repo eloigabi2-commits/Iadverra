@@ -104,13 +104,18 @@ globalThis.IU_API = globalThis.IU_API || (() => {
   async function userCounts(userId) {
     try {
       const body = await getJson(`${BASE}/api/v1/users/${userId}/info/`);
+      const user = body.user || {};
       return {
-        followers: body.user?.follower_count ?? null,
-        following: body.user?.following_count ?? null,
-        username: body.user?.username ?? null,
+        followers: user.follower_count ?? null,
+        following: user.following_count ?? null,
+        posts: user.media_count ?? null,
+        username: user.username ?? null,
+        full_name: user.full_name ?? null,
+        profile_pic_url: user.profile_pic_url_hd || user.profile_pic_url || null,
+        is_verified: Boolean(user.is_verified),
       };
     } catch {
-      return { followers: null, following: null, username: null };
+      return { followers: null, following: null, posts: null, username: null, full_name: null, profile_pic_url: null, is_verified: false };
     }
   }
 

@@ -2,7 +2,9 @@
 
 Extensão que mostra quem você segue e não te segue de volta no Instagram e deixa de seguir as contas que você escolher, com whitelist, limite por rodada e pausas de segurança.
 
-Tudo roda no seu navegador, com a sessão do Instagram que já está logada. A extensão não tem servidor: as únicas requisições vão para `www.instagram.com`.
+Tem visual escuro no estilo "PRO" (cabeçalho de perfil com avatar e contadores, grade de cards). Tudo roda no seu navegador, com a sessão do Instagram que já está logada: **nenhuma senha é pedida** e a extensão não tem servidor — as únicas requisições vão para `www.instagram.com`.
+
+> As telas de "visitantes do perfil" e "admiradores secretos" de alguns apps não foram incluídas de propósito: o Instagram não fornece esses dados, então qualquer número ali seria inventado.
 
 > **Atenção:** automatizar unfollows vai contra os termos de uso do Instagram. Exagerar pode gerar bloqueio temporário de ações ("feedback_required") ou pedido de verificação da conta. Mantenha as pausas padrão e não passe de ~100 unfollows por dia.
 

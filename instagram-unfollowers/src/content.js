@@ -26,6 +26,7 @@
     showSettings: false,
     uid: null,
     username: null,
+    profile: null, // { username, full_name, avatar, followers, following, posts, verified }
     settings: { ...Store.DEFAULT_SETTINGS },
     whitelist: new Map(),
     cached: null,
@@ -557,7 +558,7 @@
       h(
         'div',
         { class: 'brand' },
-        h('strong', {}, 'Unfollowers'),
+        h('div', { class: 'brand-title' }, h('strong', {}, 'Unfollowers'), h('span', { class: 'pro-badge sm' }, 'PRO')),
         h('span', {}, state.username ? `@${state.username}` : 'para Instagram'),
       ),
       h(
@@ -617,39 +618,106 @@
     );
   }
 
+  function profileHero() {
+    const p = state.profile;
+    const avatar = p && p.avatar
+      ? h('img', { class: 'hero-avatar', src: p.avatar, alt: '', referrerpolicy: 'no-referrer' })
+      : h('div', { class: 'hero-avatar empty' }, (state.username || '?').slice(0, 1).toUpperCase());
+    const metric = (value, label) =>
+      h('div', { class: 'hero-metric' }, h('strong', {}, value === null || value === undefined ? '—' : number(value)), h('span', {}, label));
+    return h(
+      'div',
+      { class: 'hero' },
+      h(
+        'div',
+        { class: 'hero-top' },
+        h(
+          'div',
+          { class: 'hero-id' },
+          avatar,
+          h(
+            'div',
+            {},
+            h('strong', { class: 'hero-name' }, state.username ? `@${state.username}` : 'Conectado'),
+            p && p.full_name && h('span', { class: 'hero-full' }, p.full_name),
+          ),
+        ),
+        h('span', { class: 'pro-badge' }, 'PRO'),
+      ),
+      h(
+        'div',
+        { class: 'hero-metrics' },
+        metric(p && p.followers, 'Seguidores'),
+        metric(p && p.following, 'Seguindo'),
+        metric(p && p.posts, 'Publicações'),
+      ),
+    );
+  }
+
+  function dashboardCard({ icon, title, subtitle, disabled, onClick, tone }) {
+    return h(
+      'button',
+      { class: `dash-card${tone ? ` ${tone}` : ''}`, type: 'button', disabled, onClick },
+      h('span', { class: 'dash-icon' }, icon),
+      h('strong', {}, title),
+      h('span', { class: 'dash-sub' }, subtitle),
+    );
+  }
+
   function renderIdle() {
     const cached = state.cached;
+    const nonFollowers = cached && cached.results ? cached.results.length : null;
+    const cards = [
+      dashboardCard({
+        icon: '👋',
+        title: 'Não te seguem de volta',
+        subtitle: nonFollowers !== null ? `${number(nonFollowers)} no último scan` : 'Toque para escanear',
+        tone: 'accent',
+        onClick: startScan,
+      }),
+      cached && cached.results &&
+        dashboardCard({
+          icon: '🕑',
+          title: 'Último scan',
+          subtitle: formatDate(cached.timestamp),
+          onClick: () => {
+            state.scan = cached;
+            state.view = 'results';
+            state.selected.clear();
+            render();
+            setStatus(`Scan de ${formatDate(cached.timestamp)} carregado.${cached.complete ? '' : ' Esse scan ficou incompleto.'}`);
+          },
+        }),
+      dashboardCard({
+        icon: '★',
+        title: 'Whitelist',
+        subtitle: `${number(state.whitelist.size)} protegida(s)`,
+        onClick: () => {
+          state.showSettings = true;
+          render();
+        },
+      }),
+      dashboardCard({
+        icon: '⚙',
+        title: 'Configurações',
+        subtitle: 'Pausas e segurança',
+        onClick: () => {
+          state.showSettings = true;
+          render();
+        },
+      }),
+    ].filter(Boolean);
+
     return h(
       'section',
-      { class: 'body intro' },
-      h('h2', {}, 'Quem não te segue de volta'),
-      h(
-        'p',
-        {},
-        'O scan lê suas listas de seguidores e de seguindo direto do Instagram, com pausas entre as páginas. Tudo roda neste navegador: nenhum dado sai do instagram.com.',
-      ),
-      h('button', { class: 'primary', type: 'button', onClick: startScan }, 'Escanear agora'),
-      cached &&
-        cached.results &&
-        h(
-          'button',
-          {
-            class: 'secondary wide',
-            type: 'button',
-            onClick: () => {
-              state.scan = cached;
-              state.view = 'results';
-              state.selected.clear();
-              render();
-              setStatus(`Scan de ${formatDate(cached.timestamp)} carregado.${cached.complete ? '' : ' Esse scan ficou incompleto.'}`);
-            },
-          },
-          `Abrir último scan (${number(cached.results.length)} contas · ${formatDate(cached.timestamp)})`,
-        ),
+      { class: 'body dashboard' },
+      profileHero(),
+      h('button', { class: 'primary scan-cta', type: 'button', onClick: startScan }, 'Escanear agora'),
+      h('div', { class: 'dash-grid' }, ...cards),
       h(
         'p',
         { class: 'note warn' },
-        'Deixar de seguir em massa vai contra os termos do Instagram e pode gerar bloqueio temporário de ações. Mantenha as pausas padrão e não passe de ~100 por dia.',
+        'Tudo roda neste navegador, com a sua sessão já logada: nenhuma senha é pedida e nenhum dado sai do instagram.com. Deixar de seguir em massa vai contra os termos do Instagram e pode gerar bloqueio temporário — não passe de ~100 por dia.',
       ),
     );
   }
@@ -1010,6 +1078,7 @@
     state.view = 'idle';
     state.whitelist = new Map();
     state.cached = null;
+    state.profile = null;
     if (!uid) {
       setStatus('Faça login no Instagram para usar o Unfollowers.', 'error');
       return;
@@ -1021,12 +1090,32 @@
     setStatus('');
   }
 
+  // Busca perfil (avatar, nome, contadores) para o cabeçalho; atualiza a tela se ainda estiver na home.
+  async function loadProfile(uid) {
+    if (!uid || (state.profile && state.profile.uid === uid)) return;
+    const info = await API.userCounts(uid);
+    if (state.uid !== uid) return;
+    state.profile = {
+      uid,
+      username: info.username,
+      full_name: info.full_name,
+      avatar: info.profile_pic_url,
+      followers: info.followers,
+      following: info.following,
+      posts: info.posts,
+      verified: info.is_verified,
+    };
+    if (info.username) state.username = info.username;
+    if (state.open && !state.showSettings && state.view === 'idle') render();
+  }
+
   async function toggle() {
     if (!host) await mount();
     state.open = !state.open;
     if (state.open) {
       await loadAccount();
       render();
+      loadProfile(state.uid);
     }
     host.hidden = !state.open;
   }
