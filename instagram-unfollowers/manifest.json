@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Unfollowers para Instagram",
+  "version": "1.0.0",
+  "description": "Mostra quem você segue e não te segue de volta no Instagram e deixa de seguir em lote, com whitelist e pausas de segurança.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Abrir Unfollowers",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": ["storage", "scripting"],
+  "host_permissions": ["https://www.instagram.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://www.instagram.com/*"],
+      "js": ["src/storage.js", "src/api.js", "src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/panel.css"],
+      "matches": ["https://www.instagram.com/*"]
+    }
+  ]
+}
