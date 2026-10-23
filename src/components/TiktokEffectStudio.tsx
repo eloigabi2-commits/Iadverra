@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FaceLandmarker } from "@mediapipe/tasks-vision";
 import {
@@ -233,6 +234,12 @@ export default function TiktokEffectStudio() {
           Monte um filtro de câmera (cor + adesivos no rosto), teste na webcam e baixe o pacote
           para publicar pelo Effect House, o programa oficial de efeitos do TikTok.
         </p>
+        <Link
+          href="/efeitos/sorteios"
+          className="mt-2 inline-block text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+        >
+          Sorteios prontos (os que mais rendem no programa de recompensas) →
+        </Link>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">

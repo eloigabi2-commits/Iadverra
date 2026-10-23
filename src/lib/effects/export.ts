@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { type ColorParams, renderLut } from "./color";
 import { type Sticker, renderSticker } from "./stickers";
 
-function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+export function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Falha ao gerar PNG"))), "image/png"),
   );
