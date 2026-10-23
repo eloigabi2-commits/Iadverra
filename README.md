@@ -125,3 +125,24 @@ processo à LGPD antes de operar em escala.
 - `src/app/api/*` — endpoints REST (`/api/cnaes`, `/api/owners`,
   `/api/owners/summary`, `/api/owners/export`).
 - `src/components/CnaeFilterDashboard.tsx` — UI de filtro.
+
+## Estúdio de efeitos para TikTok (`/efeitos`)
+
+Monta filtros de câmera para o TikTok: filtro de cor (LUT) e adesivos 2D
+presos ao rosto (blush, óculos de coração, coroa, brilhos ou uma imagem sua,
+como o logo da clínica). A prévia roda no navegador com a webcam ou com uma
+foto, usando o rastreamento de rosto do MediaPipe (`@mediapipe/tasks-vision`,
+com wasm e modelo baixados da CDN na primeira vez).
+
+O TikTok só publica efeitos de câmera feitos no **Effect House**, o programa
+oficial deles. Por isso o botão "Baixar pacote para o Effect House" gera um
+`.zip` com:
+
+- `filtro/lut-512.png` e `filtro/lut-256x16.png`: o filtro de cor como LUT;
+- `adesivos/*.png`: cada adesivo em PNG transparente (1024 px de largura);
+- `LEIAME.md`: passo a passo para montar e publicar no Effect House;
+- `efeito.json`: as configurações usadas.
+
+O código fica em `src/components/TiktokEffectStudio.tsx` e `src/lib/effects/`.
+A mesma função de cor (`grade`) gera a prévia e a LUT exportada, e cada
+adesivo usa a mesma função de desenho na prévia e no PNG.
