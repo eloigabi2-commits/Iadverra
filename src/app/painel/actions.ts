@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { criarSolicitacao } from "@/lib/documentos";
+import { criarSolicitacao, isTipoFoto } from "@/lib/documentos";
 import { COOKIE_PAINEL, estaLogado, novaSessao, senhaConfere } from "@/lib/painel-auth";
 
 export async function entrar(formData: FormData) {
@@ -46,5 +46,31 @@ export async function excluir(formData: FormData) {
   await exigirLogin();
   const id = String(formData.get("id") ?? "");
   await prisma.solicitacaoDocumento.deleteMany({ where: { id } });
+  redirect("/painel");
+}
+
+// Foto ruim: apaga só ela e reabre o link; o cliente volta direto nesse passo
+export async function pedirDeNovo(formData: FormData) {
+  await exigirLogin();
+  const id = String(formData.get("id") ?? "");
+  const tipo = formData.get("tipo");
+  if (!isTipoFoto(tipo)) redirect(`/painel/${id}`);
+  await prisma.$transaction([
+    prisma.fotoDocumento.deleteMany({ where: { solicitacaoId: id, tipo } }),
+    prisma.solicitacaoDocumento.updateMany({
+      where: { id },
+      data: { status: "aguardando", enviadoEm: null },
+    }),
+  ]);
+  redirect(`/painel/${id}?refazer=${tipo}`);
+}
+
+export async function marcarConferido(formData: FormData) {
+  await exigirLogin();
+  const id = String(formData.get("id") ?? "");
+  await prisma.solicitacaoDocumento.updateMany({
+    where: { id, status: "enviado" },
+    data: { status: "conferido" },
+  });
   redirect("/painel");
 }

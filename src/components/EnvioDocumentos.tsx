@@ -71,6 +71,7 @@ export default function EnvioDocumentos(props: {
   const [etapa, setEtapa] = useState<"inicio" | "passo" | "fim">(props.concluido ? "fim" : "inicio");
   const [ouviu, setOuviu] = useState(false);
   const [indice, setIndice] = useState(primeiroFaltando === -1 ? PASSOS.length - 1 : primeiroFaltando);
+  const [enviadas, setEnviadas] = useState<string[]>(props.fotosEnviadas);
   const [foto, setFoto] = useState<File | null>(null);
   const [previa, setPrevia] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -143,9 +144,13 @@ export default function EnvioDocumentos(props: {
       if (!resp.ok) throw new Error();
 
       trocarFoto(null);
-      if (indice < PASSOS.length - 1) {
-        setIndice(indice + 1);
-        falar(PASSOS[indice + 1]);
+      // segue para a próxima foto que ainda falta (quando a atendente pede só uma de novo, vai direto ao fim)
+      const agora = [...enviadas, tipo];
+      setEnviadas(agora);
+      const proxima = PASSOS.findIndex((p) => !agora.includes(p));
+      if (proxima >= 0) {
+        setIndice(proxima);
+        falar(PASSOS[proxima]);
         return;
       }
       const fim = await fetch(`${api}/concluir`, { method: "POST" });
@@ -172,15 +177,19 @@ export default function EnvioDocumentos(props: {
     "flex w-full items-center justify-center gap-4 rounded-3xl py-6 text-3xl font-bold text-white shadow-lg transition active:scale-95 disabled:opacity-50";
 
   return (
-    <main className="flex min-h-screen flex-col bg-white px-5 pb-10 pt-5 text-zinc-900">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
+    <main className="flex min-h-screen flex-col bg-creme text-tinta">
+      <header className="flex justify-center bg-vinho px-5 py-3 shadow-md">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/marca/esclarece-logo.png" alt="Esclarece Assessoria" className="h-14 w-auto" />
+      </header>
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-10 pt-5">
         {etapa !== "fim" && (
           <div className="flex items-center justify-between">
             <Progresso indice={etapa === "passo" ? indice : -1} />
             <button
               onClick={() => falar(falaAtual)}
               aria-label="Ouvir de novo"
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 active:scale-95"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-marfim text-vinho active:scale-95"
             >
               <IconeSom className="h-9 w-9" />
             </button>
@@ -198,18 +207,18 @@ export default function EnvioDocumentos(props: {
                 <button
                   onClick={ouvirInicio}
                   aria-label="Toque para ouvir"
-                  className="flex h-44 w-44 animate-pulse items-center justify-center rounded-full bg-blue-700 text-white shadow-xl active:scale-95"
+                  className="flex h-44 w-44 animate-pulse items-center justify-center rounded-full bg-vinho text-white shadow-xl active:scale-95"
                 >
                   <IconeSom className="h-24 w-24" />
                 </button>
-                <p className="text-2xl font-semibold">Toque para ouvir</p>
+                <p className="font-marca text-3xl font-bold text-vinho">Toque para ouvir</p>
               </>
             ) : (
               <>
-                <button key="comecar" onClick={comecar} disabled={enviando} className={`${botao} bg-green-600 py-8`}>
+                <button key="comecar" onClick={comecar} disabled={enviando} className={`${botao} bg-folha py-8`}>
                   <IconeJoinha className="h-14 w-14" /> Começar
                 </button>
-                <a href="/privacidade" target="_blank" className="text-base text-zinc-500 underline">
+                <a href="/privacidade" target="_blank" className="text-base text-tinta/60 underline">
                   Política de privacidade
                 </a>
               </>
@@ -234,24 +243,24 @@ export default function EnvioDocumentos(props: {
 
             {!previa ? (
               <>
-                <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-3xl bg-zinc-100 p-6">
+                <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-marfim bg-white p-6">
                   <Documento tipo={tipo} className={tipo === "comprovante" ? "w-40" : "w-64"} />
-                  <p className="text-2xl font-bold">{LEGENDA[tipo]}</p>
+                  <p className="font-marca text-3xl font-bold text-vinho">{LEGENDA[tipo]}</p>
                 </div>
-                <button onClick={abrirCamera} aria-label="Tirar foto" className={`${botao} bg-blue-700 py-10`}>
+                <button onClick={abrirCamera} aria-label="Tirar foto" className={`${botao} bg-vinho py-10`}>
                   <IconeCamera className="h-20 w-20" />
                 </button>
               </>
             ) : (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previa} alt="" className="max-h-[50vh] w-full rounded-3xl border-4 border-zinc-200 object-contain" />
+                <img src={previa} alt="" className="max-h-[50vh] w-full rounded-3xl border-4 border-marfim bg-white object-contain" />
                 <div className="mt-auto grid grid-cols-2 gap-4">
                   <button
                     onClick={abrirCamera}
                     disabled={enviando}
                     aria-label="Tirar de novo"
-                    className={`${botao} flex-col bg-orange-500 py-8 text-2xl`}
+                    className={`${botao} flex-col bg-cobre py-8 text-2xl`}
                   >
                     <IconeDeNovo className="h-16 w-16" />
                     De novo
@@ -260,7 +269,7 @@ export default function EnvioDocumentos(props: {
                     onClick={enviar}
                     disabled={enviando}
                     aria-label="Enviar"
-                    className={`${botao} flex-col bg-green-600 py-8 text-2xl`}
+                    className={`${botao} flex-col bg-folha py-8 text-2xl`}
                   >
                     {enviando ? <Girando className="h-16 w-16" /> : <IconeCerto className="h-16 w-16" />}
                     {enviando ? "Enviando" : "Enviar"}
@@ -280,14 +289,14 @@ export default function EnvioDocumentos(props: {
 
         {etapa === "fim" && (
           <section className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-            <div className="flex h-48 w-48 items-center justify-center rounded-full bg-green-600 text-white shadow-xl">
+            <div className="flex h-48 w-48 items-center justify-center rounded-full bg-folha text-white shadow-xl">
               <IconeCerto className="h-32 w-32" />
             </div>
-            <p className="text-3xl font-bold">Pronto! Obrigado.</p>
+            <p className="font-marca text-4xl font-bold text-vinho">Pronto! Obrigado.</p>
             <button
               onClick={() => falar("fim")}
               aria-label="Ouvir de novo"
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100"
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-marfim text-vinho"
             >
               <IconeSom className="h-9 w-9" />
             </button>
@@ -306,12 +315,12 @@ function Progresso({ indice }: { indice: number }) {
         <div
           key={p}
           className={`relative flex h-14 w-16 items-center justify-center rounded-xl border-4 ${
-            i === indice ? "border-blue-700 bg-blue-50" : i < indice ? "border-green-600 bg-green-50" : "border-zinc-200"
+            i === indice ? "border-vinho bg-white" : i < indice ? "border-folha bg-white" : "border-marfim bg-white/60"
           }`}
         >
           <Documento tipo={p} className={p === "comprovante" ? "w-6" : "w-11"} />
           {i < indice && (
-            <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-green-600 text-white">
+            <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-folha text-white">
               <IconeCerto className="h-4 w-4" />
             </span>
           )}

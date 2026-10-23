@@ -12,19 +12,16 @@ export default function CopiarLink({ url, mensagem }: { url: string; mensagem: s
   }
 
   return (
-    <div className="space-y-2">
-      <input readOnly value={url} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm" />
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => copiar(url, "link")} className="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-semibold text-white">
-          {copiado === "link" ? "Copiado!" : "Copiar link"}
-        </button>
-        <button
-          onClick={() => copiar(mensagem, "mensagem")}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold"
-        >
-          {copiado === "mensagem" ? "Copiada!" : "Copiar mensagem para o WhatsApp"}
-        </button>
-      </div>
+    <div className="flex flex-wrap gap-2">
+      <button
+        onClick={() => copiar(mensagem, "mensagem")}
+        className="rounded-lg border border-marfim bg-white px-3 py-2 text-sm font-semibold"
+      >
+        {copiado === "mensagem" ? "Mensagem copiada!" : "Copiar mensagem"}
+      </button>
+      <button onClick={() => copiar(url, "link")} className="rounded-lg border border-marfim bg-white px-3 py-2 text-sm font-semibold">
+        {copiado === "link" ? "Link copiado!" : "Copiar só o link"}
+      </button>
     </div>
   );
 }

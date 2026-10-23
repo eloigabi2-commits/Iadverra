@@ -19,7 +19,7 @@ export function isTipoFoto(valor: unknown): valor is TipoFoto {
 }
 
 export function nomeEscritorio(): string {
-  return process.env.NOME_ESCRITORIO?.trim() || "nosso escritório";
+  return process.env.NOME_ESCRITORIO?.trim() || "Esclarece Assessoria";
 }
 
 export function urlBase(req?: Request): string {
@@ -85,12 +85,22 @@ export async function buscarPorToken(token: string) {
   });
 }
 
-export function mensagemWhatsApp(nome: string | null, url: string): string {
+export function mensagemWhatsApp(nome: string | null, url: string, refazer = false): string {
   const saudacao = nome ? `Olá, ${nome.split(" ")[0]}!` : "Olá!";
+  if (refazer) {
+    return `${saudacao} Uma das fotos não ficou boa. Toque no link abaixo e tire só ela de novo: ${url}`;
+  }
   return `${saudacao} Para seguir com o seu atendimento, toque no link abaixo e tire as fotos do seu RG e do comprovante de endereço. É rápido e seguro: ${url}`;
 }
 
 export function formatarData(data: Date | null): string {
   if (!data) return "—";
   return data.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" });
+}
+
+// Abre o WhatsApp da atendente já com a conversa do cliente e a mensagem pronta
+export function linkWhatsApp(telefone: string | null, mensagem: string): string {
+  let numero = telefone?.replace(/\D/g, "") ?? "";
+  if (numero.length === 10 || numero.length === 11) numero = `55${numero}`;
+  return `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
 }

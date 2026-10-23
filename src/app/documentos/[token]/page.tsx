@@ -13,9 +13,13 @@ export default async function Page(props: PageProps<"/documentos/[token]">) {
 
   if (!solicitacao) {
     return (
-      <main className="min-h-screen bg-white px-5 py-12 text-zinc-900">
-        <div className="mx-auto max-w-md text-center">
-          <h1 className="text-3xl font-bold">Link inválido</h1>
+      <main className="min-h-screen bg-creme text-tinta">
+        <header className="flex justify-center bg-vinho px-5 py-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/marca/esclarece-logo.png" alt="Esclarece Assessoria" className="h-14 w-auto" />
+        </header>
+        <div className="mx-auto max-w-md px-5 py-12 text-center">
+          <h1 className="font-marca text-3xl font-bold text-vinho">Link inválido</h1>
           <p className="mt-4 text-xl leading-relaxed">
             Este link não existe ou foi digitado errado. Peça um novo link pelo WhatsApp.
           </p>

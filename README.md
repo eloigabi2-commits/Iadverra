@@ -118,9 +118,15 @@ processo à LGPD antes de operar em escala.
 ## Envio de documentos pelo cliente
 
 Link simples, pensado para idosos, para o lead mandar as fotos da frente e do
-verso do RG e do comprovante de endereço fora do WhatsApp. Cada lead recebe um
-link único; as fotos ficam no Postgres e as consultoras veem tudo em `/painel`
-(protegido por senha).
+verso do RG e do comprovante de endereço fora do WhatsApp, com a identidade da
+Esclarece Assessoria (`public/marca/`). Cada lead recebe um link único; as fotos
+ficam no Postgres e as atendentes veem tudo em `/painel` (protegido por senha).
+
+No painel a atendente cria o link (nome + WhatsApp) e toca em "Enviar link pelo
+WhatsApp", que abre a conversa do cliente com a mensagem pronta. Os envios
+chegam em "Para conferir" (a lista se atualiza sozinha); em cada foto há
+"Pedir de novo", que apaga só aquela e faz o cliente cair direto nela ao abrir
+o link de novo, e "Conferi, está tudo certo" move o cliente para "Conferidos".
 
 Fluxo do cliente (`/documentos/<token>`), feito para quem não sabe ler: cada
 tela é explicada em voz alta, os documentos aparecem desenhados e cada tela tem
