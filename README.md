@@ -138,7 +138,7 @@ O TikTok só publica efeitos de câmera feitos no **Effect House**, o programa
 oficial deles. Por isso o botão "Baixar pacote para o Effect House" gera um
 `.zip` com:
 
-- `filtro/lut-512.png` e `filtro/lut-256x16.png`: o filtro de cor como LUT;
+- `filtro/lut-512.png`: o filtro de cor como LUT, no formato 512×512 do Effect House;
 - `adesivos/*.png`: cada adesivo em PNG transparente (1024 px de largura);
 - `LEIAME.md`: passo a passo para montar e publicar no Effect House;
 - `efeito.json`: as configurações usadas.

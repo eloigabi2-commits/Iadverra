@@ -111,18 +111,15 @@ export function applyTable(data: Uint8ClampedArray, table: Uint8Array) {
   }
 }
 
-export type LutLayout = "512" | "256x16";
-
 /**
- * Desenha a LUT como textura PNG. Nos dois formatos cada bloco é uma fatia
- * de azul, o vermelho cresce para a direita e o verde para baixo (preto no
- * canto superior esquerdo):
- * - "512": 64 níveis, blocos de 64×64 em grade 8×8 (512×512).
- * - "256x16": 16 níveis, 16 blocos de 16×16 lado a lado (256×16).
+ * Desenha a LUT como textura PNG 512×512, no formato das texturas de exemplo
+ * do Effect House: 64 níveis, blocos de 64×64 em grade 8×8; cada bloco é uma
+ * fatia de azul, o vermelho cresce para a direita e o verde para baixo
+ * (preto no canto superior esquerdo).
  */
-export function renderLut(p: ColorParams, layout: LutLayout): HTMLCanvasElement {
-  const n = layout === "512" ? 64 : 16;
-  const perRow = layout === "512" ? 8 : 16;
+export function renderLut(p: ColorParams): HTMLCanvasElement {
+  const n = 64;
+  const perRow = 8;
   const canvas = document.createElement("canvas");
   canvas.width = n * perRow;
   canvas.height = n * (n / perRow);
