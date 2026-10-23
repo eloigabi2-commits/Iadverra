@@ -19,3 +19,5 @@ A skill `.claude/skills/google-ads-manager` (de thalesholleben/skill-google-ads,
 # Effect House (efeitos de TikTok)
 
 O estúdio em `/efeitos` gera pacotes para o Effect House. Antes de escrever scripts de efeito (TypeScript/APJS), consulte a documentação oficial em Markdown: `node scripts/effect-house-docs.mjs` baixa a API Reference para `docs/effect-house/` (`--all` baixa o site inteiro, `--filter <texto>` só algumas páginas). A pasta fica fora do git; comece pelo `docs/effect-house/INDEX.md` e por `guides/api-reference/scripting-capability-usage-guide.md`. Requer o domínio `effecthouse.tiktok.com` liberado na rede do ambiente.
+
+`scripts/effect-house-agent/` tem um agente de computer use (Python, `computer_toolset_20260801`) que roda no computador do usuário, monta e envia os sorteios de `/efeitos/sorteios` no Effect House e lê as estatísticas. Ele não roda neste ambiente cloud (não há Effect House nem tela aqui).
