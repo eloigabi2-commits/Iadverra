@@ -48,3 +48,6 @@ next-env.d.ts
 
 # documentação do Effect House baixada por scripts/effect-house-docs.mjs
 /docs/effect-house
+
+# python
+__pycache__/
