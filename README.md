@@ -115,6 +115,48 @@ opt-out em contatos comerciais, não usar para spam em massa) e, se o
 volume de prospecção for grande, vale consultar um jurídico para adequar o
 processo à LGPD antes de operar em escala.
 
+## Envio de documentos pelo cliente
+
+Link simples, pensado para idosos, para o lead mandar as fotos da frente e do
+verso do RG e do comprovante de endereço fora do WhatsApp. Cada lead recebe um
+link único; as fotos ficam no Postgres e as consultoras veem tudo em `/painel`
+(protegido por senha).
+
+Fluxo do cliente (`/documentos/<token>`): aceite da política de privacidade
+(`/privacidade`) → uma foto por tela, com botão que abre a câmera traseira →
+conferência da foto → "Pronto!". As fotos são reduzidas no celular antes do
+envio (lado maior de 1800 px), e quem fecha a página no meio continua de onde
+parou ao abrir o link de novo.
+
+### Configuração (variáveis de ambiente na Vercel)
+
+| Variável | Para quê |
+| --- | --- |
+| `PAINEL_SENHA` | senha do painel `/painel` |
+| `DOCUMENTOS_API_KEY` | chave para a IA/n8n gerar links |
+| `APP_URL` | domínio usado nos links (ex.: `https://docs.seuescritorio.com.br`) |
+| `NOME_ESCRITORIO` | nome mostrado ao cliente e na política |
+| `CONTATO_PRIVACIDADE` | e-mail/telefone para pedidos da LGPD (opcional) |
+
+A migration é aplicada sozinha pelo `vercel-build`.
+
+### Gerando o link pela IA
+
+```bash
+curl -X POST https://seu-dominio/api/solicitacoes \
+  -H "Authorization: Bearer $DOCUMENTOS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"nome": "Maria da Silva", "telefone": "11999998888", "referencia": "id-do-lead"}'
+# → {"id": "...", "url": "https://seu-dominio/documentos/abc...", "status": "aguardando"}
+```
+
+Todos os campos são opcionais. Se já existir um link aguardando para a mesma
+`referencia` (ou, sem ela, o mesmo `telefone`), a API devolve esse link em vez
+de criar outro. As consultoras também podem gerar links à mão no painel.
+
+O texto de `/privacidade` é um modelo: revise com a equipe jurídica antes de
+usar.
+
 ## Estrutura
 
 - `prisma/schema.prisma` — modelo de dados (Empresa, Estabelecimento,
@@ -125,3 +167,7 @@ processo à LGPD antes de operar em escala.
 - `src/app/api/*` — endpoints REST (`/api/cnaes`, `/api/owners`,
   `/api/owners/summary`, `/api/owners/export`).
 - `src/components/CnaeFilterDashboard.tsx` — UI de filtro.
+- `src/app/documentos/[token]` + `src/components/EnvioDocumentos.tsx` — tela
+  de envio de documentos do cliente.
+- `src/app/painel` — painel das consultoras; `src/app/api/documentos/*`,
+  `src/app/api/solicitacoes` e `src/app/api/painel/*` — endpoints do envio.

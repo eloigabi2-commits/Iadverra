@@ -103,3 +103,40 @@ model Socio {
   @@index([cnpjBasico])
   @@index([nomeSocio])
 }
+
+// Link único que a IA manda para o lead enviar as fotos dos documentos
+model SolicitacaoDocumento {
+  id              String    @id @default(cuid())
+  token           String    @unique
+  nome            String?
+  telefone        String?
+  referencia      String?
+  // "aguardando" até o cliente terminar de mandar as 3 fotos, depois "enviado"
+  status          String    @default("aguardando")
+  consentimentoEm DateTime? @map("consentimento_em")
+  enviadoEm       DateTime? @map("enviado_em")
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+
+  fotos FotoDocumento[]
+
+  @@index([status, criadoEm])
+  @@index([telefone])
+  @@index([referencia])
+  @@map("solicitacao_documento")
+}
+
+// Uma foto por tipo (rg_frente, rg_verso, comprovante); reenviar substitui a anterior
+model FotoDocumento {
+  id            String   @id @default(cuid())
+  solicitacaoId String   @map("solicitacao_id")
+  tipo          String
+  mime          String
+  tamanho       Int
+  dados         Bytes
+  criadoEm      DateTime @default(now()) @map("criado_em")
+
+  solicitacao SolicitacaoDocumento @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
+
+  @@unique([solicitacaoId, tipo])
+  @@map("foto_documento")
+}
