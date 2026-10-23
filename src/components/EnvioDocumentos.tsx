@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FALAS, type Fala } from "@/lib/falas-documentos";
 
 // Tela pensada para quem não sabe ler: cada passo é falado em voz alta,
@@ -17,10 +17,12 @@ const LEGENDA: Record<Tipo, string> = {
   comprovante: "Conta de luz ou água",
 };
 
-let audioAtual: HTMLAudioElement | null = null;
+// Um player só para a página toda: o iPhone só libera o som de um player que
+// já tocou dentro de um toque, então reaproveitar o mesmo deixa as falas
+// seguintes tocarem sozinhas, mesmo depois de esperar a internet.
+let player: HTMLAudioElement | null = null;
 
 function falar(chave: Fala) {
-  audioAtual?.pause();
   window.speechSynthesis?.cancel();
   const texto = FALAS[chave];
   const lerTexto = () => {
@@ -33,9 +35,10 @@ function falar(chave: Fala) {
     if (voz) fala.voice = voz;
     synth.speak(fala);
   };
-  const audio = new Audio(`/audio/${chave}.mp3`);
-  audioAtual = audio;
-  audio.play().catch(lerTexto);
+  player ??= new Audio();
+  player.pause();
+  player.src = `/audio/${chave}.mp3`;
+  player.play().catch(lerTexto);
 }
 
 function vibrar() {
@@ -69,7 +72,6 @@ export default function EnvioDocumentos(props: {
 }) {
   const primeiroFaltando = PASSOS.findIndex((p) => !props.fotosEnviadas.includes(p));
   const [etapa, setEtapa] = useState<"inicio" | "passo" | "fim">(props.concluido ? "fim" : "inicio");
-  const [ouviu, setOuviu] = useState(false);
   const [indice, setIndice] = useState(primeiroFaltando === -1 ? PASSOS.length - 1 : primeiroFaltando);
   const [enviadas, setEnviadas] = useState<string[]>(props.fotosEnviadas);
   const [foto, setFoto] = useState<File | null>(null);
@@ -77,6 +79,12 @@ export default function EnvioDocumentos(props: {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(false);
   const entrada = useRef<HTMLInputElement>(null);
+  const aceite = useRef<Promise<boolean> | null>(props.jaAceitou ? Promise.resolve(true) : null);
+
+  // baixa as falas antes, para tocarem na hora
+  useEffect(() => {
+    for (const chave of Object.keys(FALAS)) fetch(`/audio/${chave}.mp3`).catch(() => {});
+  }, []);
 
   const api = `/api/documentos/${props.token}`;
   const tipo = PASSOS[indice];
@@ -95,28 +103,20 @@ export default function EnvioDocumentos(props: {
     falar("erro");
   }
 
-  function ouvirInicio() {
-    vibrar();
-    setOuviu(true);
-    falar("inicio");
+  function registrarAceite(): Promise<boolean> {
+    aceite.current = fetch(`${api}/consentimento`, { method: "POST" })
+      .then((r) => r.ok)
+      .catch(() => false);
+    return aceite.current;
   }
 
-  async function comecar() {
+  // Um toque só: a fala do primeiro passo começa na hora e o aceite vai em segundo plano
+  function comecar() {
     vibrar();
     setErro(false);
-    setEnviando(true);
-    try {
-      if (!props.jaAceitou) {
-        const resp = await fetch(`${api}/consentimento`, { method: "POST" });
-        if (!resp.ok) throw new Error();
-      }
-      setEtapa("passo");
-      falar(tipo);
-    } catch {
-      falhou();
-    } finally {
-      setEnviando(false);
-    }
+    falar(tipo);
+    setEtapa("passo");
+    if (!aceite.current) registrarAceite();
   }
 
   function abrirCamera() {
@@ -132,6 +132,7 @@ export default function EnvioDocumentos(props: {
     setEnviando(true);
     falar("enviando");
     try {
+      if (!(await aceite.current) && !(await registrarAceite())) throw new Error();
       const form = new FormData();
       form.set("tipo", tipo);
       form.set("arquivo", await prepararFoto(foto), "foto.jpg");
@@ -202,27 +203,20 @@ export default function EnvioDocumentos(props: {
               <Documento tipo="rg_frente" className="w-36" />
               <Documento tipo="comprovante" className="w-24" />
             </div>
-            {!ouviu ? (
-              <>
-                <button
-                  onClick={ouvirInicio}
-                  aria-label="Toque para ouvir"
-                  className="flex h-44 w-44 animate-pulse items-center justify-center rounded-full bg-vinho text-white shadow-xl active:scale-95"
-                >
-                  <IconeSom className="h-24 w-24" />
-                </button>
-                <p className="font-marca text-3xl font-bold text-vinho">Toque para ouvir</p>
-              </>
-            ) : (
-              <>
-                <button key="comecar" onClick={comecar} disabled={enviando} className={`${botao} bg-folha py-8`}>
-                  <IconeJoinha className="h-14 w-14" /> Começar
-                </button>
-                <a href="/privacidade" target="_blank" className="text-base text-tinta/60 underline">
-                  Política de privacidade
-                </a>
-              </>
-            )}
+            <button
+              onClick={comecar}
+              aria-label="Começar"
+              className={`${botao} animate-pulse bg-folha py-10 motion-reduce:animate-none`}
+            >
+              <IconeJoinha className="h-16 w-16" /> Começar
+            </button>
+            <p className="text-base text-tinta/60">
+              Ao começar, você concorda com a{" "}
+              <a href="/privacidade" target="_blank" className="underline">
+                política de privacidade
+              </a>
+              .
+            </p>
           </section>
         )}
 
