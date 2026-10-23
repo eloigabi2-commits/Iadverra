@@ -42,6 +42,8 @@ function limpar(valor: unknown, max = 120): string | null {
 export function limparTelefone(valor: unknown): string | null {
   if (typeof valor !== "string") return null;
   const digitos = valor.replace(/\D/g, "").slice(0, 15);
+  // guarda sempre com o 55 na frente, para "11 99999-8888" e o chat_number do ChatGuru serem o mesmo lead
+  if (digitos.length === 10 || digitos.length === 11) return `55${digitos}`;
   return digitos || null;
 }
 
