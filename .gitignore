@@ -45,3 +45,6 @@ next-env.d.ts
 
 # dumps baixados da Receita Federal (import-rfb.ts)
 /data/rfb
+
+# documentação do Effect House baixada por scripts/effect-house-docs.mjs
+/docs/effect-house
