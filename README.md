@@ -122,11 +122,20 @@ verso do RG e do comprovante de endereço fora do WhatsApp. Cada lead recebe um
 link único; as fotos ficam no Postgres e as consultoras veem tudo em `/painel`
 (protegido por senha).
 
-Fluxo do cliente (`/documentos/<token>`): aceite da política de privacidade
-(`/privacidade`) → uma foto por tela, com botão que abre a câmera traseira →
-conferência da foto → "Pronto!". As fotos são reduzidas no celular antes do
-envio (lado maior de 1800 px), e quem fecha a página no meio continua de onde
-parou ao abrir o link de novo.
+Fluxo do cliente (`/documentos/<token>`), feito para quem não sabe ler: cada
+tela é explicada em voz alta, os documentos aparecem desenhados e cada tela tem
+um botão principal só. Toque no alto-falante (ouve a explicação, incluindo o
+uso dos dados) → joinha verde "Começar" (registra o aceite) → para cada
+documento, botão azul da câmera → conferência com "De novo" (laranja) ou
+"Enviar" (verde) → "Pronto!". O alto-falante no canto repete a fala da tela.
+As fotos são reduzidas no celular antes do envio (lado maior de 1800 px), e
+quem fecha a página no meio continua de onde parou ao abrir o link de novo.
+
+A voz padrão é a do próprio celular. Para usar a gravação de uma pessoa do
+escritório, coloque arquivos MP3 em `public/audio/` com os nomes `inicio`,
+`rg_frente`, `rg_verso`, `comprovante`, `conferir`, `enviando`, `fim` e `erro`
+(os textos de cada fala estão em `FALAS`, em
+`src/components/EnvioDocumentos.tsx`). Sem o arquivo, o celular lê o texto.
 
 ### Configuração (variáveis de ambiente na Vercel)
 
