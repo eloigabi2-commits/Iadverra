@@ -131,11 +131,17 @@ documento, botão azul da câmera → conferência com "De novo" (laranja) ou
 As fotos são reduzidas no celular antes do envio (lado maior de 1800 px), e
 quem fecha a página no meio continua de onde parou ao abrir o link de novo.
 
-A voz padrão é a do próprio celular. Para usar a gravação de uma pessoa do
-escritório, coloque arquivos MP3 em `public/audio/` com os nomes `inicio`,
-`rg_frente`, `rg_verso`, `comprovante`, `conferir`, `enviando`, `fim` e `erro`
-(os textos de cada fala estão em `FALAS`, em
-`src/components/EnvioDocumentos.tsx`). Sem o arquivo, o celular lê o texto.
+As falas usam a voz "eloisa" do Inworld, a mesma do fluxo de direito
+bancário no n8n. Os textos ficam em `src/lib/falas-documentos.ts`; para gravar
+(ou regravar depois de mudar um texto) os MP3 em `public/audio/`:
+
+```bash
+INWORLD_API_KEY="Basic ..." npx tsx scripts/gerar-audios.ts        # todas
+INWORLD_API_KEY="Basic ..." npx tsx scripts/gerar-audios.ts fim    # só uma
+```
+
+A chave é o valor do header `Authorization` do nó HTTP do Inworld no n8n.
+Sem os MP3, o celular lê os textos com a voz dele.
 
 ### Configuração (variáveis de ambiente na Vercel)
 

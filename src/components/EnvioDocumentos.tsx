@@ -1,34 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { FALAS, type Fala } from "@/lib/falas-documentos";
 
 // Tela pensada para quem não sabe ler: cada passo é falado em voz alta,
 // os documentos aparecem desenhados e cada tela tem um botão principal só.
-// Para trocar a voz do celular por uma gravação de verdade, coloque o MP3 em
-// public/audio/<chave>.mp3 (chaves em FALAS); sem o arquivo, o celular lê o texto.
+// As falas tocam os MP3 de public/audio/ (gerados por scripts/gerar-audios.ts);
+// sem o arquivo, o celular lê o texto com a voz dele.
 
 type Tipo = "rg_frente" | "rg_verso" | "comprovante";
-type Fala = "inicio" | Tipo | "conferir" | "enviando" | "fim" | "erro";
-
-const FALAS: Record<Fala, string> = {
-  inicio:
-    "Olá! Vamos tirar três fotos: o seu RG, dos dois lados, e uma conta de luz ou de água. " +
-    "As fotos vão direto para o escritório, só para o seu atendimento. " +
-    "Se você concorda, toque no botão verde.",
-  rg_frente:
-    "Pegue o seu RG e tire do plástico. Deixe em cima da mesa, com o lado da sua foto para cima. " +
-    "Agora toque no botão azul e tire a foto.",
-  rg_verso: "Muito bem! Agora vire o RG, para o outro lado. Toque no botão azul e tire a foto.",
-  comprovante:
-    "Falta só uma! Pegue uma conta de luz ou de água, com o seu endereço. " +
-    "Toque no botão azul e tire a foto.",
-  conferir:
-    "Olhe a foto. Se o documento aparece inteiro e sem borrão, toque no verde. " +
-    "Se ficou ruim, toque no laranja para tirar de novo.",
-  enviando: "Enviando. Espere um pouquinho.",
-  fim: "Pronto! Recebemos tudo. Muito obrigado. Pode voltar para o WhatsApp.",
-  erro: "Não deu certo. Veja se a internet está ligada e toque no botão de novo.",
-};
 
 const PASSOS: Tipo[] = ["rg_frente", "rg_verso", "comprovante"];
 const LEGENDA: Record<Tipo, string> = {
