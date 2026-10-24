@@ -48,25 +48,31 @@ export function limparTelefone(valor: unknown): string | null {
 }
 
 // Cria um link novo, ou devolve o que já está aguardando para o mesmo lead,
-// para a IA poder pedir o link de novo sem gerar duplicatas.
+// para a IA poder pedir o link de novo sem gerar duplicatas. O lead é
+// reconhecido pelo telefone; a referência só vale quando não há telefone.
 export async function criarSolicitacao(dados: {
   nome?: unknown;
   telefone?: unknown;
   referencia?: unknown;
+  atendente?: unknown;
 }) {
   const nome = limpar(dados.nome);
   const telefone = limparTelefone(dados.telefone);
   const referencia = limpar(dados.referencia);
+  const atendente = limpar(dados.atendente, 60);
 
-  if (referencia || telefone) {
+  if (telefone || referencia) {
     const existente = await prisma.solicitacaoDocumento.findFirst({
-      where: {
-        status: "aguardando",
-        ...(referencia ? { referencia } : { telefone }),
-      },
+      where: { status: "aguardando", ...(telefone ? { telefone } : { referencia }) },
       orderBy: { criadoEm: "desc" },
     });
-    if (existente) return existente;
+    if (existente) {
+      // a distribuição pode ter mudado de atendente desde o primeiro link
+      if (atendente && existente.atendente !== atendente) {
+        return prisma.solicitacaoDocumento.update({ where: { id: existente.id }, data: { atendente } });
+      }
+      return existente;
+    }
   }
 
   return prisma.solicitacaoDocumento.create({
@@ -75,8 +81,26 @@ export async function criarSolicitacao(dados: {
       nome,
       telefone,
       referencia,
+      atendente,
     },
   });
+}
+
+// Nomes das atendentes que já têm clientes, para os atalhos do painel
+export async function listarAtendentes(): Promise<{ nome: string; paraConferir: number }[]> {
+  const grupos = await prisma.solicitacaoDocumento.groupBy({
+    by: ["atendente", "status"],
+    where: { atendente: { not: null } },
+    _count: true,
+  });
+  const mapa = new Map<string, number>();
+  for (const g of grupos) {
+    if (!g.atendente) continue;
+    mapa.set(g.atendente, (mapa.get(g.atendente) ?? 0) + (g.status === "enviado" ? g._count : 0));
+  }
+  return [...mapa.entries()]
+    .map(([nome, paraConferir]) => ({ nome, paraConferir }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }
 
 export async function buscarPorToken(token: string) {

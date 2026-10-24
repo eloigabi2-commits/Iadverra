@@ -6,12 +6,20 @@ import { prisma } from "@/lib/prisma";
 import { criarSolicitacao, isTipoFoto } from "@/lib/documentos";
 import { COOKIE_PAINEL, estaLogado, novaSessao, senhaConfere } from "@/lib/painel-auth";
 
+// Volta para o painel da atendente quando ela entrou pelo link dela
+function painelDa(atendente: unknown): string {
+  const nome = typeof atendente === "string" ? atendente.trim() : "";
+  return nome ? `/painel?atendente=${encodeURIComponent(nome)}` : "/painel";
+}
+
 export async function entrar(formData: FormData) {
   const senha = String(formData.get("senha") ?? "");
+  const atendente = formData.get("atendente");
   if (!senhaConfere(senha)) {
     // atrasa a resposta para dificultar tentativas em sequência
     await new Promise((ok) => setTimeout(ok, 1000));
-    redirect("/painel/login?erro=1");
+    const volta = typeof atendente === "string" && atendente ? `&atendente=${encodeURIComponent(atendente)}` : "";
+    redirect(`/painel/login?erro=1${volta}`);
   }
   const sessao = novaSessao();
   (await cookies()).set(COOKIE_PAINEL, sessao.valor, {
@@ -21,7 +29,7 @@ export async function entrar(formData: FormData) {
     path: "/",
     maxAge: sessao.maxAge,
   });
-  redirect("/painel");
+  redirect(painelDa(atendente));
 }
 
 export async function sair() {
@@ -38,6 +46,7 @@ export async function gerarLink(formData: FormData) {
   const solicitacao = await criarSolicitacao({
     nome: formData.get("nome"),
     telefone: formData.get("telefone"),
+    atendente: formData.get("atendente"),
   });
   redirect(`/painel/${solicitacao.id}`);
 }
@@ -45,8 +54,9 @@ export async function gerarLink(formData: FormData) {
 export async function excluir(formData: FormData) {
   await exigirLogin();
   const id = String(formData.get("id") ?? "");
+  const atual = await prisma.solicitacaoDocumento.findUnique({ where: { id }, select: { atendente: true } });
   await prisma.solicitacaoDocumento.deleteMany({ where: { id } });
-  redirect("/painel");
+  redirect(painelDa(atual?.atendente));
 }
 
 // Foto ruim: apaga só ela e reabre o link; o cliente volta direto nesse passo
@@ -68,9 +78,10 @@ export async function pedirDeNovo(formData: FormData) {
 export async function marcarConferido(formData: FormData) {
   await exigirLogin();
   const id = String(formData.get("id") ?? "");
+  const atual = await prisma.solicitacaoDocumento.findUnique({ where: { id }, select: { atendente: true } });
   await prisma.solicitacaoDocumento.updateMany({
     where: { id, status: "enviado" },
     data: { status: "conferido" },
   });
-  redirect("/painel");
+  redirect(painelDa(atual?.atendente));
 }
