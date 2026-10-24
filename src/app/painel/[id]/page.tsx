@@ -30,7 +30,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
   const origem = process.env.APP_URL?.trim().replace(/\/+$/, "") || `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
   const url = `${origem}/documentos/${s.token}`;
   const ehRefazer = isTipoFoto(refazer) || (s.status === "aguardando" && s.fotos.length > 0);
-  const mensagem = mensagemWhatsApp(s.nome, url, ehRefazer);
+  const mensagem = mensagemWhatsApp(s.nome, url, { refazer: ehRefazer, atendente: s.atendente });
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-6">

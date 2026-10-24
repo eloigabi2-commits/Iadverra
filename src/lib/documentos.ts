@@ -125,12 +125,32 @@ export async function buscarPorToken(token: string) {
   });
 }
 
-export function mensagemWhatsApp(nome: string | null, url: string, refazer = false): string {
-  const saudacao = nome ? `Olá, ${nome.split(" ")[0]}!` : "Olá!";
-  if (refazer) {
-    return `${saudacao} Uma das fotos não ficou boa. Toque no link abaixo e tire só ela de novo: ${url}`;
+// Mensagem que acompanha o link no WhatsApp. O público é idoso e desconfiado:
+// explica para quê, quem vai cuidar, que é fácil e seguro, e que pode pedir ajuda.
+export function mensagemWhatsApp(
+  nome: string | null,
+  url: string,
+  opcoes: { refazer?: boolean; atendente?: string | null } = {},
+): string {
+  const primeiroNome = nome?.split(" ")[0];
+  const saudacao = primeiroNome ? `${primeiroNome}, ` : "";
+  const quem = opcoes.atendente ? `a ${opcoes.atendente}` : "a nossa equipe";
+
+  if (opcoes.refazer) {
+    return (
+      `${saudacao}tudo bem? 😊 Uma das fotos ficou um pouquinho difícil de ler, acontece bastante! ` +
+      `Toque no link abaixo e tire só ela de novo, com o documento em cima da mesa e num lugar claro:\n\n${url}\n\n` +
+      `Se precisar, peça ajuda a alguém da família ou responda aqui que a gente te ajuda.`
+    );
   }
-  return `${saudacao} Para seguir com o seu atendimento, toque no link abaixo e tire as fotos do seu RG e do comprovante de endereço. É rápido e seguro: ${url}`;
+  return (
+    `${saudacao}aqui está o seu link para enviar os documentos 👇\n\n${url}\n\n` +
+    `✅ É só tocar no link e apertar o botão verde *Começar*. Uma voz vai te explicar cada passo, bem devagar.\n` +
+    `📄 Tenha em mãos o seu *RG* e uma *conta de luz ou de água*.\n` +
+    `⏱️ Leva uns 2 minutinhos.\n` +
+    `🔒 As fotos vão direto e com segurança para ${quem}, e são usadas só para analisar o seu caso.\n\n` +
+    `Se tiver qualquer dificuldade, pode pedir ajuda a alguém da família ou responder aqui que a gente te ajuda. 💙`
+  );
 }
 
 export function formatarData(data: Date | null): string {
