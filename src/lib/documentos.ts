@@ -181,7 +181,8 @@ export function mensagemWhatsApp(
   const politica = `${new URL(url).origin}/privacidade`;
   return (
     `${inicio} está o seu link para enviar os documentos 👇\n${url}\n\n` +
-    `🔒 _Seus dados são usados só para o seu atendimento. Ao continuar, você concorda com a nossa Política de Privacidade: ${politica}_`
+    // o endereço fica fora do itálico: o WhatsApp junta o "_" final ao link e ele quebra
+    `🔒 _Seus dados são usados só para o seu atendimento. Ao continuar, você concorda com a nossa Política de Privacidade:_\n${politica}`
   );
 }
 
