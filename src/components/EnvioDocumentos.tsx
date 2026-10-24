@@ -69,6 +69,8 @@ export default function EnvioDocumentos(props: {
   jaAceitou: boolean;
   concluido: boolean;
   fotosEnviadas: string[];
+  // modo de teste (/documentos/teste): mesma tela, mas nada é enviado nem guardado
+  teste?: boolean;
 }) {
   const primeiroFaltando = PASSOS.findIndex((p) => !props.fotosEnviadas.includes(p));
   const [etapa, setEtapa] = useState<"inicio" | "passo" | "fim">(props.concluido ? "fim" : "inicio");
@@ -87,6 +89,11 @@ export default function EnvioDocumentos(props: {
   }, []);
 
   const api = `/api/documentos/${props.token}`;
+
+  function chamar(url: string, init: RequestInit): Promise<Response> {
+    if (!props.teste) return fetch(url, init);
+    return new Promise((ok) => setTimeout(() => ok(new Response("{}", { status: 200 })), 700));
+  }
   const tipo = PASSOS[indice];
   const falaAtual: Fala =
     etapa === "inicio" ? "inicio" : etapa === "fim" ? "fim" : erro ? "erro" : previa ? "conferir" : tipo;
@@ -104,7 +111,7 @@ export default function EnvioDocumentos(props: {
   }
 
   function registrarAceite(): Promise<boolean> {
-    aceite.current = fetch(`${api}/consentimento`, { method: "POST" })
+    aceite.current = chamar(`${api}/consentimento`, { method: "POST" })
       .then((r) => r.ok)
       .catch(() => false);
     return aceite.current;
@@ -136,7 +143,7 @@ export default function EnvioDocumentos(props: {
       const form = new FormData();
       form.set("tipo", tipo);
       form.set("arquivo", await prepararFoto(foto), "foto.jpg");
-      const resp = await fetch(`${api}/fotos`, { method: "POST", body: form });
+      const resp = await chamar(`${api}/fotos`, { method: "POST", body: form });
       if (resp.status === 409) {
         setEtapa("fim");
         falar("fim");
@@ -154,7 +161,7 @@ export default function EnvioDocumentos(props: {
         falar(PASSOS[proxima]);
         return;
       }
-      const fim = await fetch(`${api}/concluir`, { method: "POST" });
+      const fim = await chamar(`${api}/concluir`, { method: "POST" });
       if (!fim.ok) {
         const corpo = await fim.json().catch(() => ({}));
         const falta = PASSOS.findIndex((p) => corpo.faltando?.includes(p));
@@ -294,7 +301,18 @@ export default function EnvioDocumentos(props: {
             >
               <IconeSom className="h-9 w-9" />
             </button>
+            {props.teste && (
+              <button onClick={() => window.location.reload()} className="text-base text-tinta/60 underline">
+                Fazer o teste de novo
+              </button>
+            )}
           </section>
+        )}
+
+        {props.teste && (
+          <p className="mt-6 text-center text-sm text-tinta/60">
+            <strong>Link de teste.</strong> As fotos não são enviadas nem guardadas.
+          </p>
         )}
       </div>
     </main>
