@@ -26,13 +26,14 @@ export default function Privacidade() {
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Quais dados coletamos</h2>
         <p>
-          Fotos da frente e do verso do seu documento de identidade (RG ou CNH) e do seu comprovante de
-          endereço, além do nome e telefone que você já nos informou no atendimento.
+          Seu nome, telefone e CPF, as fotos da frente e do verso do seu documento de identidade (RG ou CNH), o
+          seu comprovante de endereço e as informações do seu benefício e dos seus empréstimos que você nos passar
+          no atendimento.
         </p>
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Para que usamos</h2>
         <p>
-          Só para analisar o seu caso, preparar a procuração e os documentos do seu processo e entrar com as
+          Exclusivamente para analisar o seu caso, preparar a procuração e os documentos do seu processo e tomar as
           medidas necessárias em seu nome. Não vendemos nem repassamos seus dados para fins de propaganda.
         </p>
 
@@ -53,6 +54,12 @@ export default function Privacidade() {
         <p>
           Pelo tempo necessário ao seu atendimento e ao cumprimento de obrigações legais e profissionais.
           Depois disso, os arquivos são apagados.
+        </p>
+
+        <h2 className="font-marca text-2xl font-bold text-vinho">Ao continuar o atendimento</h2>
+        <p>
+          Ao continuar o atendimento e enviar seus documentos, você declara que está ciente e concorda com o uso dos
+          seus dados para essa finalidade, nos termos desta política.
         </p>
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Seus direitos</h2>
