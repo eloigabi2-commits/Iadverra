@@ -165,8 +165,8 @@ export async function buscarPorToken(token: string) {
   });
 }
 
-// Mensagem que acompanha o link no WhatsApp: curta (o áudio da transferência já
-// explica tudo) e com o aviso de privacidade em uma linha.
+// Mensagem que acompanha o link no WhatsApp: só o link. O áudio da transferência
+// explica o que fazer e o aviso de privacidade já foi mandado no começo da conversa.
 export function mensagemWhatsApp(
   nome: string | null,
   url: string,
@@ -178,12 +178,7 @@ export function mensagemWhatsApp(
     return `${inicio} das fotos ficou difícil de ler. Toque no link e tire só ela de novo 👇\n${url}`;
   }
   const inicio = primeiroNome ? `${primeiroNome}, aqui` : "Aqui";
-  const politica = `${new URL(url).origin}/privacidade`;
-  return (
-    `${inicio} está o seu link para enviar os documentos 👇\n${url}\n\n` +
-    // o endereço fica fora do itálico: o WhatsApp junta o "_" final ao link e ele quebra
-    `🔒 _Seus dados são usados só para o seu atendimento. Ao continuar, você concorda com a nossa Política de Privacidade:_\n${politica}`
-  );
+  return `${inicio} está o seu link para enviar os documentos 👇\n${url}`;
 }
 
 export function formatarData(data: Date | null): string {
