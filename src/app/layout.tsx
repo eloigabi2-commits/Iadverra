@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
+// Fontes guardadas no projeto (src/app/fontes) para o build não depender de baixar do Google Fonts
+const geistSans = localFont({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  src: [
+    { path: "./fontes/geist-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fontes/geist-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fontes/geist-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fontes/geist-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
 });
 
-const playfair = Playfair_Display({
+const playfair = localFont({
   variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["600", "700"],
+  src: [
+    { path: "./fontes/playfair-display-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fontes/playfair-display-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  src: "./fontes/geist-mono-latin-400-normal.woff2",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
