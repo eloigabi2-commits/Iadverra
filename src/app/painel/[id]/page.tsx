@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
+  garantirCodigo,
+  linkDaSolicitacao,
   formatarData,
   isTipoFoto,
   linkWhatsApp,
@@ -28,7 +30,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
 
   const h = await headers();
   const origem = process.env.APP_URL?.trim().replace(/\/+$/, "") || `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
-  const url = `${origem}/documentos/${s.token}`;
+  const url = linkDaSolicitacao(await garantirCodigo(s), origem);
   const ehRefazer = isTipoFoto(refazer) || (s.status === "aguardando" && s.fotos.length > 0);
   const mensagem = mensagemWhatsApp(s.nome, url, { refazer: ehRefazer, atendente: s.atendente });
 
