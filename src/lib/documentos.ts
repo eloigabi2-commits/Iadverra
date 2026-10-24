@@ -59,7 +59,7 @@ export async function criarSolicitacao(dados: {
   const nome = limpar(dados.nome);
   const telefone = limparTelefone(dados.telefone);
   const referencia = limpar(dados.referencia);
-  const atendente = limpar(dados.atendente, 60);
+  const atendente = limpar(dados.atendente, 60)?.replace(/\s+/g, " ") ?? null;
 
   if (telefone || referencia) {
     const existente = await prisma.solicitacaoDocumento.findFirst({
@@ -86,20 +86,34 @@ export async function criarSolicitacao(dados: {
   });
 }
 
-// Nomes das atendentes que já têm clientes, para os atalhos do painel
+// Filtro do painel por atendente: "Vitoria Vechetin" e "vitoria  vechetin" são a mesma pessoa
+export function filtroDaAtendente(nome: string | null) {
+  if (!nome) return {};
+  return { atendente: { equals: nome.trim().replace(/\s+/g, " "), mode: "insensitive" as const } };
+}
+
+// Nomes das atendentes que já têm clientes, para os atalhos do painel.
+// Junta grafias diferentes do mesmo nome e mostra a mais usada.
 export async function listarAtendentes(): Promise<{ nome: string; paraConferir: number }[]> {
   const grupos = await prisma.solicitacaoDocumento.groupBy({
     by: ["atendente", "status"],
     where: { atendente: { not: null } },
     _count: true,
   });
-  const mapa = new Map<string, number>();
+  const mapa = new Map<string, { grafias: Map<string, number>; paraConferir: number }>();
   for (const g of grupos) {
     if (!g.atendente) continue;
-    mapa.set(g.atendente, (mapa.get(g.atendente) ?? 0) + (g.status === "enviado" ? g._count : 0));
+    const chave = g.atendente.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR");
+    const item = mapa.get(chave) ?? { grafias: new Map(), paraConferir: 0 };
+    item.grafias.set(g.atendente, (item.grafias.get(g.atendente) ?? 0) + g._count);
+    if (g.status === "enviado") item.paraConferir += g._count;
+    mapa.set(chave, item);
   }
-  return [...mapa.entries()]
-    .map(([nome, paraConferir]) => ({ nome, paraConferir }))
+  return [...mapa.values()]
+    .map((item) => ({
+      nome: [...item.grafias.entries()].sort((a, b) => b[1] - a[1])[0][0],
+      paraConferir: item.paraConferir,
+    }))
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }
 

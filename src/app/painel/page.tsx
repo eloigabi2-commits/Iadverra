@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatarData, listarAtendentes } from "@/lib/documentos";
+import { filtroDaAtendente, formatarData, listarAtendentes } from "@/lib/documentos";
 import { estaLogado } from "@/lib/painel-auth";
 import AtualizarSozinho from "@/components/AtualizarSozinho";
 import { gerarLink, sair } from "./actions";
@@ -28,7 +28,7 @@ export default async function Painel(props: PageProps<"/painel">) {
   }
   const status = ABAS.find((a) => a.status === busca.aba)?.status ?? "enviado";
   const atendente = typeof busca.atendente === "string" && busca.atendente.trim() ? busca.atendente.trim() : null;
-  const filtroAtendente = atendente ? { atendente } : {};
+  const filtroAtendente = filtroDaAtendente(atendente);
 
   const [solicitacoes, contagem, atendentes] = await Promise.all([
     prisma.solicitacaoDocumento.findMany({
@@ -60,7 +60,7 @@ export default async function Painel(props: PageProps<"/painel">) {
               key={a.nome}
               href={endereco(status, a.nome)}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold ${
-                atendente === a.nome ? "bg-tinta text-white" : "bg-white"
+                atendente?.toLocaleLowerCase("pt-BR") === a.nome.toLocaleLowerCase("pt-BR") ? "bg-tinta text-white" : "bg-white"
               }`}
             >
               {a.nome}
