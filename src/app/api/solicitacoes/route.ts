@@ -18,7 +18,7 @@ async function gerar(lead: Lead, req: NextRequest) {
   return {
     id: solicitacao.id,
     url,
-    mensagem: mensagemWhatsApp(solicitacao.nome, url),
+    mensagem: mensagemWhatsApp(solicitacao.nome, url, { atendente: solicitacao.atendente }),
     status: solicitacao.status,
     telefone: solicitacao.telefone,
     atendente: solicitacao.atendente,
