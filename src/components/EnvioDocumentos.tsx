@@ -41,6 +41,17 @@ function falar(chave: Fala) {
   player.play().catch(lerTexto);
 }
 
+// Tenta tocar sem esperar toque. Os celulares quase sempre bloqueiam som antes
+// do primeiro toque na página; aí devolve false e a fala espera esse toque.
+function tocarSozinho(chave: Fala): Promise<boolean> {
+  player ??= new Audio();
+  player.src = `/audio/${chave}.mp3`;
+  return player.play().then(
+    () => true,
+    () => false,
+  );
+}
+
 function vibrar() {
   navigator.vibrate?.(40);
 }
@@ -83,10 +94,35 @@ export default function EnvioDocumentos(props: {
   const entrada = useRef<HTMLInputElement>(null);
   const aceite = useRef<Promise<boolean> | null>(props.jaAceitou ? Promise.resolve(true) : null);
 
+  const [esperandoToque, setEsperandoToque] = useState(false);
+
   // baixa as falas antes, para tocarem na hora
   useEffect(() => {
     for (const chave of Object.keys(FALAS)) fetch(`/audio/${chave}.mp3`).catch(() => {});
   }, []);
+
+  // Boas-vindas faladas assim que a página abre. Se o celular bloquear o som,
+  // o primeiro toque em qualquer lugar da tela já começa a fala.
+  useEffect(() => {
+    if (props.concluido) return;
+    let ativo = true;
+    const eventos = ["click", "touchend", "keydown"] as const;
+    const aoTocar = (e: Event) => {
+      eventos.forEach((nome) => document.removeEventListener(nome, aoTocar, true));
+      setEsperandoToque(false);
+      // um botão já toca a própria fala (Começar, alto-falante)
+      if (!(e.target instanceof Element && e.target.closest("button"))) falar("inicio");
+    };
+    tocarSozinho("inicio").then((tocou) => {
+      if (tocou || !ativo) return;
+      setEsperandoToque(true);
+      eventos.forEach((nome) => document.addEventListener(nome, aoTocar, true));
+    });
+    return () => {
+      ativo = false;
+      eventos.forEach((nome) => document.removeEventListener(nome, aoTocar, true));
+    };
+  }, [props.concluido]);
 
   const api = `/api/documentos/${props.token}`;
 
@@ -197,7 +233,9 @@ export default function EnvioDocumentos(props: {
             <button
               onClick={() => falar(falaAtual)}
               aria-label="Ouvir de novo"
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-marfim text-vinho active:scale-95"
+              className={`flex h-16 w-16 items-center justify-center rounded-full active:scale-95 ${
+                esperandoToque ? "animate-pulse bg-vinho text-white" : "bg-marfim text-vinho"
+              }`}
             >
               <IconeSom className="h-9 w-9" />
             </button>
