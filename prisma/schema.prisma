@@ -108,6 +108,8 @@ model Socio {
 model SolicitacaoDocumento {
   id              String    @id @default(cuid())
   token           String    @unique
+  // código curto do link, com o primeiro nome do cliente: /d/maria-k7p2xq
+  codigo          String?   @unique
   nome            String?
   telefone        String?
   referencia      String?

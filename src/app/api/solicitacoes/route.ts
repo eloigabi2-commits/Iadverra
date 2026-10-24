@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { criarSolicitacao, linkDaSolicitacao, mensagemWhatsApp } from "@/lib/documentos";
+import { criarSolicitacao, linkDaSolicitacao, mensagemWhatsApp, urlBase } from "@/lib/documentos";
 import { chaveApiConfere, COOKIE_PAINEL, sessaoValida } from "@/lib/painel-auth";
 
 const MAXIMO_POR_LOTE = 500;
@@ -14,7 +14,7 @@ async function gerar(lead: Lead, req: NextRequest) {
     referencia: lead.referencia,
     atendente: lead.atendente,
   });
-  const url = linkDaSolicitacao(solicitacao.token, req);
+  const url = linkDaSolicitacao(solicitacao, urlBase(req));
   return {
     id: solicitacao.id,
     url,

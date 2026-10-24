@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 
 // Ordem em que o cliente tira as fotos
@@ -29,8 +29,37 @@ export function urlBase(req?: Request): string {
   return "";
 }
 
-export function linkDaSolicitacao(token: string, req?: Request): string {
-  return `${urlBase(req)}/documentos/${token}`;
+// Link que vai para o cliente: curto e com o nome dele (/d/maria-k7p2xq).
+// Links antigos, sem código, continuam no formato /documentos/<token>.
+export function linkDaSolicitacao(s: { token: string; codigo: string | null }, base: string): string {
+  return s.codigo ? `${base}/d/${s.codigo}` : `${base}/documentos/${s.token}`;
+}
+
+const LETRAS_DO_CODIGO = "abcdefghjkmnpqrstuvwxyz23456789"; // sem 0/o, 1/l/i, que se confundem
+
+// "Maria Aparecida" vira "maria-k7p2xq": o nome ajuda o cliente a confiar no link e
+// os 6 caracteres aleatórios impedem que alguém adivinhe o link de outra pessoa.
+export function gerarCodigo(nome: string | null): string {
+  const primeiro = (nome ?? "")
+    .split(/\s+/)[0]
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z]/g, "")
+    .slice(0, 12);
+  let sufixo = "";
+  for (let i = 0; i < 6; i++) sufixo += LETRAS_DO_CODIGO[randomInt(LETRAS_DO_CODIGO.length)];
+  return primeiro ? `${primeiro}-${sufixo}` : sufixo;
+}
+
+// Dá um código curto para links criados antes dessa mudança
+export async function garantirCodigo<T extends { id: string; nome: string | null; codigo: string | null }>(s: T): Promise<T> {
+  if (s.codigo) return s;
+  const atualizado = await prisma.solicitacaoDocumento.update({
+    where: { id: s.id },
+    data: { codigo: gerarCodigo(s.nome) },
+  });
+  return { ...s, codigo: atualizado.codigo };
 }
 
 function limpar(valor: unknown, max = 120): string | null {
@@ -69,15 +98,18 @@ export async function criarSolicitacao(dados: {
     if (existente) {
       // a distribuição pode ter mudado de atendente desde o primeiro link
       if (atendente && existente.atendente !== atendente) {
-        return prisma.solicitacaoDocumento.update({ where: { id: existente.id }, data: { atendente } });
+        return garantirCodigo(
+          await prisma.solicitacaoDocumento.update({ where: { id: existente.id }, data: { atendente } }),
+        );
       }
-      return existente;
+      return garantirCodigo(existente);
     }
   }
 
   return prisma.solicitacaoDocumento.create({
     data: {
       token: randomBytes(18).toString("base64url"),
+      codigo: gerarCodigo(nome),
       nome,
       telefone,
       referencia,
@@ -115,6 +147,14 @@ export async function listarAtendentes(): Promise<{ nome: string; paraConferir: 
       paraConferir: item.paraConferir,
     }))
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+}
+
+export async function buscarPorCodigo(codigo: string) {
+  if (!/^[a-z0-9-]{6,24}$/.test(codigo)) return null;
+  return prisma.solicitacaoDocumento.findUnique({
+    where: { codigo },
+    include: { fotos: { select: { tipo: true } } },
+  });
 }
 
 export async function buscarPorToken(token: string) {
