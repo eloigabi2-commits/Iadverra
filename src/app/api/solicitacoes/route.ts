@@ -4,7 +4,7 @@ import { chaveApiConfere, COOKIE_PAINEL, sessaoValida } from "@/lib/painel-auth"
 
 const MAXIMO_POR_LOTE = 500;
 
-type Lead = { nome?: unknown; telefone?: unknown; chat_number?: unknown; referencia?: unknown };
+type Lead = { nome?: unknown; telefone?: unknown; chat_number?: unknown; referencia?: unknown; atendente?: unknown };
 
 async function gerar(lead: Lead, req: NextRequest) {
   const solicitacao = await criarSolicitacao({
@@ -12,6 +12,7 @@ async function gerar(lead: Lead, req: NextRequest) {
     // aceita o chat_number do ChatGuru no lugar do telefone
     telefone: lead.telefone ?? lead.chat_number,
     referencia: lead.referencia,
+    atendente: lead.atendente,
   });
   const url = linkDaSolicitacao(solicitacao.token, req);
   return {
@@ -20,6 +21,7 @@ async function gerar(lead: Lead, req: NextRequest) {
     mensagem: mensagemWhatsApp(solicitacao.nome, url),
     status: solicitacao.status,
     telefone: solicitacao.telefone,
+    atendente: solicitacao.atendente,
   };
 }
 

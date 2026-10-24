@@ -128,6 +128,11 @@ chegam em "Para conferir" (a lista se atualiza sozinha); em cada foto há
 "Pedir de novo", que apaga só aquela e faz o cliente cair direto nela ao abrir
 o link de novo, e "Conferi, está tudo certo" move o cliente para "Conferidos".
 
+Cada link guarda a atendente que recebeu o cliente na distribuição (campo
+`atendente` da API, vindo da coluna "Atendente" da planilha do bancário). No
+painel, os atalhos no topo filtram por atendente, e cada uma tem o próprio
+endereço, `/painel?atendente=<Nome>`, que mostra só os clientes dela.
+
 Fluxo do cliente (`/documentos/<token>`), feito para quem não sabe ler: cada
 tela é explicada em voz alta, os documentos aparecem desenhados e cada tela tem
 um botão principal só. Toque no alto-falante (ouve a explicação, incluindo o

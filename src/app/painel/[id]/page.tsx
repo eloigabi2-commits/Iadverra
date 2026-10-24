@@ -34,14 +34,20 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-6">
-      <Link href="/painel" className="text-sm text-tinta/60 underline">
+      <Link
+        href={s.atendente ? `/painel?atendente=${encodeURIComponent(s.atendente)}` : "/painel"}
+        className="text-sm text-tinta/60 underline"
+      >
         ← Voltar para a lista
       </Link>
 
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-marca text-3xl font-bold text-vinho">{s.nome ?? "Sem nome"}</h1>
-          <p className="text-tinta/70">{s.telefone ?? "sem telefone"}</p>
+          <p className="text-tinta/70">
+            {s.telefone ?? "sem telefone"}
+            {s.atendente ? ` · atendente ${s.atendente}` : ""}
+          </p>
         </div>
         <Situacao status={s.status} />
       </div>
