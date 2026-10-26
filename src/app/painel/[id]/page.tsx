@@ -10,6 +10,7 @@ import {
   linkWhatsApp,
   mensagemWhatsApp,
   ROTULO_FOTO,
+  SEM_ATENDENTE,
   TIPOS_FOTO,
 } from "@/lib/documentos";
 import { podeVer, sessaoAtual, veTudo } from "@/lib/painel-auth";
@@ -39,7 +40,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
   return (
     <main className="mx-auto max-w-4xl px-5 py-6">
       <Link
-        href={veTudo(sessao) && s.atendente ? `/painel?atendente=${encodeURIComponent(s.atendente)}` : "/painel"}
+        href={veTudo(sessao) ? `/painel?atendente=${encodeURIComponent(s.atendente || SEM_ATENDENTE)}` : "/painel"}
         className="text-sm text-tinta/60 underline"
       >
         ← Voltar para a lista

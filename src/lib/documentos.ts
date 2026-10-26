@@ -195,6 +195,40 @@ export async function listarAtendentes(): Promise<{ nome: string; paraConferir: 
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }
 
+// Clientes sem atendente (links antigos) ficam num grupo à parte na lista de atendentes
+export const SEM_ATENDENTE = "(sem atendente)";
+
+export type ResumoAtendente = {
+  nome: string;
+  cadastrada: boolean;
+  paraConferir: number;
+  esperando: number;
+  conferidos: number;
+};
+
+// Lista de atendentes da supervisão: todas as cadastradas, mesmo sem clientes ainda,
+// e os nomes que vieram da planilha sem cadastro, para nenhum cliente ficar escondido
+export async function resumoDasAtendentes(): Promise<ResumoAtendente[]> {
+  const [cadastradas, grupos] = await Promise.all([
+    prisma.atendente.findMany({ where: { veTodos: false }, select: { nome: true } }),
+    prisma.solicitacaoDocumento.groupBy({ by: ["atendente", "status"], _count: true }),
+  ]);
+  const mapa = new Map<string, ResumoAtendente>();
+  const vazio = (nome: string, cadastrada: boolean) => ({ nome, cadastrada, paraConferir: 0, esperando: 0, conferidos: 0 });
+  for (const a of cadastradas) mapa.set(chaveDoNome(a.nome), vazio(a.nome, true));
+  for (const g of grupos) {
+    const chave = g.atendente ? chaveDoNome(g.atendente) : "";
+    const item = mapa.get(chave) ?? vazio(g.atendente ?? SEM_ATENDENTE, false);
+    if (g.status === "enviado") item.paraConferir += g._count;
+    else if (g.status === "aguardando") item.esperando += g._count;
+    else item.conferidos += g._count;
+    mapa.set(chave, item);
+  }
+  return [...mapa.values()].sort(
+    (a, b) => Number(b.cadastrada) - Number(a.cadastrada) || a.nome.localeCompare(b.nome, "pt-BR"),
+  );
+}
+
 export async function buscarPorCodigo(codigo: string) {
   if (!/^[a-z0-9-]{6,24}$/.test(codigo)) return null;
   return prisma.solicitacaoDocumento.findUnique({

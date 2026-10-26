@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { criarSolicitacao, gerarChaveAtendente, isTipoFoto } from "@/lib/documentos";
+import { criarSolicitacao, gerarChaveAtendente, isTipoFoto, SEM_ATENDENTE } from "@/lib/documentos";
 import {
   COOKIE_PAINEL,
   opcoesDoCookie,
@@ -17,8 +17,8 @@ import {
 
 // Volta para a lista geral filtrada pela atendente do cliente
 function painelDa(sessao: Sessao, atendente: string | null | undefined): string {
-  if (!veTudo(sessao) || !atendente) return "/painel";
-  return `/painel?atendente=${encodeURIComponent(atendente)}`;
+  if (!veTudo(sessao)) return "/painel";
+  return `/painel?atendente=${encodeURIComponent(atendente || SEM_ATENDENTE)}`;
 }
 
 export async function entrar(formData: FormData) {
