@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { filtroDaAtendente, formatarData, resumoDasAtendentes, SEM_ATENDENTE } from "@/lib/documentos";
+import { filtroDaAtendente, formatarData, linkDaAtendente, mesmaAtendente, resumoDasAtendentes, SEM_ATENDENTE } from "@/lib/documentos";
 import { sessaoAtual, veTudo } from "@/lib/painel-auth";
 import AtualizarSozinho from "@/components/AtualizarSozinho";
+import CopiarLink from "@/components/CopiarLink";
 import { gerarLink, sair } from "./actions";
 
 const ABAS = [
@@ -51,6 +53,18 @@ export default async function Painel(props: PageProps<"/painel">) {
   ]);
   const total = (s: string) => contagem.find((c) => c.status === s)?._count ?? 0;
 
+  // o gestor já encontra aqui o link individual da atendente, para mandar a ela
+  let linkIndividual: string | null = null;
+  if (sessao.gestor && atendente && !semAtendente) {
+    const cadastrada = (await prisma.atendente.findMany()).find((a) => mesmaAtendente(a.nome, atendente));
+    if (cadastrada) {
+      const h = await headers();
+      const origem =
+        process.env.APP_URL?.trim().replace(/\/+$/, "") || `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
+      linkIndividual = linkDaAtendente(cadastrada.chave, origem);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-4xl px-5 py-6">
       <AtualizarSozinho />
@@ -61,6 +75,18 @@ export default async function Painel(props: PageProps<"/painel">) {
             ← Todas as atendentes
           </Link>
           <h1 className="mt-2 font-marca text-3xl font-bold text-vinho">{atendente}</h1>
+          {linkIndividual && (
+            <div className="mt-3 rounded-xl bg-marfim px-4 py-3">
+              <p className="text-sm font-semibold">Link individual de {atendente} (só para ela, sem senha):</p>
+              <p className="mt-1 break-all font-mono text-sm">{linkIndividual}</p>
+              <div className="mt-2">
+                <CopiarLink
+                  url={linkIndividual}
+                  mensagem={`${atendente?.split(" ")[0]}, este é o seu acesso ao painel de documentos. Salve nos favoritos e não passe para ninguém 👇\n${linkIndividual}`}
+                />
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <p className="mb-5 rounded-xl bg-marfim px-4 py-3">
