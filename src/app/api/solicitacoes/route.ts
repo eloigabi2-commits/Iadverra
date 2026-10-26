@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { criarSolicitacao, linkDaSolicitacao, mensagemWhatsApp, urlBase } from "@/lib/documentos";
-import { chaveApiConfere, COOKIE_PAINEL, sessaoValida } from "@/lib/painel-auth";
+import { chaveApiConfere, sessaoAtual } from "@/lib/painel-auth";
 
 const MAXIMO_POR_LOTE = 500;
 
@@ -30,8 +30,8 @@ async function gerar(lead: Lead, req: NextRequest) {
 // Um lead: { nome, telefone, referencia } → { id, url, mensagem, ... }
 // Em massa: { leads: [{ nome, telefone }, ...] } → { resultados: [...] }
 export async function POST(req: NextRequest) {
-  const autorizado =
-    chaveApiConfere(req) || sessaoValida(req.cookies.get(COOKIE_PAINEL)?.value);
+  // só a IA/n8n (chave da API) e o gestor criam links para qualquer atendente
+  const autorizado = chaveApiConfere(req) || (await sessaoAtual())?.gestor === true;
   if (!autorizado) {
     return NextResponse.json({ erro: "não autorizado" }, { status: 401 });
   }

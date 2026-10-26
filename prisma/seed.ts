@@ -4,6 +4,7 @@
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { randomInt } from "node:crypto";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -49,7 +50,46 @@ function pick<T>(arr: T[], i: number): T {
   return arr[i % arr.length];
 }
 
+// Atendentes do painel de documentos: cada uma ganha o link pessoal dela (/a/<chave>).
+// Só cria quem falta; não mexe no link de quem já tem.
+const ATENDENTES = [
+  "Vitoria Vechetin", "Beatriz", "Jaqueline", "Layla", "Thalia",
+  "Solange", "Bruna", "Karen", "Giovana", "Laryssa",
+];
+
+const semAcento = (t: string) =>
+  t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase();
+
+function chaveDe(nome: string): string {
+  const letras = "abcdefghjkmnpqrstuvwxyz23456789";
+  let sufixo = "";
+  for (let i = 0; i < 12; i++) sufixo += letras[randomInt(letras.length)];
+  const primeiro = semAcento(nome).split(" ")[0].replace(/[^a-z]/g, "");
+  return primeiro ? `${primeiro}-${sufixo}` : sufixo;
+}
+
+async function seedAtendentes() {
+  const existentes = await prisma.atendente.findMany();
+  for (const nome of ATENDENTES) {
+    if (existentes.some((a) => semAcento(a.nome) === semAcento(nome))) continue;
+    await prisma.atendente.create({ data: { nome, chave: chaveDe(nome) } });
+    console.log(`Atendente cadastrada: ${nome}`);
+  }
+  // clientes gravados com outra grafia ("vitoria vechetin") passam a usar o nome cadastrado,
+  // para aparecerem no painel da atendente
+  const cadastradas = await prisma.atendente.findMany({ select: { nome: true } });
+  const grafias = await prisma.solicitacaoDocumento.groupBy({ by: ["atendente"], where: { atendente: { not: null } } });
+  for (const { atendente } of grafias) {
+    const oficial = cadastradas.find((a) => semAcento(a.nome) === semAcento(atendente!));
+    if (oficial && oficial.nome !== atendente) {
+      await prisma.solicitacaoDocumento.updateMany({ where: { atendente }, data: { atendente: oficial.nome } });
+    }
+  }
+}
+
 async function main() {
+  await seedAtendentes();
+
   const existing = await prisma.empresa.count();
   if (existing > 0) {
     console.log(`Banco já populado (${existing} empresas) — pulando seed.`);

@@ -120,7 +120,7 @@ processo à LGPD antes de operar em escala.
 Link simples, pensado para idosos, para o lead mandar as fotos da frente e do
 verso do RG e do comprovante de endereço fora do WhatsApp, com a identidade da
 Esclarece Assessoria (`public/marca/`). Cada lead recebe um link único; as fotos
-ficam no Postgres e as atendentes veem tudo em `/painel` (protegido por senha).
+ficam no Postgres e cada atendente vê só os clientes dela em `/painel`.
 
 No painel a atendente cria o link (nome + WhatsApp) e toca em "Enviar link pelo
 WhatsApp", que abre a conversa do cliente com a mensagem pronta. Os envios
@@ -129,9 +129,15 @@ chegam em "Para conferir" (a lista se atualiza sozinha); em cada foto há
 o link de novo, e "Conferi, está tudo certo" move o cliente para "Conferidos".
 
 Cada link guarda a atendente que recebeu o cliente na distribuição (campo
-`atendente` da API, vindo da coluna "Atendente" da planilha do bancário). No
-painel, os atalhos no topo filtram por atendente, e cada uma tem o próprio
-endereço, `/painel?atendente=<Nome>`, que mostra só os clientes dela.
+`atendente` da API, vindo da coluna "Atendente" da planilha do bancário). Cada
+atendente entra pelo link pessoal dela, `/a/<chave>`, sem senha, e o painel
+mostra só os clientes com o nome dela: a lista, o detalhe, as fotos e as ações
+são conferidos no servidor, então abrir o endereço de um cliente de outra
+atendente dá "não encontrado". O gestor entra com `PAINEL_SENHA`, vê todas e
+em `/painel/atendentes` copia, troca ou tira o link de cada uma (trocar o link
+derruba na hora quem entrou pelo antigo). As atendentes iniciais são
+cadastradas pelo seed (`prisma/seed.ts`), e o nome que chega da planilha é
+gravado com a grafia cadastrada ("vitória" vira "Vitoria Vechetin").
 
 Fluxo do cliente (`/documentos/<token>`), feito para quem não sabe ler: cada
 tela é explicada em voz alta, os documentos aparecem desenhados e cada tela tem
@@ -158,7 +164,7 @@ Sem os MP3, o celular lê os textos com a voz dele.
 
 | Variável | Para quê |
 | --- | --- |
-| `PAINEL_SENHA` | senha do painel `/painel` |
+| `PAINEL_SENHA` | senha do gestor no `/painel` (as atendentes entram pelo link pessoal) |
 | `DOCUMENTOS_API_KEY` | chave para a IA/n8n gerar links |
 | `APP_URL` | domínio usado nos links (ex.: `https://docs.seuescritorio.com.br`) |
 | `NOME_ESCRITORIO` | nome mostrado ao cliente e na política |

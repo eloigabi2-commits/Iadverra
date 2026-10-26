@@ -12,13 +12,14 @@ import {
   ROTULO_FOTO,
   TIPOS_FOTO,
 } from "@/lib/documentos";
-import { estaLogado } from "@/lib/painel-auth";
+import { podeVer, sessaoAtual } from "@/lib/painel-auth";
 import CopiarLink from "@/components/CopiarLink";
 import BotaoExcluir from "@/components/BotaoExcluir";
 import { excluir, marcarConferido, pedirDeNovo } from "../actions";
 
 export default async function Detalhe(props: PageProps<"/painel/[id]">) {
-  if (!(await estaLogado())) redirect("/painel/login");
+  const sessao = await sessaoAtual();
+  if (!sessao) redirect("/painel/login");
   const { id } = await props.params;
   const { refazer } = await props.searchParams;
 
@@ -26,7 +27,8 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
     where: { id },
     include: { fotos: { select: { id: true, tipo: true } } },
   });
-  if (!s) notFound();
+  // cliente de outra atendente: nem confirma que existe
+  if (!s || !podeVer(sessao, s.atendente)) notFound();
 
   const h = await headers();
   const origem = process.env.APP_URL?.trim().replace(/\/+$/, "") || `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
@@ -37,7 +39,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
   return (
     <main className="mx-auto max-w-4xl px-5 py-6">
       <Link
-        href={s.atendente ? `/painel?atendente=${encodeURIComponent(s.atendente)}` : "/painel"}
+        href={sessao.gestor && s.atendente ? `/painel?atendente=${encodeURIComponent(s.atendente)}` : "/painel"}
         className="text-sm text-tinta/60 underline"
       >
         ← Voltar para a lista
@@ -48,7 +50,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
           <h1 className="font-marca text-3xl font-bold text-vinho">{s.nome ?? "Sem nome"}</h1>
           <p className="text-tinta/70">
             {s.telefone ?? "sem telefone"}
-            {s.atendente ? ` · atendente ${s.atendente}` : ""}
+            {sessao.gestor && s.atendente ? ` · atendente ${s.atendente}` : ""}
           </p>
         </div>
         <Situacao status={s.status} />

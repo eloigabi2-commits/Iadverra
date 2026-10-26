@@ -1,12 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { estaLogado } from "@/lib/painel-auth";
+import { podeVer, sessaoAtual } from "@/lib/painel-auth";
 
 export async function GET(req: Request, ctx: RouteContext<"/api/painel/fotos/[id]">) {
-  if (!(await estaLogado())) return new Response("não autorizado", { status: 401 });
+  const sessao = await sessaoAtual();
+  if (!sessao) return new Response("não autorizado", { status: 401 });
 
   const { id } = await ctx.params;
-  const foto = await prisma.fotoDocumento.findUnique({ where: { id } });
-  if (!foto) return new Response("não encontrada", { status: 404 });
+  const foto = await prisma.fotoDocumento.findUnique({
+    where: { id },
+    include: { solicitacao: { select: { atendente: true } } },
+  });
+  // foto de cliente de outra atendente responde igual a foto inexistente
+  if (!foto || !podeVer(sessao, foto.solicitacao.atendente)) return new Response("não encontrada", { status: 404 });
 
   const extensao = foto.mime.split("/")[1] ?? "jpg";
   const baixar = new URL(req.url).searchParams.has("baixar");

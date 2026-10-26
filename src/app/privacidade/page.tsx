@@ -45,7 +45,7 @@ export default function Privacidade() {
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Quem tem acesso</h2>
         <p>
-          Apenas a equipe do escritório responsável pelo seu atendimento, por um painel protegido por senha.
+          Apenas a pessoa da equipe responsável pelo seu atendimento, por um painel de acesso individual e restrito.
           Os documentos podem ser apresentados a bancos, órgãos públicos e ao Poder Judiciário quando isso for
           necessário para o seu caso.
         </p>
