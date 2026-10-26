@@ -1,18 +1,34 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { linkDaAtendente, listarAtendentes, mesmaAtendente } from "@/lib/documentos";
 import { sessaoAtual } from "@/lib/painel-auth";
 import CopiarLink from "@/components/CopiarLink";
 import BotaoConfirmar from "@/components/BotaoConfirmar";
-import { cadastrarAtendente, removerAtendente, trocarLinkDaAtendente } from "../actions";
+import { cadastrarAtendente, removerAtendente, sair, trocarLinkDaAtendente } from "../actions";
 
 // Só o gestor: o link pessoal de cada atendente, para mandar a ela
 export default async function Atendentes() {
   const sessao = await sessaoAtual();
   if (!sessao) redirect("/painel/login");
-  if (!sessao.gestor) notFound();
+  // quem entrou por link de atendente (ou da supervisão) não vê os links das outras
+  if (!sessao.gestor) {
+    return (
+      <main className="mx-auto max-w-sm px-5 py-16">
+        <h1 className="font-marca text-2xl font-bold text-vinho">Página só do gestor</h1>
+        <p className="mt-3 text-tinta/70">
+          Este navegador está no painel de <strong>{sessao.atendente.nome}</strong>. Para ver os links das
+          atendentes, saia e entre com a senha do gestor.
+        </p>
+        <form action={sair} className="mt-6">
+          <button className="w-full rounded-lg bg-vinho px-4 py-3 text-lg font-semibold text-white">
+            Sair e entrar como gestor
+          </button>
+        </form>
+      </main>
+    );
+  }
 
   const [cadastradas, comClientes] = await Promise.all([
     prisma.atendente.findMany({ orderBy: { nome: "asc" } }),
