@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { filtroDaAtendente, formatarData, listarAtendentes } from "@/lib/documentos";
+import { filtroDaAtendente, formatarData, resumoDasAtendentes, SEM_ATENDENTE } from "@/lib/documentos";
 import { sessaoAtual, veTudo } from "@/lib/painel-auth";
 import AtualizarSozinho from "@/components/AtualizarSozinho";
 import { gerarLink, sair } from "./actions";
@@ -25,7 +25,8 @@ export default async function Painel(props: PageProps<"/painel">) {
   const sessao = await sessaoAtual();
   if (!sessao) redirect(typeof busca.atendente === "string" ? "/painel/login?atendente=1" : "/painel/login");
   const status = ABAS.find((a) => a.status === busca.aba)?.status ?? "enviado";
-  // a atendente só vê os clientes dela, não importa o que venha no endereço
+  // a atendente só vê os clientes dela, não importa o que venha no endereço;
+  // gestor e supervisão escolhem uma atendente por vez
   const geral = veTudo(sessao);
   const atendente =
     sessao.gestor || sessao.atendente.veTodos
@@ -33,9 +34,13 @@ export default async function Painel(props: PageProps<"/painel">) {
         ? busca.atendente.trim()
         : null
       : sessao.atendente.nome;
-  const filtroAtendente = filtroDaAtendente(atendente);
 
-  const [solicitacoes, contagem, atendentes] = await Promise.all([
+  if (geral && !atendente) return <ListaDeAtendentes ehGestor={sessao.gestor} nome={sessao.atendente?.nome ?? null} />;
+
+  const semAtendente = atendente === SEM_ATENDENTE;
+  const filtroAtendente = semAtendente ? { atendente: null } : filtroDaAtendente(atendente);
+
+  const [solicitacoes, contagem] = await Promise.all([
     prisma.solicitacaoDocumento.findMany({
       where: { status, ...filtroAtendente },
       orderBy: status === "aguardando" ? { criadoEm: "desc" } : { enviadoEm: "desc" },
@@ -43,7 +48,6 @@ export default async function Painel(props: PageProps<"/painel">) {
       include: { _count: { select: { fotos: true } } },
     }),
     prisma.solicitacaoDocumento.groupBy({ by: ["status"], where: filtroAtendente, _count: true }),
-    geral ? listarAtendentes() : [],
   ]);
   const total = (s: string) => contagem.find((c) => c.status === s)?._count ?? 0;
 
@@ -51,87 +55,45 @@ export default async function Painel(props: PageProps<"/painel">) {
     <main className="mx-auto max-w-4xl px-5 py-6">
       <AtualizarSozinho />
 
-      {!sessao.gestor && (
-        <p className="mb-5 rounded-xl bg-marfim px-4 py-3">
-          Olá, <strong>{sessao.atendente.nome}</strong>!{" "}
-          {sessao.atendente.veTodos
-            ? "Aqui aparecem os clientes de todas as atendentes."
-            : "Aqui aparecem só os seus clientes."}{" "}
-          Salve esta página nos favoritos do celular para abrir direto aqui.
-        </p>
-      )}
-
-      {sessao.gestor && (
-        <p className="mb-4 text-sm">
-          <Link href="/painel/atendentes" className="font-semibold text-vinho underline">
-            Links das atendentes
-          </Link>{" "}
-          <span className="text-tinta/60">· cada uma entra pelo link dela e vê só os clientes dela</span>
-        </p>
-      )}
-
-      {geral && atendentes.length > 0 && (
-        <nav className="mb-5 flex flex-wrap items-center gap-2" aria-label="Atendente">
-          <span className="text-sm font-semibold text-tinta/60">Atendente:</span>
-          <Link
-            href={endereco(status, null)}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${!atendente ? "bg-tinta text-white" : "bg-white"}`}
-          >
-            Todas
+      {geral ? (
+        <div className="mb-5">
+          <Link href="/painel" className="text-sm text-tinta/60 underline">
+            ← Todas as atendentes
           </Link>
-          {atendentes.map((a) => (
-            <Link
-              key={a.nome}
-              href={endereco(status, a.nome)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold ${
-                atendente?.toLocaleLowerCase("pt-BR") === a.nome.toLocaleLowerCase("pt-BR") ? "bg-tinta text-white" : "bg-white"
-              }`}
-            >
-              {a.nome}
-              {a.paraConferir > 0 && (
-                <span className="rounded-full bg-cobre px-1.5 text-xs text-white">{a.paraConferir}</span>
-              )}
-            </Link>
-          ))}
-        </nav>
+          <h1 className="mt-2 font-marca text-3xl font-bold text-vinho">{atendente}</h1>
+        </div>
+      ) : (
+        <p className="mb-5 rounded-xl bg-marfim px-4 py-3">
+          Olá, <strong>{atendente}</strong>! Aqui aparecem só os seus clientes. Salve esta página nos favoritos do
+          celular para abrir direto aqui.
+        </p>
       )}
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <h1 className="font-marca text-2xl font-bold text-vinho">Pedir documentos a um cliente</h1>
-        <form action={gerarLink} className="mt-4 grid gap-3 sm:grid-cols-2">
-          <label>
-            <span className="text-sm font-medium">Nome do cliente</span>
-            <input name="nome" required className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg" />
-          </label>
-          <label>
-            <span className="text-sm font-medium">WhatsApp (com DDD)</span>
-            <input
-              name="telefone"
-              required
-              inputMode="tel"
-              placeholder="11 99999-8888"
-              className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg"
-            />
-          </label>
-          {geral && (
+      {!semAtendente && (
+        <section className="rounded-2xl bg-white p-5 shadow-sm">
+          <h2 className="font-marca text-2xl font-bold text-vinho">Pedir documentos a um cliente</h2>
+          <form action={gerarLink} className="mt-4 grid gap-3 sm:grid-cols-2">
+            {geral && <input type="hidden" name="atendente" value={atendente ?? ""} />}
             <label>
-              <span className="text-sm font-medium">Atendente</span>
+              <span className="text-sm font-medium">Nome do cliente</span>
+              <input name="nome" required className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg" />
+            </label>
+            <label>
+              <span className="text-sm font-medium">WhatsApp (com DDD)</span>
               <input
-                name="atendente"
-                list="lista-atendentes"
-                defaultValue={atendente ?? ""}
+                name="telefone"
+                required
+                inputMode="tel"
+                placeholder="11 99999-8888"
                 className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg"
               />
-              <datalist id="lista-atendentes">
-                {atendentes.map((a) => (
-                  <option key={a.nome} value={a.nome} />
-                ))}
-              </datalist>
             </label>
-          )}
-          <button className="self-end rounded-lg bg-vinho px-5 py-3 text-lg font-semibold text-white">Criar link</button>
-        </form>
-      </section>
+            <button className="rounded-lg bg-vinho px-5 py-3 text-lg font-semibold text-white sm:col-span-2 sm:justify-self-start">
+              Criar link
+            </button>
+          </form>
+        </section>
+      )}
 
       <nav className="mt-6 flex flex-wrap gap-2">
         {ABAS.map((a) => (
@@ -158,10 +120,7 @@ export default async function Painel(props: PageProps<"/painel">) {
             <Link href={`/painel/${s.id}`} className="flex items-center justify-between gap-4 p-4 hover:bg-creme">
               <div className="min-w-0">
                 <p className="truncate text-lg font-semibold">{s.nome ?? "Sem nome"}</p>
-                <p className="text-sm text-tinta/60">
-                  {s.telefone ?? "sem telefone"}
-                  {geral && !atendente && s.atendente ? ` · ${s.atendente}` : ""}
-                </p>
+                <p className="text-sm text-tinta/60">{s.telefone ?? "sem telefone"}</p>
               </div>
               <div className="shrink-0 text-right text-sm text-tinta/60">
                 <p>{status === "aguardando" ? `Link criado ${formatarData(s.criadoEm)}` : `Recebido ${formatarData(s.enviadoEm)}`}</p>
@@ -176,5 +135,86 @@ export default async function Painel(props: PageProps<"/painel">) {
         <button className="text-sm text-tinta/60 underline">Sair do painel</button>
       </form>
     </main>
+  );
+}
+
+// Gestor e supervisão: o nome de cada atendente com a situação dos clientes dela
+async function ListaDeAtendentes({ ehGestor, nome }: { ehGestor: boolean; nome: string | null }) {
+  const resumo = await resumoDasAtendentes();
+  const cadastradas = resumo.filter((r) => r.cadastrada);
+  const outras = resumo.filter((r) => !r.cadastrada);
+
+  return (
+    <main className="mx-auto max-w-4xl px-5 py-6">
+      <AtualizarSozinho />
+
+      {nome && (
+        <p className="mb-5 rounded-xl bg-marfim px-4 py-3">
+          Olá, <strong>{nome}</strong>! Toque no nome de uma atendente para ver e cuidar dos clientes dela. Salve esta
+          página nos favoritos do celular para abrir direto aqui.
+        </p>
+      )}
+      {ehGestor && (
+        <p className="mb-4 text-sm">
+          <Link href="/painel/atendentes" className="font-semibold text-vinho underline">
+            Links das atendentes
+          </Link>{" "}
+          <span className="text-tinta/60">· cada uma entra pelo link dela e vê só os clientes dela</span>
+        </p>
+      )}
+
+      <h1 className="font-marca text-3xl font-bold text-vinho">Atendentes</h1>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {cadastradas.map((r) => (
+          <CartaoAtendente key={r.nome} resumo={r} />
+        ))}
+      </ul>
+
+      {outras.length > 0 && (
+        <>
+          <h2 className="mt-8 font-semibold text-tinta/70">Outros nomes que vieram da planilha</h2>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+            {outras.map((r) => (
+              <CartaoAtendente key={r.nome} resumo={r} />
+            ))}
+          </ul>
+        </>
+      )}
+
+      <form action={sair} className="mt-8 text-center">
+        <button className="text-sm text-tinta/60 underline">Sair do painel</button>
+      </form>
+    </main>
+  );
+}
+
+function CartaoAtendente({
+  resumo,
+}: {
+  resumo: { nome: string; paraConferir: number; esperando: number; conferidos: number };
+}) {
+  return (
+    <li>
+      <Link
+        href={endereco("enviado", resumo.nome)}
+        className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm hover:bg-creme"
+      >
+        <div className="min-w-0">
+          <p className="truncate text-lg font-semibold">{resumo.nome}</p>
+          <p className="text-sm text-tinta/60">
+            {resumo.esperando} esperando · {resumo.conferidos} conferidos
+          </p>
+        </div>
+        {resumo.paraConferir > 0 ? (
+          <span className="shrink-0 rounded-full bg-cobre px-3 py-1 text-sm font-bold text-white">
+            {resumo.paraConferir} para conferir
+          </span>
+        ) : (
+          <span className="shrink-0 text-xl text-tinta/40" aria-hidden>
+            ›
+          </span>
+        )}
+      </Link>
+    </li>
   );
 }
