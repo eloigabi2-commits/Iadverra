@@ -39,8 +39,9 @@ const LETRAS_DO_CODIGO = "abcdefghjkmnpqrstuvwxyz23456789"; // sem 0/o, 1/l/i, q
 
 // "Maria Aparecida" vira "maria-k7p2xq": o nome ajuda o cliente a confiar no link e
 // os 6 caracteres aleatórios impedem que alguém adivinhe o link de outra pessoa.
-export function gerarCodigo(nome: string | null): string {
+function codigoComNome(nome: string | null, tamanho: number): string {
   const primeiro = (nome ?? "")
+    .trim()
     .split(/\s+/)[0]
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -48,8 +49,12 @@ export function gerarCodigo(nome: string | null): string {
     .replace(/[^a-z]/g, "")
     .slice(0, 12);
   let sufixo = "";
-  for (let i = 0; i < 6; i++) sufixo += LETRAS_DO_CODIGO[randomInt(LETRAS_DO_CODIGO.length)];
+  for (let i = 0; i < tamanho; i++) sufixo += LETRAS_DO_CODIGO[randomInt(LETRAS_DO_CODIGO.length)];
   return primeiro ? `${primeiro}-${sufixo}` : sufixo;
+}
+
+export function gerarCodigo(nome: string | null): string {
+  return codigoComNome(nome, 6);
 }
 
 // Dá um código curto para links criados antes dessa mudança
@@ -84,15 +89,20 @@ export async function criarSolicitacao(dados: {
   telefone?: unknown;
   referencia?: unknown;
   atendente?: unknown;
-}) {
+}, opcoes: { soDaAtendente?: boolean } = {}) {
   const nome = limpar(dados.nome);
   const telefone = limparTelefone(dados.telefone);
   const referencia = limpar(dados.referencia);
-  const atendente = limpar(dados.atendente, 60)?.replace(/\s+/g, " ") ?? null;
+  const atendente = await nomeOficialDaAtendente(limpar(dados.atendente, 60));
 
   if (telefone || referencia) {
     const existente = await prisma.solicitacaoDocumento.findFirst({
-      where: { status: "aguardando", ...(telefone ? { telefone } : { referencia }) },
+      where: {
+        status: "aguardando",
+        ...(telefone ? { telefone } : { referencia }),
+        // pela atendente: reaproveita só link dela, nunca puxa o cliente de outra
+        ...(opcoes.soDaAtendente ? filtroDaAtendente(atendente) : {}),
+      },
       orderBy: { criadoEm: "desc" },
     });
     if (existente) {
@@ -116,6 +126,42 @@ export async function criarSolicitacao(dados: {
       atendente,
     },
   });
+}
+
+// "Vitória  Vechetin" e "vitoria vechetin" são a mesma pessoa
+export function chaveDoNome(nome: string): string {
+  return nome
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+export function mesmaAtendente(a: string | null, b: string | null): boolean {
+  return !!a && !!b && chaveDoNome(a) === chaveDoNome(b);
+}
+
+// Grava o cliente com o nome da atendente exatamente como está cadastrado, para ele
+// aparecer no painel dela mesmo que a planilha mande "vitória" ou só o primeiro nome.
+export async function nomeOficialDaAtendente(nome: string | null): Promise<string | null> {
+  if (!nome) return null;
+  const limpo = nome.replace(/\s+/g, " ");
+  const cadastradas = await prisma.atendente.findMany({ select: { nome: true } });
+  const exata = cadastradas.find((a) => mesmaAtendente(a.nome, limpo));
+  if (exata) return exata.nome;
+  const primeiro = chaveDoNome(limpo).split(" ")[0];
+  const peloPrimeiroNome = cadastradas.filter((a) => chaveDoNome(a.nome).split(" ")[0] === primeiro);
+  return peloPrimeiroNome.length === 1 ? peloPrimeiroNome[0].nome : limpo;
+}
+
+// Link pessoal da atendente: "thalia-" + 12 caracteres aleatórios, impossível de adivinhar
+export function gerarChaveAtendente(nome: string): string {
+  return codigoComNome(nome, 12);
+}
+
+export function linkDaAtendente(chave: string, base: string): string {
+  return `${base}/a/${chave}`;
 }
 
 // Filtro do painel por atendente: "Vitoria Vechetin" e "vitoria  vechetin" são a mesma pessoa

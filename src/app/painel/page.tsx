@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { filtroDaAtendente, formatarData, listarAtendentes } from "@/lib/documentos";
-import { estaLogado } from "@/lib/painel-auth";
+import { sessaoAtual } from "@/lib/painel-auth";
 import AtualizarSozinho from "@/components/AtualizarSozinho";
 import { gerarLink, sair } from "./actions";
 
@@ -22,12 +22,15 @@ function endereco(status: string, atendente: string | null) {
 
 export default async function Painel(props: PageProps<"/painel">) {
   const busca = await props.searchParams;
-  if (!(await estaLogado())) {
-    const nome = typeof busca.atendente === "string" ? busca.atendente : "";
-    redirect(nome ? `/painel/login?atendente=${encodeURIComponent(nome)}` : "/painel/login");
-  }
+  const sessao = await sessaoAtual();
+  if (!sessao) redirect(typeof busca.atendente === "string" ? "/painel/login?atendente=1" : "/painel/login");
   const status = ABAS.find((a) => a.status === busca.aba)?.status ?? "enviado";
-  const atendente = typeof busca.atendente === "string" && busca.atendente.trim() ? busca.atendente.trim() : null;
+  // a atendente só vê os clientes dela, não importa o que venha no endereço
+  const atendente = sessao.gestor
+    ? typeof busca.atendente === "string" && busca.atendente.trim()
+      ? busca.atendente.trim()
+      : null
+    : sessao.atendente.nome;
   const filtroAtendente = filtroDaAtendente(atendente);
 
   const [solicitacoes, contagem, atendentes] = await Promise.all([
@@ -38,7 +41,7 @@ export default async function Painel(props: PageProps<"/painel">) {
       include: { _count: { select: { fotos: true } } },
     }),
     prisma.solicitacaoDocumento.groupBy({ by: ["status"], where: filtroAtendente, _count: true }),
-    listarAtendentes(),
+    sessao.gestor ? listarAtendentes() : [],
   ]);
   const total = (s: string) => contagem.find((c) => c.status === s)?._count ?? 0;
 
@@ -46,7 +49,23 @@ export default async function Painel(props: PageProps<"/painel">) {
     <main className="mx-auto max-w-4xl px-5 py-6">
       <AtualizarSozinho />
 
-      {atendentes.length > 0 && (
+      {!sessao.gestor && (
+        <p className="mb-5 rounded-xl bg-marfim px-4 py-3">
+          Olá, <strong>{sessao.atendente.nome}</strong>! Aqui aparecem só os seus clientes. Salve esta página nos
+          favoritos do celular para abrir direto aqui.
+        </p>
+      )}
+
+      {sessao.gestor && (
+        <p className="mb-4 text-sm">
+          <Link href="/painel/atendentes" className="font-semibold text-vinho underline">
+            Links das atendentes
+          </Link>{" "}
+          <span className="text-tinta/60">· cada uma entra pelo link dela e vê só os clientes dela</span>
+        </p>
+      )}
+
+      {sessao.gestor && atendentes.length > 0 && (
         <nav className="mb-5 flex flex-wrap items-center gap-2" aria-label="Atendente">
           <span className="text-sm font-semibold text-tinta/60">Atendente:</span>
           <Link
@@ -72,13 +91,6 @@ export default async function Painel(props: PageProps<"/painel">) {
         </nav>
       )}
 
-      {atendente && (
-        <p className="mb-5 rounded-xl bg-marfim px-4 py-3 text-sm">
-          Painel de <strong>{atendente}</strong>: só os clientes distribuídos para ela. Salve este endereço nos
-          favoritos do celular para abrir direto aqui.
-        </p>
-      )}
-
       <section className="rounded-2xl bg-white p-5 shadow-sm">
         <h1 className="font-marca text-2xl font-bold text-vinho">Pedir documentos a um cliente</h1>
         <form action={gerarLink} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -96,20 +108,22 @@ export default async function Painel(props: PageProps<"/painel">) {
               className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg"
             />
           </label>
-          <label>
-            <span className="text-sm font-medium">Atendente</span>
-            <input
-              name="atendente"
-              list="lista-atendentes"
-              defaultValue={atendente ?? ""}
-              className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg"
-            />
-            <datalist id="lista-atendentes">
-              {atendentes.map((a) => (
-                <option key={a.nome} value={a.nome} />
-              ))}
-            </datalist>
-          </label>
+          {sessao.gestor && (
+            <label>
+              <span className="text-sm font-medium">Atendente</span>
+              <input
+                name="atendente"
+                list="lista-atendentes"
+                defaultValue={atendente ?? ""}
+                className="mt-1 w-full rounded-lg border border-marfim px-3 py-3 text-lg"
+              />
+              <datalist id="lista-atendentes">
+                {atendentes.map((a) => (
+                  <option key={a.nome} value={a.nome} />
+                ))}
+              </datalist>
+            </label>
+          )}
           <button className="self-end rounded-lg bg-vinho px-5 py-3 text-lg font-semibold text-white">Criar link</button>
         </form>
       </section>
@@ -118,7 +132,7 @@ export default async function Painel(props: PageProps<"/painel">) {
         {ABAS.map((a) => (
           <Link
             key={a.status}
-            href={endereco(a.status, atendente)}
+            href={endereco(a.status, sessao.gestor ? atendente : null)}
             className={`rounded-full px-4 py-2 text-sm font-semibold ${
               status === a.status ? "bg-vinho text-white" : "bg-white text-tinta"
             }`}
@@ -141,7 +155,7 @@ export default async function Painel(props: PageProps<"/painel">) {
                 <p className="truncate text-lg font-semibold">{s.nome ?? "Sem nome"}</p>
                 <p className="text-sm text-tinta/60">
                   {s.telefone ?? "sem telefone"}
-                  {!atendente && s.atendente ? ` · ${s.atendente}` : ""}
+                  {sessao.gestor && !atendente && s.atendente ? ` · ${s.atendente}` : ""}
                 </p>
               </div>
               <div className="shrink-0 text-right text-sm text-tinta/60">

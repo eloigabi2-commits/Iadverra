@@ -145,3 +145,15 @@ model FotoDocumento {
   @@unique([solicitacaoId, tipo])
   @@map("foto_documento")
 }
+
+// Atendente com acesso ao painel. A chave é o link pessoal dela (/a/<chave>):
+// quem abre o link entra no painel vendo só os clientes com esse nome.
+// Trocar a chave invalida o link antigo e as sessões abertas com ele.
+model Atendente {
+  id       String   @id @default(cuid())
+  nome     String   @unique
+  chave    String   @unique
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  @@map("atendente")
+}
