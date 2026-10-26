@@ -44,7 +44,14 @@ export default async function Atendentes() {
           return (
             <li key={a.id} className="p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-lg font-semibold">{a.nome}</p>
+                <p className="text-lg font-semibold">
+                  {a.nome}
+                  {a.veTodos && (
+                    <span className="ml-2 rounded-full bg-vinho px-2 py-0.5 text-xs font-semibold text-white">
+                      vê todas as atendentes
+                    </span>
+                  )}
+                </p>
                 <div className="flex gap-2 text-sm">
                   <form action={trocarLinkDaAtendente}>
                     <input type="hidden" name="id" value={a.id} />
@@ -95,9 +102,15 @@ export default async function Atendentes() {
       <section className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
         <h2 className="font-semibold">Nova atendente</h2>
         <p className="mt-1 text-sm text-tinta/60">Use o mesmo nome da planilha de distribuição.</p>
-        <form action={cadastrarAtendente} className="mt-3 flex gap-2">
-          <input name="nome" required className="w-full rounded-lg border border-marfim px-3 py-3 text-lg" />
-          <button className="rounded-lg bg-vinho px-5 py-3 font-semibold text-white">Criar link</button>
+        <form action={cadastrarAtendente} className="mt-3">
+          <div className="flex gap-2">
+            <input name="nome" required className="w-full rounded-lg border border-marfim px-3 py-3 text-lg" />
+            <button className="rounded-lg bg-vinho px-5 py-3 font-semibold text-white">Criar link</button>
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-sm">
+            <input type="checkbox" name="veTodos" value="sim" className="h-5 w-5" />
+            Supervisão: vê os clientes de todas as atendentes
+          </label>
         </form>
       </section>
     </main>

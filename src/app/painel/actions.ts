@@ -12,11 +12,12 @@ import {
   sessaoAtual,
   sessaoDoGestor,
   type Sessao,
+  veTudo,
 } from "@/lib/painel-auth";
 
-// Volta para a lista do gestor filtrada pela atendente do cliente
+// Volta para a lista geral filtrada pela atendente do cliente
 function painelDa(sessao: Sessao, atendente: string | null | undefined): string {
-  if (!sessao.gestor || !atendente) return "/painel";
+  if (!veTudo(sessao) || !atendente) return "/painel";
   return `/painel?atendente=${encodeURIComponent(atendente)}`;
 }
 
@@ -63,8 +64,8 @@ export async function gerarLink(formData: FormData) {
     nome: formData.get("nome"),
     telefone: formData.get("telefone"),
     // a atendente sempre cria para ela mesma
-    atendente: sessao.gestor ? formData.get("atendente") : sessao.atendente.nome,
-  }, { soDaAtendente: !sessao.gestor });
+    atendente: sessao.gestor || sessao.atendente.veTodos ? formData.get("atendente") : sessao.atendente.nome,
+  }, { soDaAtendente: !veTudo(sessao) });
   if (!podeVer(sessao, solicitacao.atendente)) redirect("/painel");
   redirect(`/painel/${solicitacao.id}`);
 }
@@ -104,11 +105,12 @@ export async function marcarConferido(formData: FormData) {
 export async function cadastrarAtendente(formData: FormData) {
   await exigirGestor();
   const nome = String(formData.get("nome") ?? "").trim().replace(/\s+/g, " ").slice(0, 60);
+  const veTodos = formData.get("veTodos") === "sim";
   if (nome) {
     await prisma.atendente.upsert({
       where: { nome },
       update: {},
-      create: { nome, chave: gerarChaveAtendente(nome) },
+      create: { nome, chave: gerarChaveAtendente(nome), veTodos },
     });
   }
   redirect("/painel/atendentes");

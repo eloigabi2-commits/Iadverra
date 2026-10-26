@@ -12,7 +12,7 @@ import {
   ROTULO_FOTO,
   TIPOS_FOTO,
 } from "@/lib/documentos";
-import { podeVer, sessaoAtual } from "@/lib/painel-auth";
+import { podeVer, sessaoAtual, veTudo } from "@/lib/painel-auth";
 import CopiarLink from "@/components/CopiarLink";
 import BotaoExcluir from "@/components/BotaoExcluir";
 import { excluir, marcarConferido, pedirDeNovo } from "../actions";
@@ -39,7 +39,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
   return (
     <main className="mx-auto max-w-4xl px-5 py-6">
       <Link
-        href={sessao.gestor && s.atendente ? `/painel?atendente=${encodeURIComponent(s.atendente)}` : "/painel"}
+        href={veTudo(sessao) && s.atendente ? `/painel?atendente=${encodeURIComponent(s.atendente)}` : "/painel"}
         className="text-sm text-tinta/60 underline"
       >
         ← Voltar para a lista
@@ -50,7 +50,7 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
           <h1 className="font-marca text-3xl font-bold text-vinho">{s.nome ?? "Sem nome"}</h1>
           <p className="text-tinta/70">
             {s.telefone ?? "sem telefone"}
-            {sessao.gestor && s.atendente ? ` · atendente ${s.atendente}` : ""}
+            {veTudo(sessao) && s.atendente ? ` · atendente ${s.atendente}` : ""}
           </p>
         </div>
         <Situacao status={s.status} />

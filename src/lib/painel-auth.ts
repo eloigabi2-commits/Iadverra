@@ -9,8 +9,11 @@ const DURACAO_GESTOR_S = 60 * 60 * 12;
 // a atendente entra pelo link dela, que já é a credencial: a sessão dura mais
 const DURACAO_ATENDENTE_S = 60 * 60 * 24 * 30;
 
-// Quem está no painel: o gestor vê todas as atendentes; a atendente só os clientes dela
-export type Sessao = { gestor: true; atendente: null } | { gestor: false; atendente: { id: string; nome: string } };
+// Quem está no painel: o gestor vê todas as atendentes; a atendente só os clientes dela,
+// a não ser que seja de supervisão (veTodos), que vê os clientes de todas
+export type Sessao =
+  | { gestor: true; atendente: null }
+  | { gestor: false; atendente: { id: string; nome: string; veTodos: boolean } };
 
 function segredo(): string | null {
   return process.env.PAINEL_SENHA?.trim() || null;
@@ -86,7 +89,7 @@ async function lerSessao(valor: string | undefined): Promise<Sessao | null> {
     const atendente = await prisma.atendente.findUnique({ where: { id } });
     if (!atendente) return null;
     if (!iguais(assinatura, assinar(`atendente:${id}:${atendente.chave}:${expira}`, chave))) return null;
-    return { gestor: false, atendente: { id: atendente.id, nome: atendente.nome } };
+    return { gestor: false, atendente: { id: atendente.id, nome: atendente.nome, veTodos: atendente.veTodos } };
   }
 
   return null;
@@ -98,9 +101,14 @@ export const sessaoAtual = cache(async (): Promise<Sessao | null> => {
   return lerSessao(store.get(COOKIE_PAINEL)?.value);
 });
 
-// O cliente pertence a quem está no painel? O gestor pode tudo; a atendente, só os dela.
+// Gestor e supervisão veem os clientes de todas as atendentes
+export function veTudo(sessao: Sessao): boolean {
+  return sessao.gestor || sessao.atendente.veTodos;
+}
+
+// O cliente pertence a quem está no painel? Gestor e supervisão podem tudo; a atendente, só os dela.
 export function podeVer(sessao: Sessao, atendenteDoCliente: string | null): boolean {
-  return sessao.gestor || mesmaAtendente(sessao.atendente.nome, atendenteDoCliente);
+  return sessao.gestor || sessao.atendente.veTodos || mesmaAtendente(sessao.atendente.nome, atendenteDoCliente);
 }
 
 // Chave usada pela IA/n8n para criar links pela API
