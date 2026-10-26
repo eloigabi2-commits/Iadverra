@@ -153,6 +153,8 @@ model Atendente {
   id       String   @id @default(cuid())
   nome     String   @unique
   chave    String   @unique
+  // supervisão: vê os clientes de todas as atendentes (mas não mexe nos links delas)
+  veTodos  Boolean  @default(false) @map("ve_todos")
   criadoEm DateTime @default(now()) @map("criado_em")
 
   @@map("atendente")

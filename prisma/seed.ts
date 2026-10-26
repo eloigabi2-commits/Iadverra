@@ -68,11 +68,14 @@ function chaveDe(nome: string): string {
   return primeiro ? `${primeiro}-${sufixo}` : sufixo;
 }
 
+// Supervisão: entram pelo link pessoal e veem os clientes de todas as atendentes
+const SUPERVISAO = ["Thaina"];
+
 async function seedAtendentes() {
   const existentes = await prisma.atendente.findMany();
-  for (const nome of ATENDENTES) {
+  for (const nome of [...ATENDENTES, ...SUPERVISAO]) {
     if (existentes.some((a) => semAcento(a.nome) === semAcento(nome))) continue;
-    await prisma.atendente.create({ data: { nome, chave: chaveDe(nome) } });
+    await prisma.atendente.create({ data: { nome, chave: chaveDe(nome), veTodos: SUPERVISAO.includes(nome) } });
     console.log(`Atendente cadastrada: ${nome}`);
   }
   // clientes gravados com outra grafia ("vitoria vechetin") passam a usar o nome cadastrado,
