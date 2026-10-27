@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { nomeEscritorio } from "@/lib/documentos";
 
 export const metadata: Metadata = { title: "Política de privacidade" };
 
 export const dynamic = "force-dynamic";
 
 // Modelo de política para o envio de documentos. Revise o texto com a equipe
-// jurídica antes de usar; nome e contato vêm de NOME_ESCRITORIO e CONTATO_PRIVACIDADE.
+// jurídica antes de usar; o contato vem de CONTATO_PRIVACIDADE.
 export default function Privacidade() {
-  const escritorio = nomeEscritorio();
   const contato = process.env.CONTATO_PRIVACIDADE?.trim();
 
   return (
@@ -20,21 +18,21 @@ export default function Privacidade() {
       <article className="mx-auto max-w-2xl space-y-5 px-5 py-10 text-lg leading-relaxed">
         <h1 className="font-marca text-3xl font-bold text-vinho">Política de privacidade</h1>
         <p>
-          Esta página explica como {escritorio} trata os documentos que você envia pelo link de envio de
-          documentos, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
+          Esta página garante como a Esclarece Assessoria trata os documentos que você envia para o nosso
+          atendimento, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).
         </p>
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Quais dados coletamos</h2>
         <p>
           Seu nome, telefone e CPF, as fotos da frente e do verso do seu documento de identidade (RG ou CNH), o
-          seu comprovante de endereço e as informações do seu benefício e dos seus empréstimos que você nos passar
-          no atendimento.
+          seu comprovante de endereço e as informações do seu benefício e dos seus empréstimos que você enviará
+          durante o seu atendimento.
         </p>
 
-        <h2 className="font-marca text-2xl font-bold text-vinho">Para que usamos</h2>
+        <h2 className="font-marca text-2xl font-bold text-vinho">Para que utilizamos os seus documentos</h2>
         <p>
-          Exclusivamente para analisar o seu caso, preparar a procuração e os documentos do seu processo e tomar as
-          medidas necessárias em seu nome. Não vendemos nem repassamos seus dados para fins de propaganda.
+          Exclusivamente para analisar o seu caso, preparar procurações, contratos e os documentos do seu processo e
+          tomar as medidas necessárias em seu nome. Não vendemos nem repassamos seus dados para fins de propaganda.
         </p>
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Base legal</h2>
@@ -45,7 +43,7 @@ export default function Privacidade() {
 
         <h2 className="font-marca text-2xl font-bold text-vinho">Quem tem acesso</h2>
         <p>
-          Apenas a pessoa da equipe responsável pelo seu atendimento, por um painel de acesso individual e restrito.
+          Apenas o especialista responsável pelo seu atendimento, por um painel de acesso individual e restrito.
           Os documentos podem ser apresentados a bancos, órgãos públicos e ao Poder Judiciário quando isso for
           necessário para o seu caso.
         </p>
