@@ -293,14 +293,14 @@ model AsaasEvento {
 model ClienteCredito {
   id           String   @id @default(cuid())
   nome         String
-  email        String
+  email        String   @unique
   telefone     String
+  senhaHash    String?  @map("senha_hash")
   criadoEm     DateTime @default(now()) @map("criado_em")
   atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
   pedidos PedidoCredito[]
 
-  @@index([email])
   @@map("cliente_credito")
 }
 

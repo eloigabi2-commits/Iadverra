@@ -229,11 +229,12 @@ sandbox em produção, nem o contrário).
 
 ## Portal de crédito (/credito)
 
-O cliente entra uma vez com nome, e-mail e WhatsApp; o cookie assinado
-(`CREDITO_SESSAO_KEY`) lembra dele por 180 dias. Não há senha. Em
-`/credito/adicionar` ele informa valor, CPF, forma de pagamento (Pix ou cartão)
-e prazo. O pedido cria uma cobrança do Asaas com atendente "Crédito", envia os
-dados para o n8n e já abre o pagamento:
+O cliente cria a conta em `/credito/cadastro` com nome, e-mail, WhatsApp e uma
+senha individual (hash scrypt no banco) e entra em `/credito` com e-mail e senha.
+O cookie assinado (`CREDITO_SESSAO_KEY`) lembra dele por 180 dias. Cada conta vê
+somente os próprios pedidos e valores. Em `/credito/adicionar` ele informa valor,
+CPF, forma de pagamento (Pix ou cartão) e prazo. O pedido cria uma cobrança do
+Asaas com atendente "Crédito", envia os dados para o n8n e já abre o pagamento:
 
 - Pix: o QR Code e o código copia-e-cola são gerados automaticamente, com o
   valor pedido, e a página mostra também o link público `/pagar/<codigo>`.

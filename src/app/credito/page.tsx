@@ -35,7 +35,7 @@ export default async function Page(props: PageProps<"/credito">) {
           <p className="font-marca text-2xl font-bold text-vinho">{nomeEscritorio()}</p>
           <h1 className="mt-6 font-marca text-3xl font-bold text-vinho">Crédito do cliente</h1>
           <p className="mt-2 text-tinta/70">
-            Entre com o seu nome, e-mail e WhatsApp para adicionar fundos e acompanhar os seus pedidos.
+            Entre com o seu e-mail e senha para adicionar fundos e acompanhar os seus pedidos.
           </p>
 
           {!creditoConfigurado() && (
@@ -47,15 +47,6 @@ export default async function Page(props: PageProps<"/credito">) {
 
           <form action={entrar} className="mt-6 space-y-4 rounded-2xl bg-white p-6 shadow-sm">
             <label className="block">
-              <span className="text-sm font-medium">Nome completo</span>
-              <input
-                name="nome"
-                required
-                autoComplete="name"
-                className="mt-1 w-full rounded-lg border border-marfim bg-white px-3 py-3 text-lg"
-              />
-            </label>
-            <label className="block">
               <span className="text-sm font-medium">E-mail</span>
               <input
                 name="email"
@@ -66,14 +57,13 @@ export default async function Page(props: PageProps<"/credito">) {
               />
             </label>
             <label className="block">
-              <span className="text-sm font-medium">WhatsApp com DDD</span>
+              <span className="text-sm font-medium">Senha</span>
               <input
-                name="telefone"
-                type="tel"
+                name="senha"
+                type="password"
                 required
-                autoComplete="tel"
-                inputMode="tel"
-                placeholder="(11) 99999-9999"
+                minLength={8}
+                autoComplete="current-password"
                 className="mt-1 w-full rounded-lg border border-marfim bg-white px-3 py-3 text-lg"
               />
             </label>
@@ -83,8 +73,14 @@ export default async function Page(props: PageProps<"/credito">) {
             >
               Entrar
             </BotaoEnviar>
+            <p className="text-center text-sm text-tinta/60">
+              Ainda não tem conta?{" "}
+              <Link href="/credito/cadastro" className="font-semibold text-vinho underline">
+                Criar conta
+              </Link>
+            </p>
             <p className="text-center text-xs text-tinta/50">
-              Você entra uma vez. Este navegador lembra de você nas próximas visitas.
+              Já tinha cadastro antes? Crie a senha usando o mesmo e-mail.
             </p>
           </form>
         </div>
@@ -92,19 +88,32 @@ export default async function Page(props: PageProps<"/credito">) {
     );
   }
 
-  const pedidos = await prisma.pedidoCredito.findMany({
-    where: { contaId: cliente.id },
-    orderBy: { criadoEm: "desc" },
-    take: 50,
-    select: {
-      id: true,
-      valor: true,
-      status: true,
-      formaPagamento: true,
-      prazo: true,
-      criadoEm: true,
-    },
-  });
+  const [pedidos, pago, aberto] = await Promise.all([
+    prisma.pedidoCredito.findMany({
+      where: { contaId: cliente.id },
+      orderBy: { criadoEm: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        valor: true,
+        status: true,
+        formaPagamento: true,
+        prazo: true,
+        criadoEm: true,
+      },
+    }),
+    prisma.pedidoCredito.aggregate({
+      where: { contaId: cliente.id, status: "pago" },
+      _sum: { valor: true },
+    }),
+    prisma.pedidoCredito.aggregate({
+      where: { contaId: cliente.id, status: { in: ["aguardando_pagamento", "erro_webhook"] } },
+      _sum: { valor: true },
+    }),
+  ]);
+
+  const totalPago = Number(pago._sum.valor ?? 0);
+  const totalAberto = Number(aberto._sum.valor ?? 0);
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-8 text-tinta">
@@ -135,6 +144,17 @@ export default async function Page(props: PageProps<"/credito">) {
           +
         </span>
       </Link>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-marfim bg-white px-4 py-3">
+          <p className="text-xs text-tinta/50">Total pago</p>
+          <p className="mt-1 text-lg font-semibold text-vinho">{formatarValor(totalPago)}</p>
+        </div>
+        <div className="rounded-xl border border-marfim bg-white px-4 py-3">
+          <p className="text-xs text-tinta/50">Em aberto</p>
+          <p className="mt-1 text-lg font-semibold text-vinho">{formatarValor(totalAberto)}</p>
+        </div>
+      </div>
 
       <h2 className="mt-8 text-lg font-semibold">Seus pedidos</h2>
       {pedidos.length === 0 ? (
