@@ -6,6 +6,10 @@
       "headers": {
         "Authorization": "Bearer ${N8N_API_KEY}"
       }
+    },
+    "everygen": {
+      "type": "http",
+      "url": "https://everygen.ai/api/mcp"
     }
   }
 }
