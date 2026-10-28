@@ -1,0 +1,61 @@
+{
+  "name": "Pregão Simulador – aviso de depósito simulado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contrato-iadverra",
+        "responseMode": "onReceived",
+        "options": { "allowedOrigins": "*" }
+      },
+      "id": "5b1f0c3a-7d1e-4c2b-9a51-1f6e8f0a1001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "5b1f0c3a-7d1e-4c2b-9a51-1f6e8f0a1002"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.evento }}",
+              "rightValue": "deposito_simulado",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5b1f0c3a-7d1e-4c2b-9a51-1f6e8f0a1003",
+      "name": "É depósito simulado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "SEU_REMETENTE@exemplo.com",
+        "toEmail": "={{ $json.body.usuario.email }}",
+        "subject": "=Saldo creditado: {{ $json.body.valor_formatado }} (simulação)",
+        "emailFormat": "html",
+        "html": "=<p>Olá, {{ $json.body.usuario.nome }}!</p><p>O depósito simulado de <b>{{ $json.body.valor_formatado }}</b> foi creditado na sua conta do Pregão Simulador{{ $json.body.bonus > 0 ? ', com ' + $json.body.bonus_formatado + ' de bônus' : '' }}.</p><p>Saldo atual: <b>{{ $json.body.saldo_formatado }}</b></p><p style=\"color:#666;font-size:12px\">Este é um ambiente de simulação. Nenhum valor real foi cobrado, recebido ou pode ser sacado.</p>",
+        "options": {}
+      },
+      "id": "5b1f0c3a-7d1e-4c2b-9a51-1f6e8f0a1004",
+      "name": "Enviar e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [480, -80]
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "É depósito simulado?", "type": "main", "index": 0 }]] },
+    "É depósito simulado?": { "main": [[{ "node": "Enviar e-mail", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

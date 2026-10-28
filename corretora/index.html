@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1220">
+<title>Pregão Simulador</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="rail" aria-label="Navegação principal">
+    <a class="brand" href="#trade" aria-label="Pregão, ir para negociação">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+    </a>
+    <nav class="rail-nav" id="rail-nav">
+      <a href="#trade" data-route="trade"><svg viewBox="0 0 24 24"><path d="M4 19V9m5 10V5m5 14v-7m5 7V8"/></svg><span>Negociar</span></a>
+      <a href="#history" data-route="history"><svg viewBox="0 0 24 24"><path d="M12 7v5l3 2M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3 4v4h4"/></svg><span>Histórico</span></a>
+      <a href="#rewards" data-route="rewards"><svg viewBox="0 0 24 24"><path d="M4 11h16v9H4zM3 7h18v4H3zM12 7v13M12 7c-2-4-6-3-5 0m5 0c2-4 6-3 5 0"/></svg><span>Prêmios</span><b class="dot" id="rewards-dot" hidden></b></a>
+      <a href="#tournaments" data-route="tournaments"><svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4m10-4h3a3 3 0 0 1-3 4M12 14v3m-4 3h8l-1-3H9z"/></svg><span>Torneios</span></a>
+      <a href="#ranking" data-route="ranking"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20v-6h4v6m0 0V9h4v11m0 0v-8h4v8"/></svg><span>Ranking</span></a>
+      <a href="#account" data-route="account"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>Conta</span></a>
+      <a href="#faq" data-route="faq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5V14m0 3h.01"/></svg><span>Ajuda</span></a>
+    </nav>
+  </aside>
+
+  <header class="top">
+    <div class="tabs" id="asset-tabs" role="tablist" aria-label="Ativos abertos"></div>
+    <button class="tab-add" id="tab-add" type="button" aria-label="Adicionar ativo">+</button>
+    <div class="top-right">
+      <span class="clock" id="clock" title="Horário de Brasília">--:--:--</span>
+      <div class="acct" id="acct">
+        <button class="acct-btn" id="acct-btn" type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="acct-kind" id="acct-kind">Conta demo</span>
+          <span class="acct-bal" id="acct-bal">R$ 0,00</span>
+          <svg viewBox="0 0 24 24" class="chev"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="acct-menu" id="acct-menu" hidden></div>
+      </div>
+      <a class="btn btn-deposit" href="#deposit">Depositar</a>
+      <button class="icon-btn" id="bell" type="button" aria-label="Notificações"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21h4"/></svg><b class="badge" id="bell-badge" hidden>0</b></button>
+      <a class="avatar" id="avatar" href="#account" aria-label="Minha conta">P</a>
+    </div>
+    <div class="notif-panel" id="notif-panel" hidden></div>
+  </header>
+
+  <main class="main">
+    <section class="trade" id="trade-view" aria-label="Negociação">
+      <div class="chart-wrap" id="chart-wrap">
+        <div class="chart-head">
+          <button class="asset-pill" id="asset-pill" type="button"></button>
+          <div class="chart-tools">
+            <div class="seg" id="tf-seg" role="group" aria-label="Tempo do candle"></div>
+            <div class="seg" id="type-seg" role="group" aria-label="Tipo de gráfico">
+              <button type="button" data-type="candles" title="Candles"><svg viewBox="0 0 24 24"><path d="M7 3v4m0 10v4M17 3v6m0 8v4"/><rect x="5" y="7" width="4" height="10"/><rect x="15" y="9" width="4" height="8"/></svg></button>
+              <button type="button" data-type="area" title="Área"><svg viewBox="0 0 24 24"><path d="m3 17 5-6 4 3 8-9"/></svg></button>
+              <button type="button" data-type="bars" title="Barras"><svg viewBox="0 0 24 24"><path d="M7 4v16M4 8h3m0 8h3M17 4v16m-3-6h3m0-6h3"/></svg></button>
+            </div>
+            <div class="seg" role="group" aria-label="Zoom">
+              <button type="button" id="zoom-out" title="Afastar">−</button>
+              <button type="button" id="zoom-in" title="Aproximar">+</button>
+            </div>
+          </div>
+        </div>
+        <canvas id="chart" aria-label="Gráfico de preço em tempo real"></canvas>
+        <button class="to-now" id="to-now" type="button" hidden>Voltar ao agora ›</button>
+        <div class="closed-veil" id="closed-veil" hidden></div>
+        <div class="result-pop" id="result-pop" hidden></div>
+      </div>
+
+      <aside class="panel" id="panel" aria-label="Painel de operação">
+        <div class="field">
+          <label for="amount">Valor</label>
+          <div class="stepper">
+            <button type="button" id="amt-dec" aria-label="Diminuir valor">−</button>
+            <input id="amount" inputmode="decimal" autocomplete="off" value="R$ 10,00">
+            <button type="button" id="amt-inc" aria-label="Aumentar valor">+</button>
+          </div>
+          <div class="chips" id="amt-chips"></div>
+        </div>
+        <div class="field">
+          <label for="expiry">Expiração</label>
+          <div class="exp-grid" id="expiry" role="radiogroup" aria-label="Tempo de expiração"></div>
+        </div>
+        <div class="payout-box">
+          <div><span class="muted">Retorno</span><strong id="payout-pct">90%</strong></div>
+          <div><span class="muted">Lucro</span><strong class="up-txt" id="payout-val">+R$ 9,00</strong></div>
+        </div>
+        <label class="norisk" id="norisk-row" hidden><input type="checkbox" id="norisk"> <span>Operação sem risco <em id="norisk-count"></em></span></label>
+        <div class="dir-btns">
+          <button class="btn-up" id="btn-up" type="button"><svg viewBox="0 0 24 24"><path d="m5 15 7-7 7 7"/></svg>Acima</button>
+          <button class="btn-down" id="btn-down" type="button"><svg viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></svg>Abaixo</button>
+        </div>
+        <div class="sentiment" aria-label="Sentimento dos traders">
+          <span class="up-txt" id="sent-up">50%</span>
+          <div class="sent-bar"><i id="sent-fill"></i></div>
+          <span class="down-txt" id="sent-down">50%</span>
+        </div>
+        <div class="panel-links">
+          <button type="button" class="link" id="open-schedule">Agendar operação</button>
+          <button type="button" class="link" id="open-auto">Auto-trade</button>
+        </div>
+        <div class="auto-card" id="auto-card" hidden></div>
+        <div class="trades-box">
+          <div class="mini-tabs" role="tablist">
+            <button type="button" class="on" data-tl="open">Abertas <b id="open-count">0</b></button>
+            <button type="button" data-tl="closed">Encerradas</button>
+            <button type="button" data-tl="sched">Agendadas <b id="sched-count">0</b></button>
+          </div>
+          <ul class="trade-list" id="trade-list"></ul>
+        </div>
+        <p class="risk-note">Opções binárias envolvem alto risco. Este é um simulador: nenhum valor real é movimentado.</p>
+      </aside>
+    </section>
+
+    <section class="page" id="page" hidden></section>
+  </main>
+</div>
+
+<div class="modal-root" id="modal-root"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
