@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // extensões de navegador: código de página, com APIs do Chrome
+    "instagram-ponte/**",
+    "instagram-unfollowers/**",
   ]),
 ]);
 

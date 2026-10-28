@@ -38,46 +38,46 @@ model Municipio {
 
 // Tabela "Empresas": dados cadastrais no nível de matriz (cnpj_basico)
 model Empresa {
-  cnpjBasico             String  @id @map("cnpj_basico") @db.VarChar(8)
-  razaoSocial            String  @map("razao_social")
-  naturezaJuridicaCod    String? @map("natureza_juridica_cod") @db.VarChar(4)
-  qualificacaoResponsavel String? @map("qualificacao_responsavel") @db.VarChar(2)
-  capitalSocial          Decimal? @map("capital_social") @db.Decimal(18, 2)
-  porteEmpresa           String?  @map("porte_empresa") @db.VarChar(2)
+  cnpjBasico              String   @id @map("cnpj_basico") @db.VarChar(8)
+  razaoSocial             String   @map("razao_social")
+  naturezaJuridicaCod     String?  @map("natureza_juridica_cod") @db.VarChar(4)
+  qualificacaoResponsavel String?  @map("qualificacao_responsavel") @db.VarChar(2)
+  capitalSocial           Decimal? @map("capital_social") @db.Decimal(18, 2)
+  porteEmpresa            String?  @map("porte_empresa") @db.VarChar(2)
 
-  naturezaJuridica  NaturezaJuridica? @relation(fields: [naturezaJuridicaCod], references: [codigo])
-  estabelecimentos  Estabelecimento[]
-  socios            Socio[]
+  naturezaJuridica NaturezaJuridica? @relation(fields: [naturezaJuridicaCod], references: [codigo])
+  estabelecimentos Estabelecimento[]
+  socios           Socio[]
 
   @@index([razaoSocial])
 }
 
 // Tabela "Estabelecimentos": unidades (matriz/filial) de cada empresa, com o CNAE, endereço e contato
 model Estabelecimento {
-  cnpjBasico              String  @map("cnpj_basico") @db.VarChar(8)
-  cnpjOrdem               String  @map("cnpj_ordem") @db.VarChar(4)
-  cnpjDv                  String  @map("cnpj_dv") @db.VarChar(2)
-  cnpjCompleto            String  @unique @map("cnpj_completo") @db.VarChar(14)
-  identificadorMatrizFilial String? @map("identificador_matriz_filial") @db.VarChar(1)
-  nomeFantasia            String? @map("nome_fantasia")
-  situacaoCadastral       String? @map("situacao_cadastral") @db.VarChar(2)
-  dataInicioAtividade     DateTime? @map("data_inicio_atividade") @db.Date
-  cnaeFiscalPrincipal     String? @map("cnae_fiscal_principal") @db.VarChar(7)
-  cnaeFiscalSecundaria    String? @map("cnae_fiscal_secundaria")
-  logradouro              String?
-  numero                  String?
-  complemento             String?
-  bairro                  String?
-  cep                     String? @db.VarChar(8)
-  uf                      String? @db.VarChar(2)
-  municipioCod            String? @map("municipio_cod") @db.VarChar(4)
-  ddd1                    String? @db.VarChar(4)
-  telefone1               String? @db.VarChar(10)
-  ddd2                    String? @db.VarChar(4)
-  telefone2               String? @db.VarChar(10)
-  correioEletronico       String? @map("correio_eletronico")
+  cnpjBasico                String    @map("cnpj_basico") @db.VarChar(8)
+  cnpjOrdem                 String    @map("cnpj_ordem") @db.VarChar(4)
+  cnpjDv                    String    @map("cnpj_dv") @db.VarChar(2)
+  cnpjCompleto              String    @unique @map("cnpj_completo") @db.VarChar(14)
+  identificadorMatrizFilial String?   @map("identificador_matriz_filial") @db.VarChar(1)
+  nomeFantasia              String?   @map("nome_fantasia")
+  situacaoCadastral         String?   @map("situacao_cadastral") @db.VarChar(2)
+  dataInicioAtividade       DateTime? @map("data_inicio_atividade") @db.Date
+  cnaeFiscalPrincipal       String?   @map("cnae_fiscal_principal") @db.VarChar(7)
+  cnaeFiscalSecundaria      String?   @map("cnae_fiscal_secundaria")
+  logradouro                String?
+  numero                    String?
+  complemento               String?
+  bairro                    String?
+  cep                       String?   @db.VarChar(8)
+  uf                        String?   @db.VarChar(2)
+  municipioCod              String?   @map("municipio_cod") @db.VarChar(4)
+  ddd1                      String?   @db.VarChar(4)
+  telefone1                 String?   @db.VarChar(10)
+  ddd2                      String?   @db.VarChar(4)
+  telefone2                 String?   @db.VarChar(10)
+  correioEletronico         String?   @map("correio_eletronico")
 
-  empresa   Empresa @relation(fields: [cnpjBasico], references: [cnpjBasico])
+  empresa   Empresa    @relation(fields: [cnpjBasico], references: [cnpjBasico])
   cnae      Cnae?      @relation(fields: [cnaeFiscalPrincipal], references: [codigo])
   municipio Municipio? @relation(fields: [municipioCod], references: [codigo])
 
@@ -89,14 +89,14 @@ model Estabelecimento {
 
 // Tabela "Sócios": pessoas físicas/jurídicas ligadas a uma empresa (os "donos")
 model Socio {
-  id                       Int      @id @default(autoincrement())
-  cnpjBasico               String   @map("cnpj_basico") @db.VarChar(8)
-  identificadorSocio       String?  @map("identificador_socio") @db.VarChar(1)
-  nomeSocio                String   @map("nome_socio")
-  cpfCnpjSocio             String?  @map("cpf_cnpj_socio") @db.VarChar(14)
-  qualificacaoSocio        String?  @map("qualificacao_socio") @db.VarChar(2)
-  dataEntradaSociedade     DateTime? @map("data_entrada_sociedade") @db.Date
-  faixaEtaria              String?  @map("faixa_etaria") @db.VarChar(1)
+  id                   Int       @id @default(autoincrement())
+  cnpjBasico           String    @map("cnpj_basico") @db.VarChar(8)
+  identificadorSocio   String?   @map("identificador_socio") @db.VarChar(1)
+  nomeSocio            String    @map("nome_socio")
+  cpfCnpjSocio         String?   @map("cpf_cnpj_socio") @db.VarChar(14)
+  qualificacaoSocio    String?   @map("qualificacao_socio") @db.VarChar(2)
+  dataEntradaSociedade DateTime? @map("data_entrada_sociedade") @db.Date
+  faixaEtaria          String?   @map("faixa_etaria") @db.VarChar(1)
 
   empresa Empresa @relation(fields: [cnpjBasico], references: [cnpjBasico])
 
@@ -121,7 +121,8 @@ model SolicitacaoDocumento {
   enviadoEm       DateTime? @map("enviado_em")
   criadoEm        DateTime  @default(now()) @map("criado_em")
 
-  fotos FotoDocumento[]
+  fotos     FotoDocumento[]
+  cobrancas Cobranca[]
 
   @@index([status, criadoEm])
   @@index([telefone])
@@ -158,4 +159,167 @@ model Atendente {
   criadoEm DateTime @default(now()) @map("criado_em")
 
   @@map("atendente")
+}
+
+// Instagram: a sessão do login feito dentro do app fica criptografada aqui
+// (a senha nunca é gravada). A extensão "Instagram Ponte" continua funcionando
+// pelo código de conexão; nesse caso guardamos só o hash do código.
+model InstagramConexao {
+  id           String    @id @default(cuid())
+  codigoHash   String    @unique @map("codigo_hash")
+  igUserId     String?   @map("ig_user_id")
+  username     String?
+  nome         String?
+  fotoUrl      String?   @map("foto_url")
+  // sessão do Instagram criptografada (AES-256-GCM); nunca guardamos a senha
+  cookies      String?   @db.Text
+  cookiesEm    DateTime? @map("cookies_em")
+  // login aguardando código de 2FA / verificação
+  pendente     String?   @db.Text
+  pendenteEm   DateTime? @map("pendente_em")
+  criadoEm     DateTime  @default(now()) @map("criado_em")
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+  ultimaSync   DateTime? @map("ultima_sync")
+
+  snapshots InstagramSnapshot[]
+  sumidos   InstagramSumido[]
+
+  @@index([username])
+  @@map("instagram_conexao")
+}
+
+// Uma foto das listas em cada sincronização. JSON para caber 10 mil+ perfis
+// sem uma tabela de milhões de linhas; o diff é feito em memória no servidor.
+model InstagramSnapshot {
+  id              String   @id @default(cuid())
+  conexaoId       String   @map("conexao_id")
+  seguidores      Json
+  seguindo        Json
+  seguidoresTotal Int      @map("seguidores_total")
+  seguindoTotal   Int      @map("seguindo_total")
+  criadoEm        DateTime @default(now()) @map("criado_em")
+
+  conexao InstagramConexao @relation(fields: [conexaoId], references: [id], onDelete: Cascade)
+
+  @@index([conexaoId, criadoEm])
+  @@map("instagram_snapshot")
+}
+
+// Perfis que estavam nas listas e desapareceram. "estado" é o que a ponte
+// conseguiu verificar depois: existe, sumiu (ainda não verificado) ou
+// inacessível (provável bloqueio, conta desativada ou excluída).
+model InstagramSumido {
+  id           String    @id @default(cuid())
+  conexaoId    String    @map("conexao_id")
+  // chave canônica: @ em minúsculas (funciona para extensão e arquivo exportado)
+  chave        String
+  // id numérico do Instagram, quando a extensão forneceu (usado na verificação)
+  igPerfilId   String?   @map("ig_perfil_id")
+  username     String
+  nome         String?
+  fotoUrl      String?   @map("foto_url")
+  origem       String
+  estado       String    @default("sumiu")
+  detectadoEm  DateTime  @default(now()) @map("detectado_em")
+  verificadoEm DateTime? @map("verificado_em")
+
+  conexao InstagramConexao @relation(fields: [conexaoId], references: [id], onDelete: Cascade)
+
+  @@unique([conexaoId, chave])
+  @@index([conexaoId, estado])
+  @@map("instagram_sumido")
+}
+
+// Cobrança real: o valor é combinado no painel e o pagamento (Pix ou cartão de
+// crédito) é criado na API do Asaas só quando o cliente escolhe a forma na tela
+// /pagar/<codigo>. Nunca guardamos número de cartão nem CVV.
+model Cobranca {
+  id              String    @id @default(cuid())
+  // código curto do link do cliente: /pagar/maria-k7p2xq
+  codigo          String    @unique
+  // cliente do envio de documentos, quando a cobrança nasceu no painel dele
+  solicitacaoId   String?   @map("solicitacao_id")
+  atendente       String?
+  nome            String
+  email           String?
+  cpfCnpj         String    @map("cpf_cnpj") @db.VarChar(14)
+  telefone        String?
+  descricao       String
+  valor           Decimal   @db.Decimal(10, 2)
+  // pendente | analise | paga | vencida | cancelada | estornada
+  status          String    @default("pendente")
+  // PIX | CREDIT_CARD, definido na primeira tentativa de pagamento
+  formaPagamento  String?   @map("forma_pagamento")
+  parcela         Int       @default(1)
+  asaasCustomerId String?   @map("asaas_customer_id")
+  asaasPaymentId  String?   @unique @map("asaas_payment_id")
+  invoiceUrl      String?   @map("invoice_url") @db.Text
+  // Pix: copia e cola + imagem em base64, para não pedir de novo ao Asaas
+  pixPayload      String?   @map("pix_payload") @db.Text
+  pixImagem       String?   @map("pix_imagem") @db.Text
+  pixExpiraEm     DateTime? @map("pix_expira_em")
+  cartaoFinal     String?   @map("cartao_final") @db.VarChar(4)
+  cartaoBandeira  String?   @map("cartao_bandeira")
+  pagoEm          DateTime? @map("pago_em")
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+  atualizadoEm    DateTime  @updatedAt @map("atualizado_em")
+
+  solicitacao   SolicitacaoDocumento? @relation(fields: [solicitacaoId], references: [id], onDelete: SetNull)
+  eventos       AsaasEvento[]
+  pedidoCredito PedidoCredito?
+
+  @@index([status, criadoEm])
+  @@index([solicitacaoId])
+  @@index([atendente])
+  @@map("cobranca")
+}
+
+// Cada webhook recebido do Asaas. O id do evento é a chave: reenvio do mesmo
+// evento não altera nada duas vezes.
+model AsaasEvento {
+  id          String   @id
+  evento      String
+  pagamentoId String?  @map("pagamento_id")
+  cobrancaId  String?  @map("cobranca_id")
+  recebidoEm  DateTime @default(now()) @map("recebido_em")
+
+  cobranca Cobranca? @relation(fields: [cobrancaId], references: [id], onDelete: SetNull)
+
+  @@index([pagamentoId])
+  @@index([cobrancaId])
+  @@map("asaas_evento")
+}
+
+model ClienteCredito {
+  id           String   @id @default(cuid())
+  nome         String
+  email        String
+  telefone     String
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  pedidos PedidoCredito[]
+
+  @@index([email])
+  @@map("cliente_credito")
+}
+
+model PedidoCredito {
+  id             String   @id @default(cuid())
+  contaId        String   @map("conta_id")
+  cobrancaId     String?  @unique @map("cobranca_id")
+  valor          Decimal  @db.Decimal(10, 2)
+  formaPagamento String   @map("forma_pagamento")
+  prazo          String
+  status         String   @default("aguardando_pagamento")
+  webhookStatus  Int?     @map("webhook_status")
+  webhookErro    String?  @map("webhook_erro") @db.Text
+  criadoEm       DateTime @default(now()) @map("criado_em")
+  atualizadoEm   DateTime @updatedAt @map("atualizado_em")
+
+  conta    ClienteCredito @relation(fields: [contaId], references: [id], onDelete: Cascade)
+  cobranca Cobranca?      @relation(fields: [cobrancaId], references: [id], onDelete: SetNull)
+
+  @@index([contaId, criadoEm])
+  @@map("pedido_credito")
 }

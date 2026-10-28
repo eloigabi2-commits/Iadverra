@@ -189,6 +189,125 @@ de criar outro. As consultoras também podem gerar links à mão no painel.
 O texto de `/privacidade` é um modelo: revise com a equipe jurídica antes de
 usar.
 
+## Cobranças (Pix e cartão pelo Asaas)
+
+O painel (`/painel/cobrancas`) cria a cobrança informando nome, CPF/CNPJ, valor
+e uma descrição. O cliente recebe um link curto (`/pagar/nome-xxxxxx`), escolhe
+Pix ou cartão de crédito e paga na hora. O valor só existe de verdade depois
+que o cliente escolhe a forma: o pagamento é criado na API do Asaas no
+momento do Pix (QR Code) ou do envio do cartão.
+
+- O link é estável: pode ser reenviado pelo WhatsApp quantas vezes precisar.
+- O Pix gerado fica em cache no banco até expirar, para o cliente não pagar
+  duas vezes; ao trocar de forma de pagamento, a tentativa pendente anterior é
+  removida no Asaas.
+- A tela consulta o servidor a cada 6 s e mostra "Pago" quando o webhook (ou a
+  consulta) confirma.
+- O número e o CVV do cartão passam direto para o Asaas e não são gravados; no
+  banco ficam só os 4 últimos dígitos e a bandeira.
+- O cartão exige CPF, e-mail, CEP, número e telefone do titular (exigência do
+  Asaas). Parcelamento em até 12x, com parcela mínima de R$ 5,00.
+- Cancelar pelo painel apaga a cobrança pendente no Asaas e invalida o link.
+  "Recebi fora do site" marca como paga uma cobrança recebida em dinheiro.
+
+| Variável | Para quê |
+| --- | --- |
+| `ASAAS_API_KEY` | chave de API da conta Asaas (sem ela, a tela avisa que o pagamento não está configurado) |
+| `ASAAS_WEBHOOK_TOKEN` | token que o Asaas envia no header `asaas-access-token`; sem ele o webhook responde 503 |
+| `ASAAS_SANDBOX` | `true` para usar `https://api-sandbox.asaas.com` |
+| `ASAAS_BASE_URL` | opcional; sobrepõe o endereço da API |
+
+No Asaas, em **Integrações > Webhooks**, cadastre
+`https://SEU-DOMINIO/api/cobrancas/webhook`, selecione os eventos de cobrança e
+informe o mesmo valor de `ASAAS_WEBHOOK_TOKEN`. Cada evento é gravado em
+`asaas_evento` pelo id (reenvio não altera nada duas vezes) e o status do
+pagamento é conferido na API antes de atualizar a cobrança.
+
+Mínimo de R$ 5,00 por cobrança. A conta é em reais (BRL); a `ASAAS_API_KEY`
+precisa ser de uma conta que possa receber cobranças (não serve a chave do
+sandbox em produção, nem o contrário).
+
+## Portal de crédito (/credito)
+
+O cliente entra uma vez com nome, e-mail e WhatsApp; o cookie assinado
+(`CREDITO_SESSAO_KEY`) lembra dele por 180 dias. Não há senha. Em
+`/credito/adicionar` ele informa valor, CPF, forma de pagamento (Pix ou cartão)
+e prazo. O pedido cria uma cobrança do Asaas com atendente "Crédito", envia os
+dados para o n8n e já abre o pagamento:
+
+- Pix: o QR Code e o código copia-e-cola são gerados automaticamente, com o
+  valor pedido, e a página mostra também o link público `/pagar/<codigo>`.
+- Cartão: o formulário já vem com e-mail, telefone e CPF do pedido; o número e
+  o CVV continuam indo direto para o Asaas, sem serem gravados.
+- Se o webhook do n8n falhar, o pedido fica como "Não enviado" e a página
+  oferece **Enviar de novo**. O pagamento só é liberado depois do envio.
+- Quando o Asaas confirma, a cobrança e o pedido viram "Pago".
+
+O n8n recebe exatamente:
+
+```json
+{
+  "contratante": { "nome": "...", "email": "...", "telefone": "5511999999999" },
+  "servico": {
+    "valor_implementacao": 1000,
+    "forma_pagamento": "pix",
+    "prazo": "Imediato"
+  }
+}
+```
+
+| Variável | Para quê |
+| --- | --- |
+| `CREDITO_SESSAO_KEY` | string longa e aleatória que assina o cookie do portal; trocá-la desconecta todos; se ausente, usa `PAINEL_SENHA` |
+| `CREDITO_WEBHOOK_URL` | opcional; padrão `https://n8n.srv1288686.hstgr.cloud/webhook/credito` |
+
+O webhook do n8n é síncrono: a página espera até 20 s pela resposta. O CPF não
+fica guardado na conta do portal; ele é gravado apenas na cobrança, como nas
+demais cobranças do Asaas.
+
+## Instagram: quem não segue de volta e prováveis bloqueios
+
+`/instagram` é o app **Espelho** (instalável como PWA). O Instagram não tem API
+oficial para listar seguidores de conta pessoal. O caminho principal é o login
+dentro do app:
+
+1. O usuário digita @ e senha em `/instagram`. A senha é usada uma única vez para
+   abrir a sessão no Instagram e **não é gravada**.
+2. O servidor guarda a sessão (cookies `sessionid`/`csrf`) criptografada com
+   AES-256-GCM no campo `instagram_conexao.cookies`. A chave vem de
+   `INSTAGRAM_SESSION_KEY` (ou, sem ela, de `DATABASE_URL`); trocar a chave
+   derruba as sessões salvas.
+3. Depois do login, o app lê seguidores e seguindo pela API web do Instagram,
+   pagina as listas, e mostra os perfis públicos. O identificador da conexão vai
+   num cookie HttpOnly assinado com HMAC.
+4. Se o Instagram pedir 2FA, o app guarda o estado pendente por 15 minutos e
+   pede o código na mesma tela. Se pedir verificação/challenge, o usuário aprova
+   no app do Instagram e tenta de novo.
+
+Cada sincronização vira um snapshot (`instagram_snapshot`) e o diff é feito no
+servidor: não te seguem de volta, você não segue de volta, quem deixou de seguir
+e prováveis bloqueios. Para os que sumiram, o app abre o perfil pela sessão: se
+o Instagram responde 404, entra como inacessível — o mesmo sinal de conta
+desativada ou excluída. Trate como suspeita, não como certeza.
+
+A API web do Instagram não é documentada: pode pedir verificação, limitar
+consultas ou mudar sem aviso. O app pausa entre páginas, limita a leitura a 20
+mil perfis por lista e limita o login por IP. Sessões expiram; nesse caso o app
+pede o login de novo. "Sair" apaga a conexão e todos os snapshots.
+
+A extensão (`instagram-ponte/` ou `/instagram-ponte.zip`) e o upload do `.zip`
+exportado pelo Instagram continuam disponíveis nos bastidores para quem usa o
+código de conexão (`/api/instagram/{conectar,importar,exportar,pendentes}`), mas
+não aparecem mais na tela principal. O upload aceita até 25 MB; em serverless
+(Vercel) o corpo fica em ~4,5 MB.
+
+Rotas do login: `/api/instagram/{entrar,verificar,sincronizar,sair,dados}`.
+Configure `INSTAGRAM_SESSION_KEY` (recomendado) e `APP_URL`. A migration
+`20261026170000_instagram` entra sozinha no `vercel-build`.
+
+O PWA vive em `public/espelho/` (manifest e ícones) e `public/sw.js` (service
+worker registrado com escopo `/instagram`).
+
 ## Estrutura
 
 - `prisma/schema.prisma` — modelo de dados (Empresa, Estabelecimento,
@@ -203,3 +322,8 @@ usar.
   de envio de documentos do cliente.
 - `src/app/painel` — painel das consultoras; `src/app/api/documentos/*`,
   `src/app/api/solicitacoes` e `src/app/api/painel/*` — endpoints do envio.
+- `src/app/instagram` + `src/components/InstagramPainel.tsx` — painel do
+  Instagram; `src/lib/instagram/` — conexão, diff e tipos.
+- `instagram-ponte/` — extensão Chrome (MV3) que lê as listas no navegador do
+  usuário; `public/instagram-ponte.zip` é o pacote para download.
+- `public/espelho/` + `public/sw.js` — manifest, ícones e service worker do PWA.

@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { criarSolicitacao, gerarChaveAtendente, isTipoFoto, SEM_ATENDENTE } from "@/lib/documentos";
+import { criarCobranca } from "@/lib/cobrancas";
 import {
   COOKIE_PAINEL,
   opcoesDoCookie,
@@ -98,6 +99,92 @@ export async function marcarConferido(formData: FormData) {
     data: { status: "conferido" },
   });
   redirect(painelDa(sessao, cliente.atendente));
+}
+
+// --- Cobranças (Pix e cartão pelo Asaas) ---
+
+export async function gerarCobranca(formData: FormData) {
+  const sessao = await exigirLogin();
+  const solicitacaoId = String(formData.get("solicitacaoId") ?? "").trim() || null;
+
+  if (solicitacaoId) {
+    const cliente = await prisma.solicitacaoDocumento.findUnique({
+      where: { id: solicitacaoId },
+      select: { atendente: true },
+    });
+    if (!cliente || !podeVer(sessao, cliente.atendente)) notFound();
+  }
+
+  const atendente =
+    sessao.gestor || sessao.atendente.veTodos
+      ? String(formData.get("atendente") ?? "").trim() || null
+      : sessao.atendente.nome;
+
+  const resultado = await criarCobranca(
+    {
+      nome: formData.get("nome"),
+      cpfCnpj: formData.get("cpfCnpj"),
+      email: formData.get("email"),
+      telefone: formData.get("telefone"),
+      descricao: formData.get("descricao"),
+      valor: formData.get("valor"),
+      solicitacaoId,
+    },
+    { atendente },
+  );
+
+  const volta = solicitacaoId ? `&solicitacao=${encodeURIComponent(solicitacaoId)}` : "";
+  if (!resultado.ok) redirect(`/painel/cobrancas?erro=${encodeURIComponent(resultado.erro)}${volta}`);
+  redirect(`/painel/cobrancas?criada=${encodeURIComponent(resultado.cobranca.codigo)}${volta}`);
+}
+
+async function cobrancaDaSessao(formData: FormData) {
+  const sessao = await exigirLogin();
+  const id = String(formData.get("id") ?? "");
+  const cobranca = await prisma.cobranca.findUnique({ where: { id } });
+  if (!cobranca || !podeVer(sessao, cobranca.atendente)) notFound();
+  return cobranca;
+}
+
+export async function cancelarCobranca(formData: FormData) {
+  const cobranca = await cobrancaDaSessao(formData);
+  const aberta = cobranca.status === "pendente" || cobranca.status === "vencida";
+  if (aberta) {
+    if (cobranca.asaasPaymentId) {
+      const { excluirPagamento } = await import("@/lib/asaas");
+      await excluirPagamento(cobranca.asaasPaymentId);
+    }
+    await prisma.cobranca.update({
+      where: { id: cobranca.id },
+      data: {
+        status: "cancelada",
+        pixPayload: null,
+        pixImagem: null,
+        pixExpiraEm: null,
+      },
+    });
+    await prisma.pedidoCredito.updateMany({
+      where: { cobrancaId: cobranca.id },
+      data: { status: "cancelado" },
+    });
+  }
+  redirect("/painel/cobrancas");
+}
+
+// Pix ou dinheiro recebido fora do site: só o painel confirma esse caso
+export async function marcarCobrancaPaga(formData: FormData) {
+  const cobranca = await cobrancaDaSessao(formData);
+  if (cobranca.status === "pendente" || cobranca.status === "vencida" || cobranca.status === "analise") {
+    await prisma.cobranca.update({
+      where: { id: cobranca.id },
+      data: { status: "paga", pagoEm: cobranca.pagoEm ?? new Date() },
+    });
+    await prisma.pedidoCredito.updateMany({
+      where: { cobrancaId: cobranca.id },
+      data: { status: "pago" },
+    });
+  }
+  redirect("/painel/cobrancas");
 }
 
 // --- Atendentes (só o gestor) ---

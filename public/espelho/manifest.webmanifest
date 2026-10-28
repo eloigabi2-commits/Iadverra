@@ -1,0 +1,38 @@
+{
+  "name": "Espelho",
+  "short_name": "Espelho",
+  "description": "Quem não te segue de volta, quem você não segue, quem saiu e prováveis bloqueios.",
+  "lang": "pt-BR",
+  "start_url": "/instagram",
+  "scope": "/instagram",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/espelho/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/espelho/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/espelho/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/espelho/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

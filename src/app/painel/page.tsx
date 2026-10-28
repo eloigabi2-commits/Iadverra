@@ -95,6 +95,13 @@ export default async function Painel(props: PageProps<"/painel">) {
         </p>
       )}
 
+      <p className="mb-4 text-sm">
+        <Link href="/painel/cobrancas" className="font-semibold text-vinho underline">
+          Cobranças
+        </Link>{" "}
+        <span className="text-tinta/60">· receber por Pix ou cartão pelo link</span>
+      </p>
+
       {!semAtendente && (
         <section className="rounded-2xl bg-white p-5 shadow-sm">
           <h2 className="font-marca text-2xl font-bold text-vinho">Pedir documentos a um cliente</h2>
@@ -188,6 +195,12 @@ async function ListaDeAtendentes({ ehGestor, nome }: { ehGestor: boolean; nome: 
           <span className="text-tinta/60">· cada uma entra pelo link dela e vê só os clientes dela</span>
         </p>
       )}
+      <p className="mb-4 text-sm">
+        <Link href="/painel/cobrancas" className="font-semibold text-vinho underline">
+          Cobranças
+        </Link>{" "}
+        <span className="text-tinta/60">· Pix e cartão pelo Asaas</span>
+      </p>
 
       <h1 className="font-marca text-3xl font-bold text-vinho">Atendentes</h1>
       <ul className="mt-4 grid gap-3 sm:grid-cols-2">

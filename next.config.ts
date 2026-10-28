@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // unzipper tem um require opcional de @aws-sdk/client-s3 que o bundler tenta resolver
+  serverExternalPackages: ["unzipper"],
   async redirects() {
     return [
       // mensagens já enviadas levavam a política em itálico e o WhatsApp abria ".../privacidade_"

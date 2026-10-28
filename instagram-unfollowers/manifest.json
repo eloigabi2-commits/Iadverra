@@ -1,0 +1,21 @@
+{
+   "action": {
+      "default_title": "Não Seguidores"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "description": "Mostra quem não está te seguindo de volta no Instagram.",
+   "host_permissions": [ "https://*.instagram.com/*" ],
+   "icons": {
+      "128": "icon128.png",
+      "16": "icon16.png",
+      "48": "icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh1A8BjBECYvDwmc8v+tD528KCCh8Buq8HYe2nvugeJW8kqT3H01oWUMNbGaYWQvGoSYizaOYikxcoNLQzGnka3gS0kCnrSHxvbleGmojdvnO82TU4Ay7uj/F0UdHUfSXwsQUHT//6gKkxmJyPzi7hVVQuYT7trnCJCk+2OWivzoDFmlgZKA0xOOIC2/Z3XqCcprP/+72/HTRnc+EXgu5jkloisAPZeRG1GYk4p/nCmwey2aNSVIcUlUARgoDwzULAk9XbhfbrQx5BCtWEB1Kl3HFk6OzCMSQQ8HPNeaGtc1ZYaYL/NMP1s267afzxf5GmVRsQ8MP9kqjow8UvTn4qwIDAQAB",
+   "manifest_version": 3,
+   "name": "Não Seguidores",
+   "permissions": [ "scripting", "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.5.2"
+}

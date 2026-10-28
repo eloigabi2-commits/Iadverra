@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Ponte — Iadverra",
+  "version": "0.1.0",
+  "description": "Leva suas listas de seguidores e seguindo para o painel do Iadverra. Nenhum cookie ou senha sai do seu navegador.",
+  "permissions": ["scripting", "storage", "activeTab"],
+  "host_permissions": ["https://www.instagram.com/*"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Instagram Ponte"
+  }
+}

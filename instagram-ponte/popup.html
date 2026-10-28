@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root { color-scheme: light; }
+      body {
+        width: 320px;
+        margin: 0;
+        padding: 16px;
+        font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: #2a1416;
+        background: #faf5ef;
+      }
+      h1 { margin: 0 0 2px; font-size: 18px; color: #5b1820; }
+      p.sub { margin: 0 0 14px; color: #2a141699; font-size: 12px; }
+      label { display: block; font-size: 12px; font-weight: 600; margin: 12px 0 4px; }
+      input {
+        width: 100%; box-sizing: border-box; padding: 9px 10px; font: inherit;
+        border: 1px solid #f1e6da; border-radius: 8px; background: #fff;
+      }
+      input[readonly] { color: #2a141680; }
+      button {
+        width: 100%; margin-top: 14px; padding: 11px; font: inherit; font-weight: 600;
+        border: 0; border-radius: 9px; background: #5b1820; color: #faf5ef; cursor: pointer;
+      }
+      button:disabled { opacity: 0.55; cursor: default; }
+      button.link { background: none; color: #5b1820; text-decoration: underline; padding: 6px; margin-top: 8px; }
+      #status { margin-top: 12px; min-height: 38px; font-size: 12px; white-space: pre-wrap; }
+      #status.err { color: #a3341f; }
+      #status.ok { color: #1f7a3d; }
+      details { margin-top: 12px; }
+      summary { cursor: pointer; font-size: 12px; color: #2a141680; }
+    </style>
+  </head>
+  <body>
+    <h1>Instagram Ponte</h1>
+    <p class="sub">Abre o Instagram na aba atual, lê suas listas e envia só os perfis para o Iadverra.</p>
+
+    <label for="codigo">Código do painel</label>
+    <input id="codigo" placeholder="ABCD-EFGH-JKLM" autocomplete="off" spellcheck="false" />
+
+    <details>
+      <summary>Endereço do Iadverra</summary>
+      <label for="app">URL</label>
+      <input id="app" placeholder="https://seu-app.vercel.app" autocomplete="off" spellcheck="false" />
+    </details>
+
+    <button id="sync">Sincronizar agora</button>
+    <button id="abrir" class="link" hidden>Abrir meu painel</button>
+
+    <div id="status"></div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -14,6 +14,7 @@ import {
   TIPOS_FOTO,
 } from "@/lib/documentos";
 import { podeVer, sessaoAtual, veTudo } from "@/lib/painel-auth";
+import { formatarValor, rotuloDoStatus } from "@/lib/cobrancas";
 import CopiarLink from "@/components/CopiarLink";
 import BotaoExcluir from "@/components/BotaoExcluir";
 import { excluir, marcarConferido, pedirDeNovo } from "../actions";
@@ -26,7 +27,10 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
 
   const s = await prisma.solicitacaoDocumento.findUnique({
     where: { id },
-    include: { fotos: { select: { id: true, tipo: true } } },
+    include: {
+      fotos: { select: { id: true, tipo: true } },
+      cobrancas: { select: { id: true, codigo: true, valor: true, status: true }, orderBy: { criadoEm: "desc" }, take: 6 },
+    },
   });
   // cliente de outra atendente: nem confirma que existe
   if (!s || !podeVer(sessao, s.atendente)) notFound();
@@ -56,6 +60,32 @@ export default async function Detalhe(props: PageProps<"/painel/[id]">) {
         </div>
         <Situacao status={s.status} />
       </div>
+
+      <section className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-semibold">Cobranças deste cliente</h2>
+          <Link
+            href={`/painel/cobrancas?solicitacao=${s.id}`}
+            className="rounded-lg bg-vinho px-3 py-2 text-sm font-semibold text-white"
+          >
+            Cobrar este cliente
+          </Link>
+        </div>
+        {s.cobrancas.length === 0 ? (
+          <p className="mt-2 text-sm text-tinta/60">Nenhuma cobrança criada ainda.</p>
+        ) : (
+          <ul className="mt-2 divide-y divide-marfim text-sm">
+            {s.cobrancas.map((c) => (
+              <li key={c.id} className="flex items-center justify-between gap-3 py-2">
+                <Link href={`/pagar/${c.codigo}`} className="font-semibold text-vinho underline">
+                  {formatarValor(Number(c.valor))}
+                </Link>
+                <span className="text-tinta/60">{rotuloDoStatus(c.status)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {s.status === "aguardando" && (
         <section className="mt-5 rounded-2xl bg-white p-5 shadow-sm">
