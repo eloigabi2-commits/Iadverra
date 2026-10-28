@@ -84,7 +84,7 @@ export async function cadastrar(formData: FormData) {
       const existentes = await tx.clienteCredito.findMany({
         where: { email },
         orderBy: { criadoEm: "asc" },
-        select: { id: true, senhaHash: true },
+        select: { id: true, senhaHash: true, telefone: true },
       });
 
       if (existentes.some((conta) => conta.senhaHash)) {
@@ -93,6 +93,10 @@ export async function cadastrar(formData: FormData) {
 
       const [principal, ...duplicadas] = existentes;
       if (principal) {
+        if (principal.telefone !== telefone) {
+          throw new Error("TELEFONE_NAO_CONFERE");
+        }
+
         if (duplicadas.length > 0) {
           const ids = duplicadas.map((conta) => conta.id);
           await tx.pedidoCredito.updateMany({
@@ -123,6 +127,12 @@ export async function cadastrar(formData: FormData) {
     }
     if ((erro as Error).message === "EMAIL_JA_CADASTRADO") {
       erroNoPortal("/credito/cadastro", "Este e-mail já está cadastrado. Entre com a sua senha.");
+    }
+    if ((erro as Error).message === "TELEFONE_NAO_CONFERE") {
+      erroNoPortal(
+        "/credito/cadastro",
+        "Este e-mail já tem cadastro. Use o mesmo WhatsApp informado antes ou fale com a equipe.",
+      );
     }
     throw erro;
   }
