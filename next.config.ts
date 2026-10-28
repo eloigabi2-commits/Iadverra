@@ -1,11 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // áudios do fluxo de maternidade (WhatsApp): o DataCrazy baixa daqui e manda como áudio de voz
+  // áudios dos fluxos de maternidade e bancário (WhatsApp): o DataCrazy baixa daqui e manda como áudio de voz
   async headers() {
     return [
       {
         source: "/audio/maternidade/:arquivo*",
+        headers: [{ key: "Content-Type", value: "audio/ogg; codecs=opus" }],
+      },
+      {
+        source: "/audio/bancario/:arquivo*",
         headers: [{ key: "Content-Type", value: "audio/ogg; codecs=opus" }],
       },
     ];
