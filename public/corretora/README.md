@@ -4,9 +4,10 @@ Plataforma de opções binárias em modo simulação, construída a partir do ma
 de um HAR da área logada de uma corretora (rotas, APIs, feature flags, catálogo de
 ativos e eventos de WebSocket). Usa marca própria e não movimenta dinheiro real.
 
-Site estático, sem dependências: abra `index.html` por um servidor qualquer
-(`python3 -m http.server` dentro desta pasta) ou publique a pasta em qualquer
-hospedagem estática.
+A interface é estática, mas as contas são reais: cadastro e login com e-mail e
+senha usam as rotas `/api/pregao/*` do site Next.js, com hash scrypt e sessão em
+cookie. O saldo, as operações e o histórico ficam salvos no Postgres por conta.
+Sirva pelo site (`/corretora/`), não abrindo o `index.html` direto do disco.
 
 ## Funcionalidades
 
@@ -48,4 +49,5 @@ navegador, o nó Webhook precisa aceitar CORS (opção *Allowed Origins* = `*`).
 
 Atalhos: Shift + ↑ abre Acima, Shift + ↓ abre Abaixo.
 
-Os dados (conta, saldos, histórico, prêmios) ficam no `localStorage` do navegador.
+A conta e o estado (saldos, histórico, prêmios) ficam no Postgres, vinculados ao
+e-mail cadastrado. O `localStorage` é usado apenas como cache local da sessão.

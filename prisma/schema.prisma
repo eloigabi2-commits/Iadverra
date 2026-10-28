@@ -233,6 +233,18 @@ model InstagramSumido {
 // Cobrança real: o valor é combinado no painel e o pagamento (Pix ou cartão de
 // crédito) é criado na API do Asaas só quando o cliente escolhe a forma na tela
 // /pagar/<codigo>. Nunca guardamos número de cartão nem CVV.
+model UsuarioPregao {
+  id           String   @id @default(cuid())
+  nome         String
+  email        String   @unique
+  senhaHash    String   @map("senha_hash")
+  estado       Json?
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("usuario_pregao")
+}
+
 model Cobranca {
   id              String    @id @default(cuid())
   // código curto do link do cliente: /pagar/maria-k7p2xq

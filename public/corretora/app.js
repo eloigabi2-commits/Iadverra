@@ -74,10 +74,32 @@ let S;
 try { S = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || 'null') || {}); } catch { S = defaults(); }
 S.rewards = Object.assign(defaults().rewards, S.rewards || {});
 S.chart = Object.assign(defaults().chart, S.chart || {});
-let saveT;
-function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 250); }
+let saveT, syncT, ONLINE = false;
+function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 250); agendarSync(); }
 function saveNow() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* armazenamento indisponível */ } }
-addEventListener('beforeunload', saveNow);
+function estadoParaServidor() {
+  return Object.assign({}, S, {
+    trades: S.trades.slice(-200),
+    tx: S.tx.slice(-200),
+    sched: S.sched.slice(-50),
+    notifs: S.notifs.slice(0, 40)
+  });
+}
+function syncNow() {
+  if (!ONLINE) return Promise.resolve();
+  clearTimeout(syncT);
+  return fetch('/api/pregao/estado', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ estado: estadoParaServidor() })
+  }).catch(() => {});
+}
+function agendarSync() {
+  if (!ONLINE) return;
+  clearTimeout(syncT);
+  syncT = setTimeout(syncNow, 1200);
+}
+addEventListener('beforeunload', () => { saveNow(); if (ONLINE) navigator.sendBeacon('/api/pregao/estado', new Blob([JSON.stringify({ estado: estadoParaServidor() })], { type: 'application/json' })); });
 
 /* ---------- ativos ---------- */
 const MIN_EXP = 30; // expiração mínima em segundos
@@ -1233,7 +1255,7 @@ function pageAccount(sub) {
         <div class="grid-2"><label class="field"><span class="label">Nome</span><input class="input" id="pf-first" value="${esc(u.first)}" required></label>
         <label class="field"><span class="label">Sobrenome</span><input class="input" id="pf-last" value="${esc(u.last)}"></label></div>
         <label class="field"><span class="label">Apelido público</span><input class="input" id="pf-nick" value="${esc(u.nick)}"></label>
-        <label class="field"><span class="label">E-mail</span><input class="input" id="pf-email" type="email" value="${esc(u.email)}"></label>
+        <label class="field"><span class="label">E-mail de acesso</span><input class="input" type="email" value="${esc(u.email)}" disabled></label>
         <div class="grid-2"><label class="field"><span class="label">País</span><input class="input" value="Brasil" disabled id="pf-country"></label><label class="field"><span class="label">Moeda</span><input class="input" value="Real (BRL)" disabled id="pf-cur"></label></div>
         <button class="btn btn-primary" type="submit">Salvar alterações</button>
       </form></div>
@@ -1245,8 +1267,8 @@ function pageAccount(sub) {
         <div class="inv-item"><span>Telefone</span>${u.phoneVerified ? '<span class="pill ok">Verificado</span>' : '<span class="pill bad">Não verificado</span>'}</div>
         <div class="inv-item"><span>Documento</span>${S.kyc === 'ok' ? '<span class="pill ok">Aprovado</span>' : S.kyc === 'pending' ? '<span class="pill warn">Em análise</span>' : '<span class="pill">Não enviado</span>'}</div>
       </div>
-      <h2>Dados locais</h2><p class="hint">Apaga conta, saldos e histórico salvos neste navegador.</p>
-      <button class="btn btn-danger" type="button" id="wipe">Apagar meus dados</button></div></div>`;
+      <h2>Sessão</h2><p class="hint">Sua conta, saldo e histórico ficam salvos no servidor. Sair não apaga os seus dados.</p>
+      <button class="btn" type="button" id="logout">Sair da conta</button></div></div>`;
   } else if (sub === 'vip') {
     const { tier, total } = vipTier(), next = TIERS.find(t => t.min > total);
     const pct = next ? Math.round((total - tier.min) / (next.min - tier.min) * 100) : 100;
@@ -1286,15 +1308,19 @@ function pageAccount(sub) {
 
   $('#pf-form')?.addEventListener('submit', e => {
     e.preventDefault();
-    const email = $('#pf-email').value.trim();
     Object.assign(S.user, { first: $('#pf-first').value.trim(), last: $('#pf-last').value.trim(), nick: $('#pf-nick').value.trim() || S.user.nick });
-    if (email !== S.user.email) { S.user.email = email; S.user.emailVerified = false; }
     save(); updateHeader(); toast('Dados salvos.', 'ok'); pageAccount('profile');
   });
-  $('#wipe')?.addEventListener('click', e => {
+  $('#logout')?.addEventListener('click', async e => {
     const b = e.currentTarget;
-    if (b.dataset.armed) { try { localStorage.removeItem(KEY); } catch { /* ignore */ } location.hash = 'trade'; location.reload(); return; }
-    b.dataset.armed = 1; b.textContent = 'Toque de novo para confirmar';
+    b.disabled = true;
+    b.textContent = 'Saindo...';
+    await syncNow();
+    await fetch('/api/pregao/sair', { method: 'POST' }).catch(() => {});
+    ONLINE = false;
+    try { localStorage.removeItem(KEY); } catch { /* ignore */ }
+    location.hash = 'trade';
+    location.reload();
   });
   const codeFlow = (form, row, btn, err, onOk) => {
     let code = null;
@@ -1400,29 +1426,118 @@ function route() {
   toggleAcctMenu(false); $('#notif-panel').hidden = true;
 }
 
-/* ---------- boas-vindas ---------- */
-function welcome() {
-  const m = openModal(`<div class="form welcome">
-    <span class="brand"><span class="brand-mark"><i></i><i></i><i></i></span></span>
-    <h2>Pregão Simulador</h2>
-    <p class="muted" style="margin:0">Treine opções binárias com cotações simuladas, ${brl(DEMO_START)} na conta demo e uma conta real fictícia para testar depósitos, saques e prêmios.</p>
-    <form class="form" id="wl-form" style="width:100%;text-align:left">
-      <div class="grid-2"><label class="field"><span class="label">Nome</span><input class="input" id="wl-first" required autocomplete="given-name"></label>
-      <label class="field"><span class="label">Sobrenome</span><input class="input" id="wl-last" autocomplete="family-name"></label></div>
-      <label class="field"><span class="label">E-mail (opcional)</span><input class="input" id="wl-email" type="email" autocomplete="email"></label>
-      <p class="hint">Sem senha: a conta fica salva só neste navegador. Nenhum dado é enviado a servidores.</p>
-      <button class="btn btn-primary" type="submit">Começar a operar</button>
-    </form></div>`, { locked: true });
-  $('#wl-form', m.el).addEventListener('submit', e => {
-    e.preventDefault();
-    const id = uid() + uid();
-    S.user = { id, first: $('#wl-first', m.el).value.trim(), last: $('#wl-last', m.el).value.trim(), email: $('#wl-email', m.el).value.trim(), nick: 'Trader#' + id.slice(0, 8), phone: '', phoneVerified: false, emailVerified: false, created: Date.now() };
-    S.notifs = [];
+/* ---------- conta e entrada ---------- */
+function usuarioDoServidor(usuario, anterior) {
+  const nome = String(usuario.nome || '').trim();
+  const partes = nome.split(/\s+/).filter(Boolean);
+  const first = partes.shift() || 'Trader';
+  return Object.assign({}, anterior || {}, {
+    id: usuario.id,
+    first,
+    last: partes.join(' '),
+    email: usuario.email,
+    nick: (anterior && anterior.nick) || 'Trader#' + String(usuario.id).slice(0, 8),
+    phone: (anterior && anterior.phone) || '',
+    phoneVerified: !!(anterior && anterior.phoneVerified),
+    emailVerified: !!(anterior && anterior.emailVerified),
+    created: usuario.criadoEm ? new Date(usuario.criadoEm).getTime() : ((anterior && anterior.created) || Date.now())
+  });
+}
+function iniciarConta(dados) {
+  ONLINE = true;
+  const estado = dados.estado && typeof dados.estado === 'object' && !Array.isArray(dados.estado) ? dados.estado : null;
+  S = Object.assign(defaults(), estado || {});
+  S.rewards = Object.assign(defaults().rewards, S.rewards || {});
+  S.chart = Object.assign(defaults().chart, S.chart || {});
+  S.user = usuarioDoServidor(dados.usuario, S.user);
+  S.trades = Array.isArray(S.trades) ? S.trades : [];
+  S.tx = Array.isArray(S.tx) ? S.tx : [];
+  S.sched = Array.isArray(S.sched) ? S.sched : [];
+  S.notifs = Array.isArray(S.notifs) ? S.notifs : [];
+  init();
+  if (!estado) {
     notify('Bem-vindo ao Pregão', `Sua conta demo tem ${brl(DEMO_START)} para treinar.`);
     notify('Valide seu número e ganhe 1 giro na roleta', 'Acesse Conta › Verificação.');
     notify('Você tem 2 giros e 1 raspadinha', 'Abra Prêmios para usar.');
-    save(); updateHeader(); m.close(); SFX.welcome();
+    SFX.welcome();
+  }
+}
+function authGate() {
+  let modo = 'entrar';
+  const m = openModal(`<div class="form welcome">
+    <span class="brand"><span class="brand-mark"><i></i><i></i><i></i></span></span>
+    <h2>Pregão Simulador</h2>
+    <p class="muted" style="margin:0">Entre com o seu e-mail e senha. A conta, o saldo e o histórico ficam salvos no servidor.</p>
+    <div class="seg" id="auth-tabs" style="width:100%;margin:2px 0 4px">
+      <button type="button" data-mode="entrar" class="on" style="flex:1">Entrar</button>
+      <button type="button" data-mode="cadastrar" style="flex:1">Criar conta</button>
+    </div>
+    <form class="form" id="auth-form" style="width:100%;text-align:left">
+      <label class="field" id="auth-nome" hidden><span class="label">Nome completo</span><input class="input" id="auth-name" autocomplete="name"></label>
+      <label class="field"><span class="label">E-mail</span><input class="input" id="auth-email" type="email" required autocomplete="email"></label>
+      <label class="field"><span class="label">Senha</span><input class="input" id="auth-senha" type="password" required minlength="8" maxlength="128" autocomplete="current-password"></label>
+      <p class="err" id="auth-err"></p>
+      <button class="btn btn-primary" type="submit" id="auth-btn">Entrar</button>
+    </form>
+    <p class="hint">A conta demo começa com ${brl(DEMO_START)}. Nenhum valor real é movimentado.</p>
+  </div>`, { locked: true });
+
+  const form = $('#auth-form', m.el);
+  const erro = $('#auth-err', m.el);
+  const botao = $('#auth-btn', m.el);
+  const nome = $('#auth-nome', m.el);
+  const senha = $('#auth-senha', m.el);
+  const definirModo = novo => {
+    modo = novo;
+    $$('#auth-tabs button', m.el).forEach(b => b.classList.toggle('on', b.dataset.mode === modo));
+    nome.hidden = modo !== 'cadastrar';
+    $('#auth-name', m.el).required = modo === 'cadastrar';
+    senha.autocomplete = modo === 'cadastrar' ? 'new-password' : 'current-password';
+    botao.textContent = modo === 'cadastrar' ? 'Criar conta' : 'Entrar';
+    erro.textContent = '';
+  };
+  $$('#auth-tabs button', m.el).forEach(b => b.addEventListener('click', () => definirModo(b.dataset.mode)));
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    erro.textContent = '';
+    botao.disabled = true;
+    const rotulo = botao.textContent;
+    botao.textContent = modo === 'cadastrar' ? 'Criando conta...' : 'Entrando...';
+    try {
+      const resposta = await fetch(`/api/pregao/${modo === 'cadastrar' ? 'cadastrar' : 'entrar'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: $('#auth-name', m.el).value.trim(),
+          email: $('#auth-email', m.el).value.trim(),
+          senha: senha.value
+        })
+      });
+      const dados = await resposta.json().catch(() => ({}));
+      if (!resposta.ok) {
+        erro.textContent = dados.erro || 'Não foi possível entrar. Tente de novo.';
+        return;
+      }
+      m.close();
+      iniciarConta(dados);
+    } catch {
+      erro.textContent = 'Sem conexão com o servidor. Tente de novo.';
+    } finally {
+      botao.disabled = false;
+      botao.textContent = rotulo;
+    }
   });
+}
+async function iniciar() {
+  try {
+    const resposta = await fetch('/api/pregao/sessao', { cache: 'no-store' });
+    if (resposta.ok) {
+      iniciarConta(await resposta.json());
+      return;
+    }
+  } catch { /* sem sessão ou sem rede */ }
+  authGate();
 }
 
 /* ---------- inicialização ---------- */
@@ -1481,8 +1596,6 @@ function init() {
   }, 1000);
   let lastMin = -1;
   setInterval(() => { const m = new Date().getMinutes(); if (m !== lastMin) { lastMin = m; renderTabs(); if (!$('#trade-view').hidden) renderPanel(); } }, 5000);
-
-  if (!S.user) welcome();
 }
-init();
+iniciar();
 })();
