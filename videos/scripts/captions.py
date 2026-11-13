@@ -1,30 +1,31 @@
-"""Converte 'palavra@ini-fim' em blocos de legenda (até 3 palavras, quebra em pontuação ou pausa)."""
+"""Converte 'palavra@ini-fim' (scripts/transcrever.py) em blocos de legenda.
+
+Até 3 palavras por bloco; quebra em pontuação ou pausa. Junta números que o
+Whisper separa ("R" "$" "399" ",00." → "R$ 399,00."; "8" ".078," → "8.078,").
+Uso: captions.py <palavras.txt> <saida.json>
+"""
 import json, re, sys
 src, out = sys.argv[1:3]
+FIX = {"impar": "limpar", "pix?": "Pix?", "soluções,": "Soluções,", "soluções": "Soluções", "soluções.": "Soluções."}
 words = []
 for tok in open(src).read().split():
     w, t = tok.rsplit("@", 1)
     a, b = map(float, t.split("-"))
-    words.append([w, a, b])
-# correções da transcrição
-FIX = {"impar": "limpar", "pix?": "Pix?", "soluções,": "Soluções,", "soluções": "Soluções"}
-merged = []
-for w in words:
-    w[0] = FIX.get(w[0], w[0])
-    if merged and (w[0] in ("$", "%") or merged[-1][0] == "R$" or (merged[-1][0] == "R" and w[0] == "$")):
-        merged[-1][0] = (merged[-1][0] + w[0]).replace("R$", "R$ ") if merged[-1][0] == "R$" else merged[-1][0] + w[0]
-        merged[-1][2] = w[2]
+    w = FIX.get(w, w)
+    prev = words[-1][0] if words else ""
+    if words and (w in ("$", "%") or re.match(r"^[,.]\d", w) or prev == "R$"):
+        words[-1][0] = prev + (" " if prev == "R$" else "") + w
+        words[-1][2] = b
     else:
-        merged.append(w)
-for w in merged:
-    w[0] = w[0].replace("R$ ", "R$ ").replace("R$399", "R$ 399")
+        words.append([w, a, b])
 chunks, cur = [], []
-for i, w in enumerate(merged):
+for i, w in enumerate(words):
     cur.append(w)
-    nxt = merged[i + 1] if i + 1 < len(merged) else None
+    nxt = words[i + 1] if i + 1 < len(words) else None
     if len(cur) >= 3 or re.search(r"[.,?!]$", w[0]) or not nxt or nxt[1] - w[2] > 0.35:
-        chunks.append({"start": cur[0][1], "end": (nxt[1] if nxt and nxt[1] - w[2] < 0.6 else w[2] + 0.2),
-                       "words": [{"t": x[0], "s": x[1]} for x in cur]})
+        end = nxt[1] if nxt and nxt[1] - w[2] < 0.6 else w[2] + 0.2
+        chunks.append({"start": cur[0][1], "end": end, "words": [{"t": x[0], "s": x[1]} for x in cur]})
         cur = []
 json.dump(chunks, open(out, "w"), ensure_ascii=False)
-print(len(chunks), "blocos;", " | ".join(" ".join(x["t"] for x in c["words"]) for c in chunks[18:30]))
+print(len(chunks), "blocos")
+print(" | ".join(" ".join(x["t"] for x in c["words"]) for c in chunks))

@@ -13,17 +13,18 @@ import {
   useVideoConfig,
 } from "remotion";
 import { loadFont } from "@remotion/fonts";
-import CAPTIONS from "./legenda-captions.json";
-import FACE from "./legenda-face.json";
+import CAPTIONS_1 from "./legenda-captions.json";
+import FACE_1 from "./legenda-face.json";
+import CAPTIONS_2 from "./legenda2-captions.json";
+import FACE_2 from "./legenda2-face.json";
 
-// Vídeo da Esclarece (Black Friday) com a logo como marca d'água no canto
+// Vídeos da Esclarece (Black Friday) com a logo como marca d'água no canto
 // superior direito, legendas palavra a palavra embaixo, zooms e ícones
 // pontuais presos ao rosto e um bloco de destaque na fala da Black Friday.
-// Tempos: transcrição do Whisper (scripts/captions.py → legenda-captions.json).
-// Rosto: scripts/track_face.py → legenda-face.json.
+// Tempos: transcrição do Whisper (scripts/captions.py → legendaN-captions.json).
+// Rosto: scripts/track_face.py → legendaN-face.json. Cada vídeo é um Cfg.
 
 const FPS = 30;
-export const LEGENDA_DURATION = Math.round(57.4 * FPS);
 const SANS = "Manrope";
 const f = (sec: number) => Math.round(sec * FPS);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -44,17 +45,36 @@ const C = {
   ink: "#0b1020",
 };
 
-// Bloco da Black Friday (s)
-const BF = { start: 46.4, friday: 46.66, off: 47.68, desconto: 49.02, novembro: 51.0, end: 51.8 };
+type Pop = { from: number; to: number; side: -1 | 1; bg: string; icon?: string; label?: string; dy?: number };
 
-// Zooms rápidos nas palavras de impacto
-const PUNCHES = [2.3, 21.94, 25.04, 47.68, 51.82];
-const SHAKES = [BF.start];
+type Cfg = {
+  video: string;
+  duration: number;
+  captions: { start: number; end: number; words: { t: string; s: number }[] }[];
+  face: number[][];
+  // bloco da Black Friday (s)
+  bf: { start: number; friday: number; off: number; desconto: number; novembro: number; end: number };
+  // zooms rápidos nas palavras de impacto
+  punches: number[];
+  // ícones que entram ao lado da cabeça, no momento da fala
+  pops: Pop[];
+  // seta em "clique no botão abaixo"
+  arrow: { from: number; to: number };
+  // quando a marca é falada (pulso da logo)
+  brand: number[];
+  // usa a posição média do rosto em vez de seguir quadro a quadro
+  // (quando o rastreamento oscila)
+  fixedFace?: boolean;
+};
+
+const CfgContext = React.createContext<Cfg | null>(null);
+const useCfg = () => React.useContext(CfgContext)!;
 
 const useCamera = () => {
   const frame = useCurrentFrame();
+  const { punches, bf } = useCfg();
   let zoom = 1;
-  for (const p of PUNCHES) {
+  for (const p of punches) {
     const d = frame - f(p);
     if (d >= 0 && d < 26) {
       zoom += d < 3 ? interpolate(d, [0, 3], [0, 0.07]) : interpolate(d, [3, 26], [0.07, 0], { easing: ease });
@@ -62,7 +82,7 @@ const useCamera = () => {
   }
   let x = 0;
   let y = 0;
-  for (const s of SHAKES) {
+  for (const s of [bf.start]) {
     const d = frame - f(s);
     if (d >= 0 && d < 16) {
       const a = (1 - d / 16) * 18;
@@ -74,8 +94,12 @@ const useCamera = () => {
 };
 
 // Posição do rosto (px do quadro 1080×1920), interpolada a 10 pontos/s
+const median = (v: number[]) => [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)];
+
 const useFace = () => {
+  const { face: FACE, fixedFace } = useCfg();
   const t = useCurrentFrame() / FPS;
+  if (fixedFace) return { x: median(FACE.map((r) => r[1])), y: median(FACE.map((r) => r[2])) };
   const i = Math.min(FACE.length - 2, Math.floor(t * 10));
   const [t0, x0, y0] = FACE[i];
   const [t1, x1, y1] = FACE[i + 1];
@@ -102,16 +126,46 @@ const I = {
   down: "M12 4v15M5 12l7 7 7-7",
 };
 
-type Pop = { from: number; to: number; side: -1 | 1; bg: string; icon?: string; label?: string; dy?: number };
+const CFG_1: Cfg = {
+  video: "legenda/original.mp4",
+  duration: Math.round(57.4 * FPS),
+  captions: CAPTIONS_1,
+  face: FACE_1,
+  bf: { start: 46.4, friday: 46.66, off: 47.68, desconto: 49.02, novembro: 51.0, end: 51.8 },
+  punches: [2.3, 21.94, 25.04, 47.68, 51.82],
+  pops: [
+    { from: 2.3, to: 4.6, side: -1, bg: C.red, icon: I.alert },
+    { from: 21.94, to: 23.9, side: -1, bg: C.green, icon: I.check },
+    { from: 24.22, to: 26.6, side: 1, bg: C.gold, icon: I.tag },
+    { from: 27.32, to: 29.6, side: -1, bg: C.blue, label: "30" },
+    { from: 31.98, to: 34.3, side: 1, bg: C.green, icon: I.shield },
+  ],
+  arrow: { from: 41.14, to: 44.0 },
+  brand: [11.54, 51.82],
+};
 
-// Ícones que entram ao lado da cabeça, no momento da fala
-const POPS: Pop[] = [
-  { from: 2.3, to: 4.6, side: -1, bg: C.red, icon: I.alert },
-  { from: 21.94, to: 23.9, side: -1, bg: C.green, icon: I.check },
-  { from: 24.22, to: 26.6, side: 1, bg: C.gold, icon: I.tag },
-  { from: 27.32, to: 29.6, side: -1, bg: C.blue, label: "30" },
-  { from: 31.98, to: 34.3, side: 1, bg: C.green, icon: I.shield },
-];
+const CFG_2: Cfg = {
+  video: "legenda2/original.mp4",
+  duration: Math.round(58.2 * FPS),
+  captions: CAPTIONS_2,
+  face: FACE_2,
+  bf: { start: 37.58, friday: 37.82, off: 40.5, desconto: 41.8, novembro: 38.72, end: 42.6 },
+  punches: [3.88, 8.32, 31.32, 40.5, 45.7, 52.34],
+  pops: [
+    { from: 3.88, to: 5.0, side: -1, bg: C.red, icon: I.alert },
+    { from: 5.02, to: 6.9, side: -1, bg: C.green, icon: I.check },
+    { from: 7.76, to: 10.1, side: 1, bg: C.gold, icon: I.tag },
+    { from: 15.96, to: 17.9, side: 1, bg: C.green, icon: I.shield },
+    { from: 31.32, to: 33.4, side: -1, bg: C.blue, label: "30" },
+    { from: 45.22, to: 47.2, side: 1, bg: C.gold, icon: I.tag },
+  ],
+  arrow: { from: 47.56, to: 50.3 },
+  brand: [10.46, 52.34],
+  fixedFace: true,
+};
+
+export const LEGENDA_DURATION = CFG_1.duration;
+export const LEGENDA2_DURATION = CFG_2.duration;
 
 const PopIcon: React.FC<{ p: Pop }> = ({ p }) => {
   const frame = useCurrentFrame();
@@ -127,7 +181,7 @@ const PopIcon: React.FC<{ p: Pop }> = ({ p }) => {
     <div
       style={{
         position: "absolute",
-        left: face.x + p.side * 350 - size / 2,
+        left: Math.min(1080 - size - 20, Math.max(20, face.x + p.side * 350 - size / 2)),
         top: face.y - 40 + (p.dy ?? 0) - size / 2 + bob,
         width: size,
         height: size,
@@ -158,8 +212,7 @@ const PopIcon: React.FC<{ p: Pop }> = ({ p }) => {
 const DownArrow: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const from = 41.14;
-  const to = 44.0;
+  const { from, to } = useCfg().arrow;
   const k = spring({ frame: frame - f(from), fps, config: { damping: 12 } });
   if (frame < f(from) || frame >= f(to)) return null;
   const out = interpolate(frame, [f(to) - 6, f(to)], [1, 0], clamp);
@@ -261,6 +314,7 @@ const GlitchWord: React.FC<{ at: number; text: string; color: string; size: numb
 };
 
 const OffBadge: React.FC = () => {
+  const BF = useCfg().bf;
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const d = frame - f(BF.off);
@@ -310,6 +364,7 @@ const OffBadge: React.FC = () => {
 };
 
 const BlackFriday: React.FC = () => {
+  const BF = useCfg().bf;
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   if (frame < f(BF.start) || frame >= f(BF.end)) return null;
@@ -343,7 +398,7 @@ const BlackFriday: React.FC = () => {
       >
         <GlitchWord at={BF.start} text="Black" color="#ffffff" size={170} />
         <GlitchWord at={BF.friday} text="Friday" color={C.yellow} size={170} />
-        <div style={{ marginTop: 10 }}>
+        <div style={{ marginTop: 10, height: 400 }}>
           <OffBadge />
         </div>
         {frame >= f(BF.novembro) && (
@@ -374,6 +429,7 @@ const BlackFriday: React.FC = () => {
 // ---------- Legendas ----------
 
 const Caption: React.FC = () => {
+  const { bf: BF, captions: CAPTIONS } = useCfg();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const t = frame / FPS;
@@ -428,7 +484,7 @@ const Caption: React.FC = () => {
 const Watermark: React.FC = () => {
   const frame = useCurrentFrame();
   const pulse = Math.max(
-    ...[11.54, 51.82].map((t) => interpolate(frame - f(t), [0, 5, 20], [0, 0.25, 0], clamp)),
+    ...useCfg().brand.map((t) => interpolate(frame - f(t), [0, 5, 20], [0, 0.25, 0], clamp)),
   );
   return (
     <Img
@@ -451,16 +507,17 @@ const Watermark: React.FC = () => {
 
 const sfx = (name: string) => staticFile(`esclarece/${name}`);
 
-const SOUNDS: [string, number[], number][] = [
-  ["pop.wav", POPS.map((p) => p.from), 0.4],
-  ["whoosh.wav", [BF.start - 0.2, 41.0], 0.35],
-  ["thud.wav", [BF.start, BF.off], 0.75],
-  ["coin.wav", [BF.off + 0.15, BF.off + 0.35], 0.4],
-  ["up.wav", [BF.desconto], 0.45],
-  ["bip.wav", [BF.novembro, 11.54, 51.82], 0.35],
-];
-
-const Soundtrack: React.FC = () => (
+const Soundtrack: React.FC = () => {
+  const { bf: BF, pops, arrow, brand } = useCfg();
+  const SOUNDS: [string, number[], number][] = [
+    ["pop.wav", pops.map((p) => p.from), 0.4],
+    ["whoosh.wav", [BF.start - 0.2, arrow.from - 0.14], 0.35],
+    ["thud.wav", [BF.start, BF.off], 0.75],
+    ["coin.wav", [BF.off + 0.15, BF.off + 0.35], 0.4],
+    ["up.wav", [BF.desconto], 0.45],
+    ["bip.wav", [BF.novembro, ...brand], 0.35],
+  ];
+  return (
   <>
     {SOUNDS.flatMap(([file, times, volume]) =>
       times.map((t) => (
@@ -470,9 +527,11 @@ const Soundtrack: React.FC = () => (
       )),
     )}
   </>
-);
+  );
+};
 
-export const LegendaAd: React.FC = () => {
+const LegendaVideo: React.FC = () => {
+  const { video, pops } = useCfg();
   const cam = useCamera();
   return (
     <AbsoluteFill style={{ background: "#000" }}>
@@ -483,10 +542,10 @@ export const LegendaAd: React.FC = () => {
         }}
       >
         <OffthreadVideo
-          src={staticFile("legenda/original.mp4")}
+          src={staticFile(video)}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
-        {POPS.map((p) => (
+        {pops.map((p) => (
           <PopIcon key={p.from} p={p} />
         ))}
       </AbsoluteFill>
@@ -498,3 +557,15 @@ export const LegendaAd: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+export const LegendaAd: React.FC = () => (
+  <CfgContext.Provider value={CFG_1}>
+    <LegendaVideo />
+  </CfgContext.Provider>
+);
+
+export const Legenda2Ad: React.FC = () => (
+  <CfgContext.Provider value={CFG_2}>
+    <LegendaVideo />
+  </CfgContext.Provider>
+);
