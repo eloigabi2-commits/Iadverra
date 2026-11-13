@@ -2,10 +2,19 @@ import { Composition } from "remotion";
 import { AllureAd, AD_DURATION } from "./AllureAd";
 import { NfcAd, NFC_DURATION } from "./NfcAd";
 import { EsclareceAd, ESCLARECE_DURATION } from "./EsclareceAd";
+import { LegendaAd, LEGENDA_DURATION } from "./LegendaAd";
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+    <Composition
+      id="LegendaAd"
+      component={LegendaAd}
+      durationInFrames={LEGENDA_DURATION}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
     <Composition
       id="EsclareceAd"
       component={EsclareceAd}
