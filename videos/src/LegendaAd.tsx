@@ -39,7 +39,6 @@ const C = {
   red: "#ef233c",
   green: "#22c55e",
   blue: "#2b35a8",
-  teal: "#32bcad",
   gold: "#f5b700",
   yellow: "#ffd60a",
   ink: "#0b1020",
@@ -49,8 +48,8 @@ const C = {
 const BF = { start: 46.4, friday: 46.66, off: 47.68, desconto: 49.02, novembro: 51.0, end: 51.8 };
 
 // Zooms rápidos nas palavras de impacto
-const PUNCHES = [2.3, 10.0, 11.54, 19.78, 21.94, 25.04, 27.32, 33.48, 39.58, 47.68, 51.82];
-const SHAKES = [BF.start, 39.58];
+const PUNCHES = [2.3, 21.94, 25.04, 47.68, 51.82];
+const SHAKES = [BF.start];
 
 const useCamera = () => {
   const frame = useCurrentFrame();
@@ -97,15 +96,9 @@ const Icon: React.FC<{ d: string; size: number; color?: string; width?: number }
 
 const I = {
   alert: "M12 7v6M12 16.8v.1",
-  bank: "M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18",
-  card: "M3 6h18v12H3zM3 10h18M7 15h4",
-  pix: "M12 3l9 9-9 9-9-9z",
-  x: "M6 6l12 12M18 6L6 18",
   check: "M5 12.5l4.5 4.5L19 7.5",
   tag: "M3 12V4h8l10 10-8 8zM7.5 8.5v.1",
   shield: "M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6zM8.5 12l2.5 2.5 4.8-5",
-  up: "M3 17l6-6 4 4 8-8M15 7h6v6",
-  bolt: "M13 2L4 14h7l-1 8 9-12h-7z",
   down: "M12 4v15M5 12l7 7 7-7",
 };
 
@@ -114,16 +107,10 @@ type Pop = { from: number; to: number; side: -1 | 1; bg: string; icon?: string; 
 // Ícones que entram ao lado da cabeça, no momento da fala
 const POPS: Pop[] = [
   { from: 2.3, to: 4.6, side: -1, bg: C.red, icon: I.alert },
-  { from: 4.96, to: 7.8, side: 1, bg: C.ink, icon: I.bank },
-  { from: 6.24, to: 8.6, side: -1, bg: C.blue, icon: I.card },
-  { from: 10.0, to: 11.3, side: 1, bg: C.teal, icon: I.pix },
-  { from: 19.0, to: 21.0, side: -1, bg: C.red, icon: I.x },
   { from: 21.94, to: 23.9, side: -1, bg: C.green, icon: I.check },
   { from: 24.22, to: 26.6, side: 1, bg: C.gold, icon: I.tag },
   { from: 27.32, to: 29.6, side: -1, bg: C.blue, label: "30" },
   { from: 31.98, to: 34.3, side: 1, bg: C.green, icon: I.shield },
-  { from: 34.9, to: 38.9, side: -1, bg: C.green, icon: I.up },
-  { from: 39.58, to: 40.7, side: 1, bg: C.gold, icon: I.bolt },
 ];
 
 const PopIcon: React.FC<{ p: Pop }> = ({ p }) => {
@@ -469,7 +456,7 @@ const SOUNDS: [string, number[], number][] = [
   ["whoosh.wav", [BF.start - 0.2, 41.0], 0.35],
   ["thud.wav", [BF.start, BF.off], 0.75],
   ["coin.wav", [BF.off + 0.15, BF.off + 0.35], 0.4],
-  ["up.wav", [BF.desconto, 34.9], 0.45],
+  ["up.wav", [BF.desconto], 0.45],
   ["bip.wav", [BF.novembro, 11.54, 51.82], 0.35],
 ];
 
