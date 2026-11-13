@@ -16,3 +16,10 @@ Não existe conector do Google Ads nesta sessão: o acesso é feito pela API RES
 Conta padrão: 2955725842 (Dra Jessica). MCC: 3069154123. Nunca imprima os valores das credenciais.
 
 A skill `.claude/skills/google-ads-manager` (de thalesholleben/skill-google-ads, licença MIT) traz os roteiros de diagnóstico, criação de campanhas, lances, palavras-chave e relatórios. Rode as consultas GAQL dela com `scripts/google-ads.mjs query`. A conta é em reais (BRL). O script só faz leitura: alterações na conta ainda não estão implementadas.
+
+# Física e matemática
+
+Skills de estudo em `.claude/skills`:
+
+- As 16 skills de física (`classical-mechanics`, `electromagnetism`, `quantum-mechanics`, `waves-and-oscillations` etc.) vêm de meta-agentic/meta-discipline-physics (licença MIT).
+- `math-olympiad` vem de anthropics/claude-plugins-official, `plugins/math-olympiad` (licença Apache 2.0). Resolve e verifica problemas de olimpíada (IMO, Putnam, OBM).
