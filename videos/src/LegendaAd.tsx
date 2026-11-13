@@ -230,7 +230,7 @@ const DownArrow: React.FC = () => {
         position: "absolute",
         left: 0,
         right: 0,
-        top: 1640 + bounce,
+        top: 1720 + bounce,
         display: "flex",
         justifyContent: "center",
         opacity: k * out,
@@ -244,43 +244,56 @@ const DownArrow: React.FC = () => {
 
 // ---------- Black Friday ----------
 
-// Banner "Black Friday / limpe seu nome por R$ 399": entra batendo, com
-// brilho dourado pulsando, um reflexo de luz que atravessa e faíscas.
-const Banner: React.FC<{ at: number; width: number }> = ({ at, width }) => {
+// Banner "Black Friday / limpe seu nome por R$ 399", fixo do início ao fim
+// na parte de baixo (as legendas ficam logo acima dele). Entra batendo, flutua,
+// tem brilho dourado pulsando, um reflexo de luz que passa de tempos em tempos
+// e faíscas; nas falas do preço e da Black Friday dá um "soco" e pisca.
+const BANNER_W = 1060;
+const BANNER_TOP = 1300;
+
+const FixedBanner: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const d = frame - f(at);
-  if (d < 0) return null;
-  const k = spring({ frame: d, fps, config: { damping: 10, stiffness: 200 } });
-  const pulse = 1 + 0.03 * Math.sin(d / 4);
-  const glow = 20 + 14 * (0.5 + 0.5 * Math.sin(d / 5));
-  const sweep = ((d % 40) / 40) * 160 - 30;
+  const { trim, price, bf } = useCfg();
+  const d = frame - f(trim.start);
+  // inteiro desde o primeiro quadro (vira a miniatura), com um pulso de entrada
+  const hits = [trim.start + 0.1, ...price.map((x) => x.from), bf.start, bf.off];
+  const punch = Math.max(...hits.map((t) => interpolate(frame - f(t), [0, 3, 20], [0, 0.12, 0], clamp)));
+  const strobe = Math.max(...price.map((x) => interpolate(frame - f(x.from), [0, 1, 5], [0, 0.55, 0], clamp)));
+  const float = Math.sin(d / 18) * 6;
+  const glow = 18 + 12 * (0.5 + 0.5 * Math.sin(d / 6)) + punch * 200;
+  // reflexo: atravessa em 24 quadros, a cada 75
+  const sweep = interpolate(d % 75, [0, 24], [-30, 130], clamp);
   const src = staticFile("legenda/banner-bf.png");
   const mask = { WebkitMaskImage: `url(${src})`, WebkitMaskSize: "100% 100%", maskImage: `url(${src})`, maskSize: "100% 100%" };
+  const h = BANNER_W * 0.369;
   return (
-    <div
-      style={{
-        position: "relative",
-        width,
-        height: width * 0.369,
-        transform: `scale(${(2.6 - 1.6 * k) * pulse}) rotate(${(1 - k) * -10 - 2}deg)`,
-        opacity: Math.min(1, k * 3),
-        filter: `drop-shadow(0 0 ${glow}px rgba(255,190,0,.85)) drop-shadow(0 18px 30px rgba(0,0,0,.6))`,
-      }}
-    >
-      <Img src={src} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
-      {/* reflexo de luz recortado no formato do banner */}
+    <>
       <div
         style={{
           position: "absolute",
-          inset: 0,
-          ...mask,
-          background: `linear-gradient(105deg, rgba(255,255,255,0) ${sweep - 12}%, rgba(255,255,255,.75) ${sweep}%, rgba(255,255,255,0) ${sweep + 12}%)`,
-          mixBlendMode: "screen",
+          left: (1080 - BANNER_W) / 2,
+          top: BANNER_TOP + float,
+          width: BANNER_W,
+          height: h,
+          transform: `scale(${1 + punch}) rotate(-1.5deg)`,
+          filter: `drop-shadow(0 0 ${glow}px rgba(255,190,0,.85)) drop-shadow(0 18px 30px rgba(0,0,0,.6))`,
         }}
-      />
-      <Sparkles d={d} w={width} h={width * 0.369} />
-    </div>
+      >
+        <Img src={src} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
+        {/* reflexo de luz recortado no formato do banner */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            ...mask,
+            background: `linear-gradient(105deg, rgba(255,255,255,0) ${sweep - 12}%, rgba(255,255,255,.75) ${sweep}%, rgba(255,255,255,0) ${sweep + 12}%)`,
+            mixBlendMode: "screen",
+          }}
+        />
+        <Sparkles d={d} w={BANNER_W} h={h} />
+      </div>
+      <AbsoluteFill style={{ background: `rgba(255,255,255,${strobe})` }} />
+    </>
   );
 };
 
@@ -311,37 +324,6 @@ const Sparkles: React.FC<{ d: number; w: number; h: number }> = ({ d, w, h }) =>
     })}
   </>
 );
-
-// Destaque do preço: escurece em volta e mostra o banner
-const PriceBanner: React.FC = () => {
-  const frame = useCurrentFrame();
-  const p = useCfg().price.find((x) => frame >= f(x.from) && frame < f(x.to));
-  if (!p) return null;
-  const d = frame - f(p.from);
-  const out = interpolate(frame, [f(p.to) - 7, f(p.to)], [1, 0], clamp);
-  const dim = interpolate(d, [0, 5], [0, 0.45], clamp) * out;
-  const strobe = interpolate(d, [0, 1, 4], [0, 0.6, 0], clamp);
-  return (
-    <AbsoluteFill>
-      <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} />
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 880,
-          display: "flex",
-          justifyContent: "center",
-          opacity: out,
-          transform: `scale(${0.85 + 0.15 * out})`,
-        }}
-      >
-        <Banner at={p.from} width={980} />
-      </div>
-      <AbsoluteFill style={{ background: `rgba(255,255,255,${strobe})` }} />
-    </AbsoluteFill>
-  );
-};
 
 const Confetti: React.FC<{ at: number }> = ({ at }) => {
   const frame = useCurrentFrame();
@@ -452,15 +434,14 @@ const BlackFriday: React.FC = () => {
           position: "absolute",
           left: 0,
           right: 0,
-          top: 700,
+          top: 780,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           opacity: out,
         }}
       >
-        <Banner at={BF.start} width={1000} />
-        <div style={{ marginTop: -20, height: 330, transform: "scale(.8)" }}>
+        <div style={{ height: 400 }}>
           <OffBadge />
         </div>
         {frame >= f(BF.novembro) && (
@@ -506,7 +487,7 @@ const Caption: React.FC = () => {
         position: "absolute",
         left: 60,
         right: 60,
-        top: 1480,
+        top: 1130,
         display: "flex",
         flexWrap: "wrap",
         justifyContent: "center",
@@ -624,8 +605,9 @@ const LegendaContent: React.FC = () => {
           <PopIcon key={p.from} p={p} />
         ))}
       </AbsoluteFill>
-      <PriceBanner />
       <BlackFriday />
+      {/* depois da Black Friday para não ser escurecido por ela */}
+      <FixedBanner />
       <DownArrow />
       <Caption />
       <Watermark />
