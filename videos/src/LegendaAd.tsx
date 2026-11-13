@@ -53,7 +53,7 @@ type Cfg = {
   captions: { start: number; end: number; words: { t: string; s: number }[] }[];
   face: number[][];
   // bloco da Black Friday (s)
-  bf: { start: number; friday: number; off: number; desconto: number; novembro: number; end: number };
+  bf: { start: number; off: number; desconto: number; novembro: number; end: number };
   // zooms rápidos nas palavras de impacto
   punches: number[];
   // ícones que entram ao lado da cabeça, no momento da fala
@@ -65,6 +65,10 @@ type Cfg = {
   // usa a posição média do rosto em vez de seguir quadro a quadro
   // (quando o rastreamento oscila)
   fixedFace?: boolean;
+  // corte dos bastidores (s do vídeo original): ele ligando/desligando o celular
+  trim: { start: number; end: number };
+  // falas do "R$ 399": banner da Black Friday em destaque
+  price: { from: number; to: number }[];
 };
 
 const CfgContext = React.createContext<Cfg | null>(null);
@@ -72,7 +76,7 @@ const useCfg = () => React.useContext(CfgContext)!;
 
 const useCamera = () => {
   const frame = useCurrentFrame();
-  const { punches, bf } = useCfg();
+  const { punches, bf, price } = useCfg();
   let zoom = 1;
   for (const p of punches) {
     const d = frame - f(p);
@@ -82,7 +86,7 @@ const useCamera = () => {
   }
   let x = 0;
   let y = 0;
-  for (const s of [bf.start]) {
+  for (const s of [bf.start, ...price.map((p) => p.from)]) {
     const d = frame - f(s);
     if (d >= 0 && d < 16) {
       const a = (1 - d / 16) * 18;
@@ -121,22 +125,22 @@ const Icon: React.FC<{ d: string; size: number; color?: string; width?: number }
 const I = {
   alert: "M12 7v6M12 16.8v.1",
   check: "M5 12.5l4.5 4.5L19 7.5",
-  tag: "M3 12V4h8l10 10-8 8zM7.5 8.5v.1",
   shield: "M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6zM8.5 12l2.5 2.5 4.8-5",
   down: "M12 4v15M5 12l7 7 7-7",
 };
 
 const CFG_1: Cfg = {
   video: "legenda/original.mp4",
-  duration: Math.round(57.4 * FPS),
+  duration: Math.round((55.9 - 0.5) * FPS),
+  trim: { start: 0.5, end: 55.9 },
+  price: [{ from: 24.22, to: 26.9 }],
   captions: CAPTIONS_1,
   face: FACE_1,
-  bf: { start: 46.4, friday: 46.66, off: 47.68, desconto: 49.02, novembro: 51.0, end: 51.8 },
+  bf: { start: 46.4, off: 47.68, desconto: 49.02, novembro: 51.0, end: 51.8 },
   punches: [2.3, 21.94, 25.04, 47.68, 51.82],
   pops: [
     { from: 2.3, to: 4.6, side: -1, bg: C.red, icon: I.alert },
     { from: 21.94, to: 23.9, side: -1, bg: C.green, icon: I.check },
-    { from: 24.22, to: 26.6, side: 1, bg: C.gold, icon: I.tag },
     { from: 27.32, to: 29.6, side: -1, bg: C.blue, label: "30" },
     { from: 31.98, to: 34.3, side: 1, bg: C.green, icon: I.shield },
   ],
@@ -146,18 +150,21 @@ const CFG_1: Cfg = {
 
 const CFG_2: Cfg = {
   video: "legenda2/original.mp4",
-  duration: Math.round(58.2 * FPS),
+  duration: Math.round((56.2 - 0.7) * FPS),
+  trim: { start: 0.7, end: 56.2 },
+  price: [
+    { from: 7.76, to: 10.15 },
+    { from: 45.22, to: 47.25 },
+  ],
   captions: CAPTIONS_2,
   face: FACE_2,
-  bf: { start: 37.58, friday: 37.82, off: 40.5, desconto: 41.8, novembro: 38.72, end: 42.6 },
+  bf: { start: 37.58, off: 40.5, desconto: 41.8, novembro: 38.72, end: 42.6 },
   punches: [3.88, 8.32, 31.32, 40.5, 45.7, 52.34],
   pops: [
     { from: 3.88, to: 5.0, side: -1, bg: C.red, icon: I.alert },
     { from: 5.02, to: 6.9, side: -1, bg: C.green, icon: I.check },
-    { from: 7.76, to: 10.1, side: 1, bg: C.gold, icon: I.tag },
     { from: 15.96, to: 17.9, side: 1, bg: C.green, icon: I.shield },
     { from: 31.32, to: 33.4, side: -1, bg: C.blue, label: "30" },
-    { from: 45.22, to: 47.2, side: 1, bg: C.gold, icon: I.tag },
   ],
   arrow: { from: 47.56, to: 50.3 },
   brand: [10.46, 52.34],
@@ -237,6 +244,105 @@ const DownArrow: React.FC = () => {
 
 // ---------- Black Friday ----------
 
+// Banner "Black Friday / limpe seu nome por R$ 399": entra batendo, com
+// brilho dourado pulsando, um reflexo de luz que atravessa e faíscas.
+const Banner: React.FC<{ at: number; width: number }> = ({ at, width }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const d = frame - f(at);
+  if (d < 0) return null;
+  const k = spring({ frame: d, fps, config: { damping: 10, stiffness: 200 } });
+  const pulse = 1 + 0.03 * Math.sin(d / 4);
+  const glow = 20 + 14 * (0.5 + 0.5 * Math.sin(d / 5));
+  const sweep = ((d % 40) / 40) * 160 - 30;
+  const src = staticFile("legenda/banner-bf.png");
+  const mask = { WebkitMaskImage: `url(${src})`, WebkitMaskSize: "100% 100%", maskImage: `url(${src})`, maskSize: "100% 100%" };
+  return (
+    <div
+      style={{
+        position: "relative",
+        width,
+        height: width * 0.369,
+        transform: `scale(${(2.6 - 1.6 * k) * pulse}) rotate(${(1 - k) * -10 - 2}deg)`,
+        opacity: Math.min(1, k * 3),
+        filter: `drop-shadow(0 0 ${glow}px rgba(255,190,0,.85)) drop-shadow(0 18px 30px rgba(0,0,0,.6))`,
+      }}
+    >
+      <Img src={src} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
+      {/* reflexo de luz recortado no formato do banner */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          ...mask,
+          background: `linear-gradient(105deg, rgba(255,255,255,0) ${sweep - 12}%, rgba(255,255,255,.75) ${sweep}%, rgba(255,255,255,0) ${sweep + 12}%)`,
+          mixBlendMode: "screen",
+        }}
+      />
+      <Sparkles d={d} w={width} h={width * 0.369} />
+    </div>
+  );
+};
+
+const Sparkles: React.FC<{ d: number; w: number; h: number }> = ({ d, w, h }) => (
+  <>
+    {Array.from({ length: 10 }).map((_, i) => {
+      const cycle = (d + i * 7) % 24;
+      const s = Math.sin((cycle / 24) * Math.PI);
+      const x = ((i * 97) % 100) / 100;
+      const y = ((i * 53) % 100) / 100;
+      return (
+        <svg
+          key={i}
+          width="60"
+          height="60"
+          viewBox="0 0 24 24"
+          style={{
+            position: "absolute",
+            left: x * w - 30,
+            top: y * h - 30,
+            transform: `scale(${s}) rotate(${d * 6}deg)`,
+            opacity: s,
+          }}
+        >
+          <path d="M12 0l2.5 9.5L24 12l-9.5 2.5L12 24l-2.5-9.5L0 12l9.5-2.5z" fill="#fff6c2" />
+        </svg>
+      );
+    })}
+  </>
+);
+
+// Destaque do preço: escurece em volta e mostra o banner
+const PriceBanner: React.FC = () => {
+  const frame = useCurrentFrame();
+  const p = useCfg().price.find((x) => frame >= f(x.from) && frame < f(x.to));
+  if (!p) return null;
+  const d = frame - f(p.from);
+  const out = interpolate(frame, [f(p.to) - 7, f(p.to)], [1, 0], clamp);
+  const dim = interpolate(d, [0, 5], [0, 0.45], clamp) * out;
+  const strobe = interpolate(d, [0, 1, 4], [0, 0.6, 0], clamp);
+  return (
+    <AbsoluteFill>
+      <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} />
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 880,
+          display: "flex",
+          justifyContent: "center",
+          opacity: out,
+          transform: `scale(${0.85 + 0.15 * out})`,
+        }}
+      >
+        <Banner at={p.from} width={980} />
+      </div>
+      <AbsoluteFill style={{ background: `rgba(255,255,255,${strobe})` }} />
+    </AbsoluteFill>
+  );
+};
+
 const Confetti: React.FC<{ at: number }> = ({ at }) => {
   const frame = useCurrentFrame();
   const d = frame - f(at);
@@ -267,49 +373,6 @@ const Confetti: React.FC<{ at: number }> = ({ at }) => {
         );
       })}
     </>
-  );
-};
-
-// Título com brilho e glitch de cor nos primeiros quadros
-const GlitchWord: React.FC<{ at: number; text: string; color: string; size: number }> = ({
-  at,
-  text,
-  color,
-  size,
-}) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const d = frame - f(at);
-  if (d < 0) return null;
-  const k = spring({ frame: d, fps, config: { damping: 12, stiffness: 240 } });
-  const glitch = d < 10 && d % 3 !== 2 ? (d % 2 ? 10 : -10) : 0;
-  const base: React.CSSProperties = {
-    fontFamily: SANS,
-    fontWeight: 800,
-    fontSize: size,
-    lineHeight: 0.95,
-    letterSpacing: "-0.04em",
-    textTransform: "uppercase",
-  };
-  return (
-    <div style={{ position: "relative", transform: `scale(${3 - 2 * k})`, opacity: Math.min(1, k * 3) }}>
-      {glitch !== 0 && (
-        <>
-          <div style={{ ...base, position: "absolute", left: glitch, top: 0, color: "rgba(255,0,80,.8)" }}>{text}</div>
-          <div style={{ ...base, position: "absolute", left: -glitch, top: 0, color: "rgba(0,220,255,.8)" }}>{text}</div>
-        </>
-      )}
-      <div
-        style={{
-          ...base,
-          position: "relative",
-          color,
-          textShadow: `0 0 18px ${color}, 0 0 50px ${color}, 0 10px 30px rgba(0,0,0,.6)`,
-        }}
-      >
-        {text}
-      </div>
-    </div>
   );
 };
 
@@ -389,16 +452,15 @@ const BlackFriday: React.FC = () => {
           position: "absolute",
           left: 0,
           right: 0,
-          top: 770,
+          top: 700,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           opacity: out,
         }}
       >
-        <GlitchWord at={BF.start} text="Black" color="#ffffff" size={170} />
-        <GlitchWord at={BF.friday} text="Friday" color={C.yellow} size={170} />
-        <div style={{ marginTop: 10, height: 400 }}>
+        <Banner at={BF.start} width={1000} />
+        <div style={{ marginTop: -20, height: 330, transform: "scale(.8)" }}>
           <OffBadge />
         </div>
         {frame >= f(BF.novembro) && (
@@ -530,7 +592,20 @@ const Soundtrack: React.FC = () => {
   );
 };
 
+// Pula os bastidores do começo: com `from` negativo, tudo dentro da Sequence
+// enxerga o tempo do vídeo original
 const LegendaVideo: React.FC = () => {
+  const { trim } = useCfg();
+  return (
+    <AbsoluteFill style={{ background: "#000" }}>
+      <Sequence from={-f(trim.start)}>
+        <LegendaContent />
+      </Sequence>
+    </AbsoluteFill>
+  );
+};
+
+const LegendaContent: React.FC = () => {
   const { video, pops } = useCfg();
   const cam = useCamera();
   return (
@@ -549,6 +624,7 @@ const LegendaVideo: React.FC = () => {
           <PopIcon key={p.from} p={p} />
         ))}
       </AbsoluteFill>
+      <PriceBanner />
       <BlackFriday />
       <DownArrow />
       <Caption />
