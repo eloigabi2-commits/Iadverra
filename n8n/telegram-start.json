@@ -1,0 +1,53 @@
+{
+  "name": "Telegram - Resposta ao /start",
+  "nodes": [
+    {
+      "parameters": { "updates": ["message"], "additionalFields": {} },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "webhookId": "telegram-start-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "cond-start",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "/start",
+              "operator": { "type": "string", "operation": "startsWith" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "É /start?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "Olá! 👋 Seja bem-vindo(a) ao grupo. Em breve responderemos suas dúvidas.",
+        "additionalFields": { "appendAttribution": false }
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Enviar mensagem padrão",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [480, -80]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": { "main": [[{ "node": "É /start?", "type": "main", "index": 0 }]] },
+    "É /start?": { "main": [[{ "node": "Enviar mensagem padrão", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
