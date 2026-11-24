@@ -18,6 +18,15 @@ export const RemotionRoot: React.FC = () => {
       height={1920}
     />
     <Composition
+      id="AssessoriaAd"
+      component={LimpamosAd}
+      defaultProps={{ versao: "assessoria" as const }}
+      durationInFrames={LIMPAMOS_DURATION}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
       id="MamaeAd"
       component={LimpamosAd}
       defaultProps={{ versao: "mamae" as const }}

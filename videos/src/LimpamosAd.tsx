@@ -7,8 +7,9 @@ import { loadFont } from "@remotion/fonts";
 // a logo branca da Esclarece Soluções gravada; cada versão a cobre:
 // - Soluções: logo-azul.png recriada no mesmo lugar e formato
 //   (scripts/logo_do_video.py);
-// - Mamãe: a logo gravada é apagada antes (scripts/apagar_logo.py →
-//   mamae/sem-logo.mp4) e a logo da Esclarece Mamãe entra só em rosa.
+// - Mamãe e Assessoria: a logo gravada é apagada antes
+//   (scripts/apagar_logo.py → limpamos/sem-logo.mp4) e a logo da marca entra
+//   só na cor dela, sem fundo.
 
 const FPS = 30;
 export const LIMPAMOS_DURATION = Math.round(15.3 * FPS);
@@ -56,12 +57,28 @@ const SolucoesText: React.FC = () => (
   </div>
 );
 
-const MamaeText: React.FC = () => (
+const MARCAS = {
+  mamae: {
+    nome: "Esclarece Mamãe",
+    logo: "mamae/logo-mamae-rosa.png",
+    destaque: "rgba(232,120,166,.9)",
+    sombra: "drop-shadow(0 2px 8px rgba(0,0,0,.25))",
+  },
+  assessoria: {
+    nome: "Esclarece Assessoria",
+    logo: "assessoria/logo-assessoria.png",
+    destaque: "rgba(123,28,42,.9)",
+    // halo claro: o vinho some no teto escuro sem ele
+    sombra: "drop-shadow(0 0 6px rgba(255,255,255,.55)) drop-shadow(0 2px 6px rgba(0,0,0,.2))",
+  },
+};
+
+const MarcaText: React.FC<{ marca: keyof typeof MARCAS }> = ({ marca }) => (
   <div style={{ position: "absolute", left: 66, right: 50, top: 1400 }}>
     <div style={{ ...line, fontWeight: 400, fontSize: 62, lineHeight: 1.2 }}>
       Nós e nossos Advogados
       <br />
-      aqui da <Highlight color="rgba(232,120,166,.9)">Esclarece Mamãe</Highlight>
+      aqui da <Highlight color={MARCAS[marca].destaque}>{MARCAS[marca].nome}</Highlight>
     </div>
     <div style={{ ...line, fontWeight: 800, fontSize: 70, lineHeight: 1.12, marginTop: 14 }}>
       estamos preparados pra
@@ -71,19 +88,19 @@ const MamaeText: React.FC = () => (
   </div>
 );
 
-export type LimpamosProps = { versao: "solucoes" | "mamae" };
+export type LimpamosProps = { versao: "solucoes" | keyof typeof MARCAS };
 
 export const LimpamosAd: React.FC<LimpamosProps> = ({ versao }) => (
   <AbsoluteFill style={{ background: "#000" }}>
     <OffthreadVideo
-      src={staticFile(versao === "mamae" ? "mamae/sem-logo.mp4" : "limpamos/original.mov")}
+      src={staticFile(versao === "solucoes" ? "limpamos/original.mov" : "limpamos/sem-logo.mp4")}
       style={{ width: "100%", height: "100%", objectFit: "cover" }}
     />
     {/* escurece a parte de baixo para o texto ler bem */}
     <AbsoluteFill
       style={{
         background:
-          versao === "mamae"
+          versao !== "solucoes"
             ? "linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 72%, rgba(0,0,0,.65) 100%)"
             : "linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.35) 62%, rgba(0,0,0,.62) 100%)",
       }}
@@ -96,16 +113,16 @@ export const LimpamosAd: React.FC<LimpamosProps> = ({ versao }) => (
     ) : (
       <>
         <Img
-          src={staticFile("mamae/logo-mamae-rosa.png")}
+          src={staticFile(MARCAS[versao].logo)}
           style={{
             position: "absolute",
             left: 40,
             top: 55,
             width: 380,
-            filter: "drop-shadow(0 2px 8px rgba(0,0,0,.25))",
+            filter: MARCAS[versao].sombra,
           }}
         />
-        <MamaeText />
+        <MarcaText marca={versao} />
       </>
     )}
     {/* trilha bem baixinha, por baixo da fala */}
