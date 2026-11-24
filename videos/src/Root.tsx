@@ -11,6 +11,16 @@ export const RemotionRoot: React.FC = () => {
     <Composition
       id="LimpamosAd"
       component={LimpamosAd}
+      defaultProps={{ versao: "solucoes" as const }}
+      durationInFrames={LIMPAMOS_DURATION}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="MamaeAd"
+      component={LimpamosAd}
+      defaultProps={{ versao: "mamae" as const }}
       durationInFrames={LIMPAMOS_DURATION}
       fps={30}
       width={1080}
