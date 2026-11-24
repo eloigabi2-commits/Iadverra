@@ -7,7 +7,8 @@ import { loadFont } from "@remotion/fonts";
 // a logo branca da Esclarece Soluções gravada; cada versão a cobre:
 // - Soluções: logo-azul.png recriada no mesmo lugar e formato
 //   (scripts/logo_do_video.py);
-// - Mamãe: selo rosa com a logo da Esclarece Mamãe, maior que a logo gravada.
+// - Mamãe: a logo gravada é apagada antes (scripts/apagar_logo.py →
+//   mamae/sem-logo.mp4) e a logo da Esclarece Mamãe entra só em rosa.
 
 const FPS = 30;
 export const LIMPAMOS_DURATION = Math.round(15.3 * FPS);
@@ -56,7 +57,7 @@ const SolucoesText: React.FC = () => (
 );
 
 const MamaeText: React.FC = () => (
-  <div style={{ position: "absolute", left: 66, right: 50, top: 1170 }}>
+  <div style={{ position: "absolute", left: 66, right: 50, top: 1400 }}>
     <div style={{ ...line, fontWeight: 400, fontSize: 62, lineHeight: 1.2 }}>
       Nós e nossos Advogados
       <br />
@@ -75,13 +76,16 @@ export type LimpamosProps = { versao: "solucoes" | "mamae" };
 export const LimpamosAd: React.FC<LimpamosProps> = ({ versao }) => (
   <AbsoluteFill style={{ background: "#000" }}>
     <OffthreadVideo
-      src={staticFile("limpamos/original.mov")}
+      src={staticFile(versao === "mamae" ? "mamae/sem-logo.mp4" : "limpamos/original.mov")}
       style={{ width: "100%", height: "100%", objectFit: "cover" }}
     />
     {/* escurece a parte de baixo para o texto ler bem */}
     <AbsoluteFill
       style={{
-        background: "linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.35) 62%, rgba(0,0,0,.62) 100%)",
+        background:
+          versao === "mamae"
+            ? "linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,.35) 72%, rgba(0,0,0,.65) 100%)"
+            : "linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.35) 62%, rgba(0,0,0,.62) 100%)",
       }}
     />
     {versao === "solucoes" ? (
@@ -91,15 +95,14 @@ export const LimpamosAd: React.FC<LimpamosProps> = ({ versao }) => (
       </>
     ) : (
       <>
-        {/* cobre a logo gravada (x 54–322, y 79–296) */}
         <Img
-          src={staticFile("mamae/selo-mamae.png")}
+          src={staticFile("mamae/logo-mamae-rosa.png")}
           style={{
             position: "absolute",
-            left: 38,
-            top: 70,
-            width: 330,
-            filter: "drop-shadow(0 6px 16px rgba(0,0,0,.25))",
+            left: 40,
+            top: 60,
+            width: 340,
+            filter: "drop-shadow(0 2px 8px rgba(0,0,0,.25))",
           }}
         />
         <MamaeText />
