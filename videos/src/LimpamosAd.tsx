@@ -100,8 +100,8 @@ export const LimpamosAd: React.FC<LimpamosProps> = ({ versao }) => (
           style={{
             position: "absolute",
             left: 40,
-            top: 60,
-            width: 340,
+            top: 55,
+            width: 380,
             filter: "drop-shadow(0 2px 8px rgba(0,0,0,.25))",
           }}
         />
