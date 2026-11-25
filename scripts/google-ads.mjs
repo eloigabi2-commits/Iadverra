@@ -6,6 +6,11 @@
 //   node scripts/google-ads.mjs accounts                  # lista as contas que o login enxerga
 //   node scripts/google-ads.mjs campaigns [dias]          # resumo das campanhas (padrão: últimos 30 dias)
 //   node scripts/google-ads.mjs query "SELECT ..."        # qualquer consulta GAQL
+//   node scripts/google-ads.mjs mutate plano.json         # testa (validateOnly) as operações, sem alterar nada
+//   node scripts/google-ads.mjs mutate plano.json --apply # aplica de verdade, só depois do "sim" do dono da conta
+//
+// O arquivo do mutate é um JSON com a lista "mutateOperations" do GoogleAdsService.Mutate. As operações rodam
+// numa transação só (tudo ou nada) e podem se referir umas às outras por IDs temporários negativos.
 //
 // Opções:
 //   --customer 2955725842   conta a consultar (padrão: GOOGLE_ADS_CUSTOMER_ID ou 2955725842, Dra Jessica)
@@ -16,6 +21,8 @@
 //   GOOGLE_ADS_LOGIN_CUSTOMER_ID   ID da MCC, só se a conta for acessada via administrador
 //   GOOGLE_ADS_DEVELOPER_TOKEN     opcional: desde set/2026 o acesso vem do projeto do Google Cloud
 //   GOOGLE_ADS_API_VERSION         padrão: v25
+
+import { readFile } from "node:fs/promises";
 
 const API_VERSION = process.env.GOOGLE_ADS_API_VERSION ?? "v25";
 const DEFAULT_CUSTOMER = "2955725842";
@@ -30,11 +37,13 @@ const digits = (id) => String(id).replace(/\D/g, "");
 function parseArgs(argv) {
   const positional = [];
   let customer = process.env.GOOGLE_ADS_CUSTOMER_ID ?? DEFAULT_CUSTOMER;
+  let apply = false;
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--customer") customer = argv[++i];
+    else if (argv[i] === "--apply") apply = true;
     else positional.push(argv[i]);
   }
-  return { command: positional[0] ?? "check", rest: positional.slice(1), customer: digits(customer) };
+  return { command: positional[0] ?? "check", rest: positional.slice(1), customer: digits(customer), apply };
 }
 
 function missingVars() {
@@ -103,7 +112,7 @@ function campaignsQuery(days) {
 }
 
 async function main() {
-  const { command, rest, customer } = parseArgs(process.argv.slice(2));
+  const { command, rest, customer, apply } = parseArgs(process.argv.slice(2));
 
   const missing = missingVars();
   if (command === "check") {
@@ -126,8 +135,16 @@ async function main() {
   } else if (command === "query") {
     if (!rest[0]) throw new Error('Informe a consulta GAQL: node scripts/google-ads.mjs query "SELECT ..."');
     result = await search(customer, rest.join(" "));
+  } else if (command === "mutate") {
+    if (!rest[0]) throw new Error("Informe o arquivo JSON: node scripts/google-ads.mjs mutate plano.json [--apply]");
+    const { mutateOperations } = JSON.parse(await readFile(rest[0], "utf8"));
+    result = await adsFetch(`customers/${customer}/googleAds:mutate`, {
+      method: "POST",
+      body: JSON.stringify({ mutateOperations, validateOnly: !apply, responseContentType: "RESOURCE_NAME_ONLY" }),
+    });
+    console.error(apply ? `Aplicado: ${mutateOperations.length} operações.` : `Validado sem alterar nada: ${mutateOperations.length} operações. Use --apply para aplicar.`);
   } else {
-    throw new Error(`Comando desconhecido: ${command}. Use check, accounts, campaigns ou query.`);
+    throw new Error(`Comando desconhecido: ${command}. Use check, accounts, campaigns, query ou mutate.`);
   }
   console.log(JSON.stringify(result, null, 2));
 }
