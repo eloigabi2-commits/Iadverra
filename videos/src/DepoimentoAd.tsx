@@ -4,6 +4,8 @@ import {
   Audio,
   Img,
   OffthreadVideo,
+  Sequence,
+  interpolate,
   spring,
   staticFile,
   useCurrentFrame,
@@ -18,7 +20,9 @@ import CAPTIONS from "./video5-captions.json";
 // (com "enrolei" e "Esclarece Soluções" corrigidos à mão na transcrição).
 
 const FPS = 30;
-export const DEPOIMENTO_DURATION = Math.round(34.9 * FPS);
+// corte (s do vídeo original): começa no "Olá" e termina logo depois da fala
+const TRIM = { start: 1.25, end: 33.5 };
+export const DEPOIMENTO_DURATION = Math.round((TRIM.end - TRIM.start) * FPS);
 const SANS = "Manrope";
 
 loadFont({ family: SANS, url: staticFile("fonts/manrope-latin-800-normal.woff2"), weight: "800" });
@@ -72,7 +76,17 @@ const Caption: React.FC = () => {
   );
 };
 
+// Com `from` negativo, tudo dentro da Sequence enxerga o tempo do vídeo
+// original, então as legendas continuam sincronizadas
 export const DepoimentoAd: React.FC = () => (
+  <AbsoluteFill style={{ background: "#000" }}>
+    <Sequence from={-Math.round(TRIM.start * FPS)}>
+      <Conteudo />
+    </Sequence>
+  </AbsoluteFill>
+);
+
+const Conteudo: React.FC = () => (
   <AbsoluteFill style={{ background: "#000" }}>
     <OffthreadVideo
       src={staticFile("video5/original.mp4")}
@@ -90,6 +104,9 @@ export const DepoimentoAd: React.FC = () => (
     />
     <Caption />
     {/* trilha bem baixinha, por baixo da fala */}
-    <Audio src={staticFile("video5/musica.wav")} volume={0.03} />
+    <Audio
+      src={staticFile("video5/musica.wav")}
+      volume={(f) => 0.03 * interpolate(f / FPS, [TRIM.end - 1, TRIM.end], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
+    />
   </AbsoluteFill>
 );
