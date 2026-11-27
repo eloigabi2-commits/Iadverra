@@ -1,6 +1,7 @@
 import { Composition } from "remotion";
 import { AllureAd, AD_DURATION } from "./AllureAd";
 import { NfcAd, NFC_DURATION } from "./NfcAd";
+import { DepoimentoAd, DEPOIMENTO_DURATION } from "./DepoimentoAd";
 import { LimpamosAd, LIMPAMOS_DURATION } from "./LimpamosAd";
 import { EsclareceAd, ESCLARECE_DURATION } from "./EsclareceAd";
 import { LegendaAd, LEGENDA_DURATION, Legenda2Ad, LEGENDA2_DURATION } from "./LegendaAd";
@@ -8,6 +9,14 @@ import { LegendaAd, LEGENDA_DURATION, Legenda2Ad, LEGENDA2_DURATION } from "./Le
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+    <Composition
+      id="DepoimentoAd"
+      component={DepoimentoAd}
+      durationInFrames={DEPOIMENTO_DURATION}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
     <Composition
       id="LimpamosAd"
       component={LimpamosAd}
